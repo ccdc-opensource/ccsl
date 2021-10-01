@@ -10,4 +10,4 @@ In September 2021, CCDC reached out to Prof. Brown in order to relicence the CCS
 
 Prof. Brown provided us with an up to date archive of the source code and granted CCDC permission to relicence it under the MIT licence.
 
-The code in the 4.4.39 tag in this repository accurately reflects the contents of the archives provided by Prof. Brown. The original archives can be found in the 4.4.39 release.
+The code in the 4.4.39 tag in this repository accurately reflects the contents of the archives provided by Prof. Brown. The original archives can be found in the [4.4.39 release](https://github.com/ccdc-opensource/ccsl/releases/tag/4.4.39).
