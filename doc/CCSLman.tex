@@ -1,0 +1,127 @@
+\documentclass[onecolumn,twoside,12pt,a4paper]{report}
+\usepackage{ifthen,CCSLman,makeidx,color,bm}
+\usepackage{hyperref}
+\makeatletter
+\@ifpackageloaded{tex4ht}
+  {\let\iftexforht\@firstoftwo}
+  {\let\iftexforht\@secondoftwo}
+\@ifpackageloaded{CCSLman}
+\makeatother
+%
+%
+
+\newenvironment{clist}{\begin{list}{}{\setlength{\labelwidth}{2.5cm}
+  \setlength{\itemsep}{-4ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{2cm}}}{\end{list}}
+
+\pagestyle{newheadings}\usepackage{CCSLman}
+
+\input{versiondate}
+\newcommand{\versiondate}{\version}
+%
+%
+\begin{document}
+\pagenumbering{roman}
+\pagestyle{plain}
+%\htmladdtonavigation{\htmladdnormallink
+%  {\htmladdimg{../icons/appenx.gif}}
+%  {../appenx/appendix.html}}
+\title
+{\Large\bfseries THE \\[1ex]
+CAMBRIDGE CRYSTALLOGRAPHY\\[1ex]
+SUBROUTINE LIBRARY\\[1ex]
+USERS' MANUAL}
+\author
+{\bbold{P J Brown and J C Matthewman}(deceased)}
+\date{Revision \versiondate}
+
+\latexonly{\maketitle
+%
+\vspace{30mm}
+\newpage
+\vfill
+\begin{center}
+\dbox{\vspace*{3ex}
+{\large\bfseries WELCOME TO\ \ C C S L}\\
+CCSL is still being developed.\\
+\parbox{90mm}{{\cl{This version of the Manual reflects the state of the Mark 4 system
+in \versiondate.}}}
+\vspace {0.5ex}
+\parbox{90mm}{\cl{New and useful facilities will be added, but in consequence
+we do not guarantee that some of the details given
+in this Manual may not change.}}\\
+\vspace {0.5ex}
+The authors would welcome reports of any errors or difficulties.\\
+\vspace {0.5ex}
+}
+\end{center}
+\vspace{3cm}
+\vfill\begin{center}
+\dbox{\vspace*{2ex}
+{\cl{\large\bfseries DEDICATION}}
+\vspace {2ex}
+\parbox{90mm}{This revision of the CCSL manual is dedicated to the memory of Judy
+Matthewman, co-author of the Library and my friend and collaborator
+for many years. P.J.B.}}\\
+\vspace{10mm}
+The Manual has been typeset using \LaTeX
+\end{center}
+\vspace{30mm}
+\newpage
+}%\end{latexonly}
+%
+%\begin{
+\iftexforht{
+\begin{center}
+{\large\bfseries The C C S L Users' Manual: Revision \versiondate%
+.}\\[2ex]
+\end{center}%\tableofcontents[chapter,appendix]
+\hyperlink{mantoc}{{\bbig Contents}}
+}
+{\tableofcontents
+\p
+\begin{center}\large\bfseries APPENDICES AVAILABLE SEPARATELY\end{center}
+\vspace {0.5ex}
+\begin{list}{}{\setlength{\leftmargin}{40mm}
+               \setlength{\labelwidth}{\leftmargin}
+               \addtolength{\leftmargin}{\labelsep}}
+
+\item[Appendix A\hfill]ROUTINE SPECIFICATIONS:\\
+ in alphabetical order,in more detail
+\item[Appendix B\hfill]Tree structure:\\ how the routines fit together (information now in Appendix A)
+\item[Appendix C\hfill]LABELLED COMMON:\\
+ alphabetical list with descriptions
+\item[Appendix D\hfill] MAIN PROGRAMS AVAILABLE:\\
+ what they do and how to run them.
+\item[Appendix E\hfill]TOOLS TO MANIPULATE THE MASTER FILE:\\
+details
+\end{list}
+}
+\pagenumbering{arabic}
+\chapter[Chapter 1]{INTRODUCTION TO CCSL}\input{chap1}
+\chapter[Chapter 2]{THE STRUCTURE OF THE SYSTEM}\input{chap2}
+\chapter[Chapter 3]{THE CRYSTAL DATA FILE}\input{chap3}
+\chapter[Chapter 4]{INPUT AND OUTPUT OF OTHER DATA}\input{chap4}
+\chapter[Chapter 5]{LEAST SQUARES REFINEMENT USING CCSL}\input{chap5}
+\chapter[Chapter 6]{MAGNETIC STRUCTURES AND STRUCTURE FACTORS}\input{chap6}
+\chapter[Chapter 7]{USING THE SYSTEM}\input{chap7}
+\iftexforht{\appendix
+\chapter[Appendices A-E]{APPENDICES AVAILABLE SEPARATELY}
+\begin{list}{}{\setlength{\leftmargin}{40mm}
+               \setlength{\labelwidth}{\leftmargin}
+               \addtolength{\leftmargin}{\labelsep}}
+\item[Appendix A\hfill]\htmladdnormallink{ROUTINE SPECIFICATIONS:}
+{../appenx/appendix.html\#appa} in alphabetical order,in more detail
+\item[Appendix B\hfill]Tree structure: how the routines fit together (information now in Appendix A)
+\item[Appendix C\hfill]\htmladdnormallink{LABELLED COMMON:}
+{../appenx/appendix.html\#appc}
+ alphabetical list with descriptions
+\item[Appendix D\hfill]\htmladdnormallink{MAIN PROGRAMS AVAILABLE:}
+{../appenx/appendix.html\#appd} details
+\item[Appendix E\hfill]\htmladdnormallink{TOOLS TO MANIPULATE THE MASTER FILE}
+{../appenx/appene.html} details
+\end{list}
+}{}%
+\printindex
+\end{document}

@@ -1,0 +1,223 @@
+<HTML>
+<HEAD>
+<title>CCSL tools</title>
+<LINK REL="STYLESHEET" HREF="ccslweb.css">
+</HEAD>
+<BODY class = "interior">
+<spacer type = vertical size = 20>
+<h1>Manipulating CCSL </h1>
+A collection of shell (csh) and perl  scripts  is included with the
+library. They provide tools needed to build and manipulate it.
+<h2>Tools available</h2>
+These tools may be installed as commands using the <a href = "#ccslalias">
+aliases </a> file.
+<dl>
+<dt> <b>fpr</b> [<em>-d pname</em>] <em>filename</em>
+<dd> Prints the Fortran listing file <em>filename </em>on the printer
+<em> pname</em>. If the -d switch is not given the output goes to the default
+printer.
+<dt><b>get</b> [<em>part</em>] [<em>module</em>]
+<dd>Extracts subroutine or program <em>module</em> from the
+<A href = "ccslparts.html#CCSLPARTS">
+<em>part</em></a> specified. If <em>module</em> is not given the program
+prompts for the name of the subroutine or program. It is possible to get
+several modules in a single run, and more efficient to specify them in
+alphabetical order. The extracted routines are given the extension ".got".
+<p>
+<dt>	<b>extract</b> <em>part</em> <em>fttopt</em> <em>system</em>
+<em>site</em>
+<dd>
+<dl>
+<dd><em>part</em> is one of LIB, MAI, PJB, JBF, PIG, PR, PF, PMA<br>
+<dd><em>ftnopt</em> either LAX or PICKY<br>
+<dd><em>system</em> is either UNIX or VMS<br>
+<dd><em>site</em> is either ILL or RAL<br>
+</dl>
+Makes the <em>part</em> specified from the master file.  This process substitutes
+numbers for the variable dimensions in the master file using local preferences
+given in a file (parlist) and adopts the  system and site options specified.
+The master file mistre.ss is read from the directory $CCSL_SSSRC or if that is
+not defined $CCSL_SRC or failing that the current directory.   The fortran file
+created is called xxxmk4.f where xxx is the three letter <A href =
+"ccslparts.html#CCSLPARTS"> <em>part</em></a> name. e.g. extract lib makes libmk4.f and
+extract mai makes maimk4.f If the environment variable $CCSL_FDEST is a
+directory the file is placed there.
+<p>
+<dt>	<b>makobj</b>	 [<em>switch</em>] <em>part</em> <em>name</em> <em>command</em>
+<dd>
+<dl>
+<dd> <em>switch</em> is either <em>-c</em> (split and compile)
+or <em>-s</em> split only. The default is <em>-c</em>.
+<dd><em>part</em> is one of LIB, MAI, PJB, JBF, PIG, PR, PF, PMA<br>
+</dl>
+<spacer type=vertical size=4>
+if compiling
+<dl>
+<dd><em>name</em> the name of a file to which Fortran errors will be
+written<br>
+<dd><em>command</em> The command needed to compile a module with Fortran 77
+(eg f77 -c) <br>
+</dl>
+<dd> Makes a searchable archive library of object files out of the contents of
+xxxmk4.f. It will be called xxxmk4.a and will be moved to the library directory.
+<br>
+NB It makes no sense to run maklib with the <em>parts</em> containing main programs
+i.e. <em>MAI</em> and <em>PMA</em>.
+<spacer type=vertical size=4>
+<dd>
+If splitting
+<dl>
+<dd><em>name</em> the name of a directory in which the Fortran modules
+will be placed. If it doesn't exist it will be created.
+<br>
+</dl>
+<dd> Splits  the contents of xxxmk4.f into individual Fortran modules (extension .f)
+<p>
+<dt>	<b>ccsl</b> <em>part</em> [<em>-switches</em>] [<em>filename</em>]
+<dd>
+<dl>
+<dd><em>part</em> is one of LIB, MAI, PJB, JBF, PIG, PR, PF, PMA<br>
+<dd><em>switches</em> one or more of a, c, e, l, s.
+<dl><dd>
+<table border=0 rules=no cellspacing=3 cellpadding = 3>
+<tr><td valign="top">a <spacer type=horizontal size=10>
+<td>Make a linkable archive out of a set of object files </tr>
+<tr><td valign="top">c
+<td>Split up xxxmk4.f into individual modules and compile each</tr>
+<tr><td valign="top">e
+<td>Extract <em>part</em> from the mistress file: parameters to be
+substituted are in <em>filename</em></tr>
+<tr><td valign="top">g
+<td>Gets the graphics driver <em>filename</em> out of pigmk4.f</tr>
+<tr><td>l
+<td>Load a list of main programs: names in <em>filename</em></tr>
+<tr><td valign="top">s
+<td>Split xxxmk4.f into individual fortran modules in the directory <em>filename</em>
+</tr>
+</table>
+</dl>
+<dd><em>filename</em> Name of a file the use of which depends on
+<em>switches</em> as above.<br>
+</dl>
+<spacer type=vertical size=4>
+<dd>Script use to build the whole or part of the system by successive calls
+to <b>extract</b>, <b>maklib</b> and <b>makobj</b>.
+The sources and destinations of the various files used or created are derived
+from <em>part</em> and the environment variables given in the table below.
+<spacer type=vertical size=4>
+  <dl>
+    <dt><b>Examples</b>
+    <dd>"ccsl -ace lib parlis"  will create libmk4.a from mistre.ss
+    <dd>"ccsl -e mai" will extract the main program file maimk4.f from mistre.ss
+  </dl>
+</dl>
+<p>
+<dt>	<b>load</b> [<em>-g</em>] <em>prog</em> [<em>-switches</em>]
+<dl>
+<dd>Makes an executable <em>prog</em> out of a main program
+<em>prog</em>.f searching the CCSL library $CCSL_LIB/libmk4.a to resolve
+references to CCSL routines.
+<spacer type=vertical size=4>
+<dl>
+<dd>The switch <em>-g</em> will prevent optimisation and force creation
+of a symbol table for debugging purposes.
+<spacer type=vertical size=4>
+<dd> <em>switches</em> are needed for graphics programs
+<dl><dd>
+<table border=0 rules=no cellspacing=3 cellpadding = 3>
+<tr><td valign="top">-g <spacer type=horizontal size=10>
+<td>Link with the <a href="http://www.astro.caltech.edu/~tjp/pgplot/">
+ PGPLOT</a> library</tr>
+ <tr><td valign="top">-pg
+ <td>Link with the CCSL plotting plotting routines specified in the file
+ $CCSL_OPT/graphics_choices.</tr>
+ <tr><td valign="top">-ps
+ <td>Link with the simple CCSL postscript plotting routines. </tr>
+ </table>
+ </dl>
+</dl>
+</dl>
+<dt>	<b>split</b>  <em>part</em> <em>directory</em>
+<dl>
+<dd>An alias for "makobj -s <em>part</em> <em>directory</em>"
+<dd> Splits <em>part</em>mk4.f into separate Fortran files in
+<em>directory</em>
+</dl>
+
+<table border=1 cellspacing=3 cellpadding = 3>
+<caption><b>Environment variables used for files and directories
+(xxx stands for <em>part<em>)</b></caption>
+<tr><th align=middle rowspan = 2> File</th>
+     <th align=center colspan = 2> Name </th>
+     <th align = center colspan=3>Directory</th></tr>
+     <tr><th>1st choice</th><th>default</th>
+     <th>1st choice</th><th>2nd choice</th> <th>default</th></tr>
+<tr><td>Master file<td>mistre.ss</td></td><td>mistre.ss</td>
+     <td>$CCSL_SSSRC</td> <td>$CCSL_SRC</td><td>current</td>
+</tr>
+<tr><td>Fortran source</td><td>xxxmk4.f</td><td>xxxmk4.f</td>
+     <td>$CCSL_FSRC</td> <td>$CCSL_SRC</td><td>current</td>
+<tr><td>Fortran destination</td><td>xxxmk4.f</td><td>xxxmk4.f</td>
+     <td>$CCSL_FDEST</td> <td>$CCSL_SRC</td><td>current</td>
+</tr>
+<tr><td>Symbolic parameters</td> <td>$CCSL_PARLIST</td><td>parlist</td>
+     <td>$CCSL_OPT</td><td>$CCSL/options</td><td>current</td>
+</tr>
+<tr><td>Fortran commands</td> <td>f77_choices</td><td align=center>-</td>
+     <td>$CCSL_OPT</td><td>$CCSL/options</td><td>current</td>
+</tr>
+<tr><td>Graphics libraries</td> <td>Graphics_choices</td>
+<td align=center>-</td>
+     <td>$CCSL_OPT</td><td>$CCSL/options</td><td>current</td>
+</tr>
+<tr><td>Programs to compile</td><td><em>filename</em></td><td>list_of_progs</td>
+     <td>current</td><td>$CCSL_OPT</td><td>$CCSL/options</td>
+</tr>
+<tr><td>Libraries</td> <td>$xxxmk4.a</td><td>xxxmk4.a</td>
+     <td>$CCSL_LIB</td><td>$CCSL/lib</td><td>./lib</td>
+</tr>
+</table>
+<a name = "ccslalias">
+<h2>Setting Aliases</h2>
+The scripts to execute all the commands given above are held in the directory
+given by the environment variable $CCSL_PERL. There is a file "aliases"
+in the CCSL root directory which defines the commands
+<b>get</b>,<b>extract</b>, <b>makobj</b>, <b>load</b> and <b>split</b>
+as aliases to these scripts. Inserting a command to <em>source</em>
+this file in your .cshrc file should set up these aliases.<br>
+ <a name = "cslgraf">
+ <h2>Loading graphics programs</h2></a>
+ The command to load a CCSL graphics program typically has the form
+ <pre>
+ f77 gprog.f pigxxx.f $CCSLIB lgraf -o gprog
+ </pre>
+where gprog is the name of the program and xxx is the mnemonic for the graphics
+driver eg tek. the module "pigxxx.f" contains a subroutine  piglet which includes
+all the driver dependent commands for ccsl graphics.  "graf" is the name of
+the system library for that driver. Some PIGLETs such as the postscript driver
+PIGPOS do not need this additional library.
+ <p>
+ At ILL use of the PGPLOT library is recommended. A make file which makes the
+ fourier plotting program fourpl_pg is
+ <pre>
+# Example Makefile for PGPLOT programs on Unix system
+#	Fortran compiler
+FCOMPL= f77 -mips3
+#	Location of PGPLOT library
+PGPLOT=/usr/local/lib/libpgplot.a -lX11
+#  CCSL graphics directory
+GRAF=$(CCSL_GRAF)
+fourpg : fourpl.f $(CCL)/graf/pigpg.o
+	$(FCOMPL) -o fourpl_pg fourpl.f $(GRAF)/pigpg.o $(CCSLIB) $(PGPLOT)
+fourpl.o : fourpl.f
+	$(FCOMPL) -c fourpl.f
+</pre>
+<b><big>NB</big></b> Before using PGPLOT programs set the environment variable PGPLOT_DIR
+to the directory in which pgplot is installed eg /usr/local/lib/pgplot
+<p>
+<ADDRESS>
+P.J. Brown - Institut Laue Langevin, Grenoble,  FRANCE.
+<script type="text/javascript" src="./mailing.js">  </script>
+</ADDRESS>
+</BODY>
+</HTML>

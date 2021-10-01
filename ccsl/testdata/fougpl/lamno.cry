@@ -1,0 +1,43 @@
+A Mn1    0      0     0.09642   0.143  3.27
+A Mnj    0      0     0.09642   0.143  0.02
+A  O1    0      0      0         0.76  0.02
+A  O2    0      0      0.19621   0.64  0.02
+A  O3    0      0.5    0.09518   0.66  0.02
+N LaMnO  3.27 muB spherical
+F Mn  2  0.4198 14.2829  0.6054  5.4689  0.9241 -0.0088 -0.9498
+F Mnj  4  1.2427 14.9966  1.9567  6.1181  0.5732  2.2577  0.0031
+F O  3 0.00  1.0000 0.05  0.9693 0.10  0.8834 0.15  0.7599 0.20  0.6199
+F O  3 0.25  0.4818 0.30  0.3577 0.35  0.2537 0.40  0.1711 0.45  0.1084
+F O 3 0.50  0.0626 0.60  0.0094 0.70 -0.0107 0.80 -0.0138 0.90 -0.0092
+F O  3 1.00 -0.0023
+ZF Mn  0 3.266
+C 3.8742 3.8742 20.1454
+S -y,x,z
+S x,y,-z
+S y,x,z
+S 1/2+x, 1/2+y, 1/2+z
+D WVLN    0.8430
+D GEOM 8
+D L/R 1
+D UMAT  -0.24961  -0.07398  -0.00209
+D UMAT   0.00127  -0.01164   0.26009
+D UMAT  -0.01426   0.04804   0.00222
+P UP     0.9470    0.0010 DOWN   -0.9400    0.0010
+I DTYP 1
+I NCYC 5 PRIN 3
+L MODE 3 REFI 4
+L VARY ONLY ALL SITE
+L SCAL 1.0
+M AXES 0 0 1 1 0 0 0 1 0
+M NDIM 3 FTYP 4 DTYP 1 CM/A 1 SMAX 0.8
+M PLOT 0 0.5
+M PRIN 0
+M MESH 0 .25 .005 -.5 .5 .01
+M SCAL 100
+M CONT STEP -18 18 4
+Z Symbol sizes now given in Angstroms
+M LABL Mn1 0.1 green circle filled
+M LABL O1 0.1 red square filled
+M LABL O2 0.1 red uptria filled
+M LABL O3 0.1 red dwntria filled
+

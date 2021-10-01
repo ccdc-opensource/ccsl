@@ -1,0 +1,383 @@
+%\chapter{INPUT AND OUTPUT OF OTHER DATA}
+%\begin{htmlonly}
+%\documentclass[a4paper]{CCSLman}
+%\usepackage{html,makeidx,color}
+%\input{chap4.ptr}
+%\end{htmlonly}
+%\internal{c2}
+%\internal{c3}
+%\internal{c1}
+%\internal{c5}
+%\internal{c6}
+%\internal{c7}
+\startdocument
+%\begin{document}
+%\htmladdtonavigation{\htmladdnormallink
+%  {\htmladdimg{../icons/appenx.gif}}
+%  {../appenx/appendix.html}}
+\label{chap:4}
+\markboth{Input and Output}{}
+\section{Introduction}\markright{Introduction}
+Some uses of CCSL require as input only the Crystal Data.  More often, a
+file of what the crystallographer usually thinks of as his \ital{data}
+is needed as well.  This will typically be a list of items, all similar in
+format, e.g. indexed reflection or intensity data.\p
+At present such files are usually read by FORTRAN fixed format READ
+statements. CCSL free format read routines are gradually being
+introduced instead, in cases where the fixed format causes problems. An
+example is in GRLSQ, the Least Squares Refinement of a structure for
+which it is required to group together several reflections on input, to
+compare against one calculated value.  Such data are read by SUBROUTINE
+\stlink{i}{INOBGR}, which is required to read an unknown number of integers followed
+by a real number (with decimal point).  This is not simple using
+FORTRAN READ.\p
+Another application of free format is the routine \stlink{r}{RDDATA}, which reads 
+$h,k,l$ and a set of other numbers, with the inclusion
+of a \ital{comment} facility, so that such a list can be headed by some
+identifying title.
+\section{Diffraction data files}\markright{Diffraction data files}
+Many of the data files treated using CCSL routines will be the results of
+diffraction experiments which depend both on the diffraction
+geometry, UB matrix, wavelength etc. and on sample environment parameters
+such as the temperature and magnetic field. If these parameters can be extracted
+from the raw data when it is initially processed, they may be written in the form of a header on the resulting data files. Each line in the header starts with a hash (\#),
+followed by a word to identify the parameters on the rest of the line. Subsequent
+processing programs may either recognise the word and use the parameters, or write them
+unchanged on the output file. The information in the headers allows data sets
+collected with different wavelengths, applied fields etc. to be refined
+together using the multi-souce options for structure factor least-squares.
+%
+\section{Input of Least Squares Data}\markright{Input of Least Squares Data}
+Wherever possible, the point at which these other data 
+(which we will call \ital{reflection data}) are read is accessible to
+the user, so that if he has data
+in some strange format he can still read them. An example of this is
+in the various Least Squares Refinement main programs like \mlink{sflsq}{SFLSQ}, 
+\mlink{maglsq}{MAGLSQ},
+which actually contain the READ and FORMAT statements for the reflection
+data. Several alternative formats are already provided;  there is also a
+data input type 0, indicating that the data will be provided, a line at a
+time, by successive calls to SUBROUTINE QLSQIN, which the user must provide.\p
+In general, any SUBROUTINE QxxxIN is a user-provided input routine for
+reflection data.  (The user need not concern himself with special formats
+or a routine QLSQIN if he has data in some standard format known to the
+system; there is a dummy routine \stlink{q}{QLSQIN}\ in the Library, which will be
+superseded by any routine of the same name if the user provides one.)
+%
+\section{Input of Fourier Data}\markright{Input of Fourier Data}
+Input of reflection data for Fourier calculations is less accessible,
+being buried in the various Fourier routines like \stlink{f}{FOUR1Z}, 
+\stlink{f}{FOUR1D}\ as a
+call to \stlink{f}{FOUINP}.  Again an input type 0 input routine \stlink{q}{QFOUIN}\ is
+available.  The user would need to write a new QFOUIN if, say, he had
+non-centrosymmetric data and was not assuming Friedel's Law.  He would
+have to decide what to do with Friedel pairs before presenting them to
+the standard Fourier calculations, which do assume Friedel.
+%
+\section{File Handling and the Use of Input/Output Units}
+\markright{File Handling}
+The assignment of FORTRAN units is handled by CCSL.
+Interactive terminal input and output units, the line-printer and the
+plotter are assigned to the units named ITI, ITO, LPT, and IPLO
+respectively, and are given values appropriate to the system by INITIL.
+They are held in the COMMON /IOUNIT/.\p
+Assignment of files to FORTRAN units is done using FUNCTION
+\stlink{n}{NOPFIL} to open a file and SUBROUTINE \stlink{c}{CLOFIL} to close it.\p
+Fifteen units are required by CCSL and managed by it; if not forbidden by
+the particular operating system they are units 20-34.  The user of
+standard programs should find that his input and output are taken care
+of by calls of NOPFIL already in the system.  A user writing or
+modifying a main program will need to know more details, in order to
+deal with his own files.\p
+{\bf Note} The length of the leaf part of file-names in CCSL is restricted
+to 10 characters: a main part of up to 6 characters optionally followed by a period (.)
+and and extension of up to 3 characters.
+\subsection{Opening a File to be Read}
+To open a file to be read by a program in the simplest possible way
+the code:
+\\ 
+\exac{~~~~~~LUN=NOPFIL(1)}\\ 
+should be obeyed. The system will respond with the message:\\ 
+\exac{Give name of input file}\\ 
+to which the user should respond with the file name.  Under VMS on a VAX,
+this can
+include the full path name and an extension if required but it may be simply the
+letters (up to 6) of the file name, in which case the extension .DAT is
+added.  LUN will be set to the value of the Fortran unit allocated by 
+the system.
+The value of LUN should not normally concern the user;  he reads the file
+by code such as:\\
+\exac{~~~~~~READ (LUN,42)  FRED}\\ 
+but if he needs for some reason to open a specifically numbered file he may
+use SUBROUTINE \stlink{o}{OPNFIL}, thus:
+\begin{verbatim} 
+
+      LUNIT=14
+      CALL OPNFIL(LUNIT,1)
+\end{verbatim}
+NOPFIL can interpret relative directory specifications in UNIX (eg ../) or VMS
+(eg [-.]) and absolute file or directory names given as environment variables
+(\$$\cdots$) in UNIX or as logical assignments ($\cdots:$) in VMS.
+\subsection{Opening an Output File}
+To open for writing a file which is not destined for a line printer, the
+code:\\[0.2ex]
+\exac{~~~~~~LUN=NOPFIL(2)}\\[0.2ex]
+should be obeyed.  The file is then written using, for example,\\[0.2ex]
+\exac{~~~~~~WRITE (LUN,43) JOAN}\\ 
+To open for writing a file which is destined for a line printer, a VMS
+user may write:\\[0.2ex]
+\exac{~~~~~~LUN=NOPFIL(2002)}\\[0.2ex]
+When the file is opened this will use:
+\begin{verbatim}
+      CARRIAGECONTROL='FORTRAN'
+\end{verbatim}
+Fortran carriage control is not recognised by UNIX.
+\subsection{Options Available when Opening Files}
+Other options can be obtained by obeying:\\[0.2ex]
+\exac{~~~~~~LUN=NOPFIL(MODE)}\\[0.2ex]
+where MODE indicates the type of file to be opened and how to obtain
+the file-name.\p 
+MODE may have up to 5 digits.The least significant, MODE1, indicates
+the file-type; the second digit, MODE2, shows how to obtain the file
+name; the third, MODE3, deals with default extensions; the fourth, MODE4,
+selects formatted or unformatted files and the fifth, MODE5, selects
+sequential or direct access files.\p
+Character data such as a message or
+the file name are transmitted to NOPFIL via the COMMON /SCRACH/ which
+can contain 200 characters, and within NOPFIL is divided into MESSAG 
+and NAMFIL of 100 characters each. The maximum length of both these
+strings is configurable when building the system. \p
+The significance of MODE is as follows:
+\begin{list} {} {\setlength{\labelwidth}{3cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{1cm}} 
+\item[MODE1 \hfill] = 1 for a read file\\
+       = 2 for a write file status new\\
+       = 3 for a write file status undefined (UNKNOWN)\\
+       = 4 for a write file to be modified (APPEND for sequential files)\\
+       = 5 for a scratch file.
+ 
+\item[MODE2 \hfill] = 0 give the standard messages for
+ read or write files; machine specific
+           information like the path name and file extension 
+           may be included in
+           the user's response.\\
+       = 1 use the message in MESSAG; otherwise as MODE2=0\\
+       = 2 use the file-name in MESSAG. Report that the file is opened.\\
+       = 3 as 2 but do not give file-opened message.\\
+       = 4 as 0 but do not give file-opened message.
+ 
+\item[MODE3 \hfill] = 0 use the system default for path and default 
+           extension .DAT\\
+       = 1 use defaults for extension, disc and path-name found in characters
+           1-4, 5-10, and 11-30 respectively of NAMFIL (up to 40
+           characters, in common SCRACH after item MESSAG). If the disc or
+           path-name is absent, default as system.\\
+       = 2 use the file-name exactly as given in response to the request.
+ 
+\item[MODE4 \hfill] = 0 for a formatted file, not expecting FORTRAN 
+           carriage control
+           characters (and therefore not a line-printer file)\\
+       = 1 for an unformatted file\\
+       = 2 for a formatted file with FORTRAN carriage control characters,
+           such as would be sent to a line printer.
+ 
+\item[MODE5 \hfill] = 0 for a sequential file\\
+       = 1 for a direct access file\\
+       = 2 for RECORDTYPE='FIXED' (needed for ``GENIE" files).\end{list}
+ 
+\subsection{Exit from NOPFIL}
+After a successful exit from the call:\\[0.2ex]
+\exac{~~~~~~LUN=NOPFIL(MODE)}\\[0.2ex]
+LUN is set to a small positive number, which is the
+unit number allocated to the opened file by NOPFIL.  LUN is zero
+if no response is obtained (i.e. the RETURN key is pressed) when a
+file name is reqested. LUN is negative if the file could not be opened,
+although NOPFIL allows the user to try again after typing errors or
+other blunders from which it has a sensible way to recover.\p 
+The short names (10 characters) are stored in COMMON FILNAM and
+may be obtained by declaring the COMMON and obeying:
+\\[0.2ex]
+\begin{verbatim}         CHARACTER*10 NAME,FILNOM
+         NAME=FILNOM(LUN)
+\end{verbatim}
+\subsection{Closing Files}
+When input or output operations are terminated on a particular unit
+it should be returned to the system by obeying:
+\verb|         CALL CLOFIL(LUN)|
+\subsection{Examples of the Use of NOPFIL} 
+The main program for a Fourier calculation is given below:
+\begin{verbatim}C MINIMAL FOURIER PROGRAM.
+      CALL PREFIN
+      LUNI= NOPFIL(1)
+      CALL RECIP
+      CALL OPSYM(2)
+      CALL SETFOU
+   . . . map-producing code - see various main program examples
+      STOP
+      END
+\end{verbatim}
+\ssk
+It contains one explicit call to NOPFIL; however the call to PREFIN
+provokes several other calls to NOPFIL, one of which sends the message:\\ 
+\exac{Give name of Crystal Data File :}\\ 
+to which the user must reply by typing the appropriate file name.
+Another call to NOPFIL does not result in a message as it just opens
+an internal scratch file.  (If the Libary has been generated for RAL rather
+than ILL, an early call of NOPFIL asks for the name of the printer 
+output file.)\p
+The call to \stlink{n}{NOPFIL}\ in the main program sends
+the message:\\ 
+\exac{Give name of input file :}\\ 
+and the user should type the name of the file containing his reflection data.\p
+A less trivial example is given in the fragments from the main program ABSMSF
+reproduced below. \mlink{absmsf}{ABSMSF}\ is a program which reads a file containing
+reflection intensities in the special format produced by the sorting
+programs \mlink{arrnge}{ARRNGE}\ and \mlink{arrinc}{ARRINC}.  
+The file name has the extension .ARR.
+ It then makes 
+an absorption correction if required and calculates the 
+average of the corrected intensity over all equivalent reflections. Finally
+it writes an output file containing
+the mean structure factors and their standard deviations.
+\\[0.2ex]
+\begin{verbatim}      PROGRAM ABSMSF
+            .
+            .
+      DIMENSION LUN(2)
+      CHARACTER*56 HEDING
+      LOGICAL INC
+            .
+            .
+      COMMON /IOUNIT/LPT,ITI,ITO,IPLO,LUNI,IOUT
+      COMMON /REFS/K(3,2),LL(48,2),R(500,2),SCALE(2),INC,II,FF(3,2)
+      COMMON/SCRACH/MESSAG,NAMFIL
+      CHARACTER *40 MESSAG
+      CHARACTER *60 NAMFIL
+      DATA HEADNG/'(5X,''h'',4X,''k'',4X,''l'',10X,''Fobs'',7X,
+     1''DFobs''/)'/
+            .
+            .
+      IF (INC.EQ.0) GO TO 2
+C ALTER THE FORMAT FOR FLOATING POINT OUTPUT:
+      HEADNG(2:2)='6'
+      HEADNG(9:9)='7'
+      HEADNG(16:16)='7'
+      HEADNG(23:24)='12'
+            .
+            .
+      NAMFIL='.ARR'
+      LUN(1)=NOPFIL(101)
+      NAMFIL='.SF '
+      LOUT=NOPFIL(102)
+            .
+            .
+      STOP
+      END
+\end{verbatim}
+\ssk
+The first call to NOPFIL asks the user for the name of the input file
+and uses the default .ARR if no ``." is found in the reply.
+The second call creates a new file for output with the same name as
+the input file but with extension .SF (structure factors).
+\section{Printed Output Files: Use of subroutine \slink{t}{TESTP}}
+\markright{Printed Output Files}
+There is a SUBROUTINE TESTP which
+has been written to facilitate the production of long lists of similar
+items with column headings at the top of each page.  Calls to TESTP have
+the form:\\ 
+\exac{      CALL TESTP(LUN,LCOUNT,NTEST,HEADNG,NLINES)}\\ 
+where LUN is the FORTRAN unit on which the list is being written, LCOUNT
+is the number of lines printed since the last page throw, NTEST is used
+to provoke a page throw if there are less than NTEST lines left on the
+page.\p
+HEADNG is a character variable containing the page heading (see
+the example above and also that 
+in the BLOCK DATA sub-program below). NLINES is the number of
+lines in the heading. HEADNG need not be in COMMON if data are only
+written to the list from the main program. In ABSMSF it can be seen that
+HEADNG is modified by the program if INC is .TRUE. (non-integer indices)
+to accomodate the longer FORMAT required to print the indices in this case.
+\\[0.2ex]
+\begin{verbatim}      BLOCK DATA PAGEHD
+      COMMON /HEDING/ HEADNG
+      CHARACTER*132 HEADNG
+      DATA HEADNG/' (''0Seq No       h    k    l   Omega  2Theta   
+     1  Nu       R        dR      Peak cps  Bkgd cps      DVM
+     2  Date    Time''/)'/
+      END
+\end{verbatim}\ssk
+\section{Graphical Output}\markright{{Graphical Output}}
+%
+The form of graphical output is very dependent on the hardware used
+to produce it and the local software used to drive that hardware.
+CCSL addresses this problem by chanelling all calls to the plotter
+hardware through a single SUBROUTINE \stlink{p}{PIGLET}.
+\p
+There is a separate
+section of the CCSL Master File which contains various PIGLETs which have
+been written to drive different devices, such as Tektronix 
+4010 terminals and BENSON plotters. Special PIGLETs for GKS,
+PostScript and PGPLOT interfaces are also included. A user who wishes to compile
+a program which uses CCSL graphics should extract the most suitable
+SUBROUTINE PIGLET from the Master File, modify it if necessary, and
+include it in his link statement together with any graphics libraries
+called by this particular PIGLET.
+\p
+In many cases the output will drive a graphics terminal directly
+and local system facilities will be used to obtain hard copies.
+Output files destined for centralised plotters will usually be
+created and named by the local system software. 
+\p
+When the graphical output is sent directly to a file
+by the CCSL graphics interface, for instance when using the
+PostScript or PGPLOT PIGLETs the output file will be named by CCSL, usually
+with the name of the program, a sequence number and an extension approriate to the type
+of output (e.g. .PS for a PostScript file).
+\subsection{Plotting in colour} 
+16 different colour names are recognised by CCSL using the first 3 letters of their names
+(case insensitive), they are:\\[1ex]
+\begin{tabular}{rlllll}
+\hspace{10mm}Number&\quad&Name&Red&Green&Blue\\
+0&&White&1.00&  1.00  &1.00\\
+1&&Black &0.00  &0.00  &0.00\\
+2&&Red  &1.00  &0.00  &0.00\\
+3&&Green  &0.00  &1.00  &0.00\\
+4&&Blue&0.00  &0.00  &1.00\\
+5&&Cyan&0.00  &1.00  &1.00\\
+6&&Magenta&1.00  &0.00  &1.00\\
+7&&Yellow&1.00  &1.00  &0.00\\
+8&&Orange&1.00  &0.50  &0.00\\
+9&&SpringGreen&0.50  &1.00  &0.00\\
+10&&SeaGreen&0.00  &1.00  &0.50\\
+11&&Aqua&0.00  &0.50  &1.00\\
+12&&Purple&0.50  &0.00  &1.00\\
+13&&Pink&1.00  &0.00  &0.50\\
+14&&DkGrey&0.33  &0.33  &0.33\\
+15&&LtGrey&0.66  &0.66  &0.66 \\ 
+\end{tabular} \\
+The function \stlink{l}{LCOLPG} will convert a colour name to a colour number recognised by
+\stlink{p}{PIGLET}.
+\subsection{Plotting Symbols}
+Symbols in CCSL are plotted using the subroutine \stlink{k}{KANGA3} which recognises 9 different symbol shapes and two fill types: \em{filled} and \em{open}. The full list of symbols
+with their names is given below. The names are recognised by case insensitive matching 
+of the first 6 letters; and the fill property by case insensitive matching
+of the first 4 letters in \em{filled} or \em{open}. \\[1ex]
+\begin{tabular}{rlllll}
+\hspace{10mm}Number&\quad&Name&Description&Filled/Open\\
+1&&square&Square&Yes\\
+2&&trianup&Triangle vertex up&Yes\\
+3&&triandown&Triangle vertex down&Yes\\
+4&&circle&A hexagon&Yes\\
+5&&xcross&Cross with diagonal members&No\\
+6&&plussign&Cross with hor. and vert. bars&No\\
+7&&eggtimer&Xcross with ends closed&Yes\\
+8&&bowtie&Eggtimer rotated 90 degreep&Yes\\
+9&&diamond&Square rotated 45 degrees&Yes\\
+\end{tabular}
+The function \stlink{l}{LSYMPG} will convert a symbol name and fill type into a symbol
+number for input to \stlink{k}{KANGA3}.
+
+\finchapter
+%\end{document}

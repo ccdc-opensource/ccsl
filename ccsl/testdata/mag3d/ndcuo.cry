@@ -1,0 +1,30 @@
+N Nd2CuO4 Double-q Magnetic Structure 
+C 3.892 3.892 11.97 90. 90. 90.
+S 1/2+x, 1/2+y, 1/2+z
+S -x, -y, -z
+S -y, x, z
+S x, y, -z
+S y, x, z
+A Nd     0.00000   0.00000   0.35159   0.12261     
+A Cu     0.00000   0.00000   0.00000   0.27722     
+ZA O1     0.00000   0.50000   0.00000   0.47496     
+ZA O2     0.00000   0.50000   0.25000   0.38662     
+F Nd      1   0.769
+F Cu      1   0.7600
+F O       1   0.5810
+F NdM 2 1.4530 18.3398 1.6196 7.2854  0.8752 2.6224 0.0126
+Q PROP 1/2 1/2 0
+Q STYP ANTI
+Q NdM FORM Nd
+Q Sm SDIR  90 45
+Q Nd MU  2
+Q MSYM -1 -1 3 -1  5 -1
+ZQ NSYM 2 1 0 0 0 1 0 0 0 1
+X PERS .5 .7660 .6428
+X ARRO .33 .2 .1 .005 .5
+X TRAN 1 0 0 0 1 0 0 0 1
+X SYMB Cu 0.2 0
+X SYMB Nd .3 .8
+ZX SYMB O1 .7 4
+ZX SYMB O2 .7 4
+X CM/A 1.5

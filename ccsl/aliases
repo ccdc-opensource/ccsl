@@ -1,0 +1,10 @@
+#! /bin/csh
+# Set up  aliases for CCSL
+# get a subroutine out of a "part" of the library
+alias get \$CCSL_PERL/ccsl
+# General Manipulation of the libray
+alias ccsl \$CCSL_PERL/ccsl
+# extract a "part" of the library from the master file
+alias extract \$CCSL_PERL/ccsl -e
+# load a single main program [optional list of subroutines]
+alias load \$CCSL_PERL/load

@@ -1,0 +1,226 @@
+#! /usr/bin/perl
+# Modified to do just source and testdata
+# Make sure the path  above  is the location of perl on your system
+#local ($locale) = "/usr/bin/perl";
+
+# To distribute the various files in the archive into a standard
+# Directory structure
+#
+local @filelist = ();
+local ($basedir,$logfile);
+local %parts=("source"=>2,"doc"=>3);
+# %direc associates file extensions with system subdirectories
+local %direc = ("ss"=>"source", "opt"=>"options","ccsl"=>"","pl"=>"perl",
+# These for doc files
+                "doc"=>"", "sty"=>"texes", "tex"=>"texes","cfg"=>"texes",
+               );
+ %envsrc = (SRC=>"source", OPT=>"options",  PERL=>"perl",GRAF=>"graf",
+	 TESTD=>"testdata");
+%envdoc = ( DOC=>"doc",TEX=>"doc/texes");
+%keep    = (ss=>1, sty=>1, tex=>1, css=>1, perl=>1, cfg=>1);
+#
+$pwd = $ENV{PWD};
+$basedir = $ARGV[0];
+while (!$basedir) {
+	print "Base directory for CCSL installation? : ";
+	$basedir=<STDIN>;
+	chomp $basedir;
+}
+if ($basedir =~ /^ *\./) {$basedir = localdir($basedir)}
+while  ($basedir eq $pwd) {print " Installing in the directory containing the",
+	" unpacked files is not reccomended.\nPlease choose another ";
+	$basedir=<STDIN>;
+	chomp $basedir;
+}
+$ccsldir=$basedir;
+#
+#Check that 0README file exists
+$readme="$pwd/0README";
+unless (-e $readme) {
+	die "$readme does not exist: fatal Installation error\n";
+}
+($ofile,$doc,@filelist) = getfiles($readme);
+if ($doc) {
+	$basedir.="/doc";
+	 unless (-d $ccsldir) {die "CCSL system must be installed in $ccsldir
+	 before installing the documentation"}
+	 unless (-d $basedir)  {
+	 	mkdir ($basedir, 493) or die "Can't create directory $basedir";
+	 }
+} else {
+	 unless (-d $ccsldir)  {
+	 	mkdir ($ccsldir, 493) or die "Can't create directory $ccsldir";
+	 }
+}
+
+local %dirlist = ();
+#############################################################################
+# This section finds the location of Perl in this script to substitute
+# later into all the other perl scripts
+local($name) = $0; # Program name
+$name =~ s!^\./!!;
+$name=$name;
+print "Executing  \"$name\"\n";
+open PFILE,"$name" or die "Can't open $name";
+while (<PFILE>) {last if (s/#! *//)}
+chomp;
+local ($locale) =$_;
+print "Perl from $locale\n";
+close  PFILE;
+#############################################################################
+$system=1;
+$test=$system;
+#
+	foreach $_ (@filelist) {
+   	($file,$ext) = split(/\./);
+   	$oldfile=$_;
+   	last if (!$file);
+   	if (-d $oldfile) { # file is a directory copy without extension
+#   		if (system("mv $oldfile $basedir/$file")){
+		rename $oldfile => "$basedir/$file" or die
+     	  "error moving directory  $oldfile to $basedir/$file";
+     	print "Directory $oldfile renamed $basedir/$file\n";
+     	next;
+     }
+# The  files without extensions or ext =.doc are copied to the base directory
+    unless ($ext && $ext ne "doc") {
+     if (!(rename $file, "$basedir/$file")){
+     	die "error moving  $file to $basedir";
+     }
+     print "$file.$ext moved to $basedir/$file\n";
+     next;
+  	 }
+  	 $newdir = $basedir."/".$direc{$ext};
+   	next unless ($newdir);	#$thisdir = "PWD"}
+   	unless (-d $newdir) {
+        mkdir ($newdir, 493) or die "Can't create directory $thisdir";
+	}
+    $newfile=$file;
+   	if ($keep{$ext}){ $newfile.=".$ext"}
+   	unless (-e "$oldfile") {die "Can't find $oldfile"}
+   	if ($newdir) {$newdir.="/"}
+# Substitute the location of perl in all perl scripts
+# and ensure they are executable
+   if ($ext eq "pl") {
+      open TFILE, ">$newdir$newfile" or die "can't open $newdir$newfile";
+      open PFILE, "$oldfile" or die "can't open $oldfile";
+      while (<PFILE>) {last if (/^#! */)}
+      print TFILE "#! $locale\n";
+      while (<PFILE>) {print TFILE $_}
+      close PFILE;
+      close TFILE;
+      chmod 0755,  "$newdir$newfile";
+      unlink $oldfile;
+    } else {
+    unless (rename $oldfile, "$newdir$newfile"){
+      die "error renaming $oldfile as $newdir$newfile";
+    }
+  }
+  print "$oldfile moved to $newdir$newfile\n";
+}
+#
+# Try to get the PGPLOT_DIR environment variable
+$gopt= "$ccsldir/options/graphics_choices";
+if (-e $gopt) {
+	open GFILE,"$gopt" or die "Can't open graphic options file $gopt";
+	GLINE:	while (<GFILE>) {
+		s/#.*$//;
+		if (/libpgplot/) {
+			@words=split;
+			foreach $word (@words) {
+				next unless ($word=~ s!/libpgplot.*$!!);
+				$pgword=$word;
+				last GLINE
+			}
+		}
+	}
+}
+# Prepare the file for environment variables
+@elines=();
+push @elines, "setenv CCSL $ccsldir\n";
+push @elines, "setenv PGPLOT_DIR $pgword/\n";
+#set or clear the rest of the CCSL environment
+while (($env,$dir)=each %envsrc) {
+ 	if (-d "$ccsldir/$dir") {
+  		push @elines,  "setenv CCSL_$env \$CCSL/$dir/\n";
+  	}
+}
+push @elines,  "setenv CCSL_LIB \$CCSL/lib/\n";
+push @elines,  "setenv CCSL_LIBDEST \$CCSL/lib/\n";
+push @elines,  "setenv CCSL_EXE \$CCSL/exe/\n";
+push @elines,  "setenv CCSL_GRAF \$CCSL/graf/\n";
+push @elines,  "setenv CCSLIB \$CCSL/lib/libmk4.a\n";
+if ($doc) {
+	while (($env,$dir)=each %envdoc) {
+ 		if (-d "$ccsldir/$dir") {
+  			push @elines, "setenv CCSL_$env \$CCSL/$dir/\n";
+  		}
+  	}
+}
+push @elines,"setenv PATH `echo \$PATH | sed -e 's\@:/CCSL/.*/exe\@:'\"\$CCSL\"'/exe\@'`\n";
+push @elines,  "echo \"CCSL environment variables set with base directory \$CCSL\"\n";
+push @elines, "echo \$PATH\n";
+# Open a new file for environment variables
+open ENVFILE, ">$ccsldir/environment" or die
+    "can't open file $ccsldir/environment";
+print ENVFILE @elines;
+close ENVFILE;
+#
+if ($doc) {print
+  "CCSL documentation installed in directory $basedir\n";
+} else {print
+  "CCSL system installed in directory $ccsldir\n";
+}
+#clean up
+opendir DIR,"$pwd" or die "Can't open directory $pwd ";
+@list=readdir DIR;
+closedir DIR;
+if (scalar(@list==2)) {system "rm -rf $pwd"}
+
+#############################################################################
+# Function to get the file-list from the README file
+sub getfiles(){
+  my ($fname,$f,$doc,$inlist);
+  my @filelist = ();
+  $fname=shift;
+  $doc=0;
+
+  open README, $fname or die "Can't open $fname";
+  $inlist=0;
+  while (<README>) {
+     if (s/^\s*tar -[xzf]{3,3}//) {
+     	chomp;
+     	 s/^ *//;
+     	 $ofile = $_;
+     	 next;
+     }
+ 	unless ($inlist) {next unless ($inlist=/README/)}
+	last if (length($_)<2);
+	next if (/^\s{6}/);
+	@f=split;
+	if ($f[0]=~/\.tex/) {$doc++}
+    push @filelist, $f[0]}
+  return ($ofile,$doc,@filelist);
+}
+#############################################################################
+# Function to get the name of a directory given with respect to $pwd
+sub localdir() {
+	my ($thedir,$path);
+	$path=shift;
+    $thedir = $pwd;
+	while ($path =~ s!\.\./!!) {
+		#go up a directory
+		$thedir = substr($thedir,0,rindex($thedir,"/"));
+	}
+	unless ($path =~ /^\.$/) {
+		$path =~ s!^\./!!;
+	    $thedir.="/$path";
+	}
+	$thedir =~ s!/$!!;
+
+	return $thedir;
+}
+
+#############################################################################
+
+

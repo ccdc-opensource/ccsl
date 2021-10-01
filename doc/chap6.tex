@@ -1,0 +1,223 @@
+%\documentclass[onecolumn,twoside,11pt,a4paper]{report}
+%\usepackage{CCSLman,html,makeidx,color,ifthen,bm}
+%\chapter{MAGNETIC STRUCTURES AND STRUCTURE FACTORS}
+%\begin{htmlonly}
+%\usepackage{CCSLman,html,makeidx,color,ifthen,bm}
+%\input{chap6.ptr}
+%\end{htmlonly}
+%\internal{c2}
+%\internal{c3}
+%\internal{c4}
+%\internal{c5}
+%\internal{c1}
+%\internal{c7}
+\startdocument
+%\htmladdtonavigation{\htmladdnormallink
+%  {\htmladdimg{../.icons/appenx.gif}}
+%  {../appenx/appendix}}
+\label{chap:6}
+\markboth{Magnetic Structures and Structure Factors}{}
+\section{Description of a Magnetic Structure}
+\markright{Description of a Magnetic Structure}
+In CCSL magnetic structures are described using a propagation vector to define  
+the periodicity, and a magnetic space group to define the relative 
+orientations of spins on different sub-lattices within the non-magnetic 
+unit cell. This approach has the advantage that only the minimum 
+information need be given and multiple unit cells are not required.
+The propagation vector \pv\ is defined so that
+the ordered moment $\Sv$ on a magnetic sublattice is related to that 
+${\Sv}_l$ in 
+another unit cell at vector distance \lat\space(a lattice vector) from it by
+\[{\Sv}_l= {\Sv}\,\mbox{\rm fn}(\pv\cdot\mathbf{l})\]
+where $\mbox{\rm fn}(x)$ is a periodic function of $x$ such that  
+$\mbox{\rm fn}(x)=\mbox{\rm fn}(n+x)$ for
+all integer $n$.\p
+The magnetic space group must be congruent with the crystallographic space
+group or one of its sub-groups.
+Each of the elements of the magnetic group acts on the magnetic moment with 
+the rotation and translation appropriate to the corresponding element in the 
+crystallographic group.
+This may be followed by the operation of time 
+inversion in which case the element is \ital{primed};
+otherwise it is \ital{unprimed}.\p
+If $\tilde R_s$ and ${\bf t}_s$ are the rotation and translation operators
+associated with one of the elements in the magnetic group and $\tilde T_s$
+the corresponding time reversal operator (1 or $-$1 depending on whether 
+time-reversal is invoked) then
+magnetic moment 
+\Sv\ at vector distance \rv\ from the origin of the unit
+cell implies magnetic moment 
+\[{\Sv}_s=\tilde T_s\tilde R_s{\Sv}\quad\mbox{at}\quad
+\tilde R_s{\bf r}+{\bf t}_s\]
+There is one such relationship for each of the elements in the magnetic 
+group. One must
+remember that magnetic moment is an axial vector so that \ital{improper}
+rotations introduce an additional inversion.
+\p
+The information needed to describe a magnetic structure is given on 
+\cds{Q}
+which are fully described in \hyperlink{card:Q}{chapter 3}.
+\section{Types of Magnetic Order}
+\markright{Types of Magnetic Order}
+Eight types of magnetic order are recognised. 
+They are defined on \hyperlink{card:Q}{\cds{Q STYP}} by 
+the words:
+\p
+\begin{list} {} {\setlength{\labelwidth}{30mm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{10mm}}
+\item[\bd{FERO} \hfill] Ferromagnetic and unmagnetised so all possible 
+domains are equally populated.
+\item[\bd{FERA} \hfill] Ferromagnetic and magnetised in the direction of the z 
+diffractometer axis.
+\item[\bd{FANI} \hfill] Anisotropic ferromagnetic the direction of magnetisation is in the plane
+containing both the magnetic field direction and the easy axis 
+diffractometer axis.
+\item[\bd{ANTI} \hfill] A simple commensurate antiferromagnetic structure.
+\item[\bd{AMOD} \hfill] A possibly incommensurate amplitude modulated structure; this 
+differs from \bd{ANTI} in that the relative phases of the modulation at the 
+different symmetrically related sub-lattices may need to be defined.
+\item[\bd{HELI} \hfill] A possibly incommensurate helical structure. 
+It differs from \bd{AMOD} 
+because the magnitude and direction of both spin components which define the 
+helical envelope must be defined. They are necessarily perpendicular to one 
+another.
+\item[\bd{INCM} \hfill] An incommensurate structure  defined by the complex Fourier
+components of the magnetisation distribution, one for each partner in the irreduciuble
+representation of the magnetic symmetry group. 
+\item[\bd{PARA} \hfill] Paramagnetic magnetised in the direction of the z 
+diffractometer axis (only recognised by \mlink{chilsq}{CHILSQ}.\end{list}
+\p
+\section{Symmetry constraints on magnetic parameters}
+\markright{Symmetry constraints}
+As with other crystallographic parameters such as site multiplicities, anisotropic
+temperature factors, etc, CCSL takes care of the constraints imposed by symmetry on
+the magnetic parameters. Such constraints may apply to the propagation vector, the
+magnetic moment directions and the magnetic moments themselves. The propagation vector
+must be invariant under the symmetry operations of the reciprocal lattice, if it is
+not, either the cell symmetry is reduced, leading to configuration domains, or the
+structure is a multi-q one. Propagation vectors corresponding to special points in the
+Brillouin zone are fixed, those on symmetry  axes or planes are constrained so as to
+continue to lie on them. The magnetic moments on atoms which are at special positions
+are constrained to have the point group symmetries of those positions. For instance,
+the magnetic moment of  an atom which lies on an axis of order higher than 2 is
+constrained to be parallel to the axis. For an atom on a mirror plane the moment is
+parallel to the plane if the reflection operation is combined with time-reversal, and
+perpendicular if it is not. Atoms on centres of symmetry which are combined with
+time-reversal can carry no moment. The subroutine \stlink{m}{MAGCON}\ determines the
+symmetry constraints on the magnetic  moments and prints them on the listing file. If
+the value of the magnetic moment is determined to be fixed by symmetry it must be
+zero.
+\p
+\p 
+\section{Magnetic Structure Factors}
+\markright{Magnetic Structure Factors}
+The magnetic structure factor \Mk\ can be defined as 
+the Fourier transform of
+the magnetisation distribution.\p
+The intensity of neutron scattering is proportional to the square
+of the component of \Mk\ perpendicular to the scattering
+vector \kv. This is the \ital{magnetic interaction\ vector} $\mathbf{Q(k)}$. Thus
+\[\Qk=\kv\times\Mk\times\kv\]
+Using the description of a magnetic structure just given the unit cell magnetic 
+structure factor can be written:
+\begin{eqnarray*}
+\Mk & = &\frac1N\sum_{n=-\infty}^\infty Q(n) \sum_l^{\mathit{crystal}}
+\exp \imath[(\kv+n\pv)\cdot\lat]\\
+&\times&\sum_i^{\mathit{magnetic\ atoms}}\ \sum_p^{\mathit{group}}
+\ \tilde T_p{\bf M}_{i}
+f_i(\kv)\exp \imath[\kv\cdot(\tilde R_p{\bf r}_i+{\bf t}_p)+\phi_i]
+\end{eqnarray*}
+In this equation 
+$\tilde T_p$ and $\tilde R_p$ represent rotations imposed by the elements of the space group on the magnetic 
+moments $\Mv_i$ and position vectors $\rv_i$ of the atoms in the unit cell, $f_i(\kv)$ is the magnetic form factor 
+and $\phi_i$ the phase factor for the $i$th atom. $Q(n)$ is  the Fourier transform of the
+modulating function $\mbox{\rm fn}(x)$. The sum over the lattice vectors is
+zero unless $\kv=\rl\pm n\pv$ where \rl\ is a  reciprocal lattice vector. 
+
+The projection of the unit cell magnetic structure factor on the plane perpendicular to the scattering vector is
+the  quantity calculated by the magnetic structure factor routines 
+\stlink{f}{FMCALC}\ and \stlink{l}{LMCALC}.
+\p
+For the magnetic structure type INCM the parameters used are the complex fourier components $\Sv_{si}(\qv)$ of the 
+ magnetisation distribution for partner $s$ of the relevant irreducible representation. The unit cell magnetic structure factor for partner $s'$ is 
+ then
+\begin{eqnarray*}&&\Mv(\pv)=\frac1N \sum_{n=-\infty}^\infty Q(n) \sum_l^{\mathit{crystal}}
+\exp \imath[(\kv+n\pv)\cdot\lat]\\
+\times&&\sum^{partners}_{s}\ \sum^{magnetic\ atoms}_{i}\ \sum^{group}_{p}f_i(k)\sigma_{s'} \tilde {O}_{sip}S_{si}\exp\imath(\pv\cdot(\tilde R_p\rv_i+{\bf t}_p)\pm\phi_{p})
+\end{eqnarray*}
+$\sigma_s$ is the complex order parameter for partner $s'$ and $\tilde {O}_{sip}$ defines 
+the symmetry operation
+of the element $p$ of the representation on $\Sv_{si}(\pv)$. The irreducible representation  being used is
+ defined by the MSYM card and the  $\tilde {O}_{sip}$ operators by combining this information with the 
+ symmetry properties of the propagation vector (subroutines \stlink{p}{PROPER} and \stlink{c}{CPVSYM}). 
+For the INCM structure type the magnetic interaction vectors are obtained using  the subroutines
+\stlink{c}{CPVCAL}\ and \stlink{l}{LPVCAL}.
+\p
+At
+present CCSL only recognises sinusoidal modulations so that $p(n)=0$ unless
+$n=1$. 
+\
+%
+\section{Magnetic Domains}\markright{Magnetic Domains}
+Whenever the magnetic symmetry of a structure is less than the symmetry of 
+the nuclear structure magnetic domains can occur.
+Different parts of 
+the crystal conform to one or other of the possible domains.
+The different types that occur are: configuration domains, 180\degrees
+domains, orientation domains and chirality domains. 
+\p
+Configuration domains
+occur when the propagation vector \pv\ is not invariant under one or 
+more of the symmetry operations of the space group. Magnetic structure
+factors are calculated for the configuration domain whose propagation
+vector is given on the \cd{Q PROP}. If magnetic atoms which were equivalent
+under the full symmetry, are found to be inequivalent with the reduced 
+configuration symmetry CCSL will raise an error. In this case the symmetry 
+cards 
+and atomic positions must be adjusted to conform to the configuration symmetry.
+\p
+180\degrees\ domains occur for all 
+structures for which $\pv=0$; the magnetic structure factors for pairs of 
+180\degrees\ domains are reversed in direction. 
+\p
+Orientation domains occur
+whenever the magnetic group has symmetry lower than the configurational 
+symmetry i.e. when there are one or more \cds{Q NSYM}. 
+\p
+The subroutines \stlink{f}{FMCALC}\ and \stlink{l}{LMCALC}\  calculate 
+magnetic interaction vectors for all the 
+orientation domains and store them in COMMON/QCAL/. They also calculate
+the mean squared interaction vector averaged over all such orientation
+domains assuming equal populations. This is the quantity used in
+the \mlink{maglsq}{MAGLSQ}\ magnetic structure refinement with REFI=1 or 2 and printed out as $F_m^2$\ 
+by the magnetic structure factor program \mlink{getmsf}{GETMSF}. 
+\p
+A further type of orientation domain occurs when the magnetic structure cannot be 
+described using all the operators of the parent space-group even using NSYM 
+operations. This happens when one or more of
+the symmetry operators of the space group operates differently on the magnetic moments 
+of different magnetic atoms. In this case the magnetic structure factors must be calculated
+using the sub-group which omits these operators. The associated domains can be described as {\em
+magnetic twin domains} related by twin matrices corresponding to the rotational parts of the missing operators. 
+\p
+In magnetic structure calculations the contributions from different 
+twin domains can be included by using twin matrices given on \cds{R TMAT}.  
+ \p
+ In cases where chirality domains occur their interaction vectors complex 
+conjugate to one another; they are not now (Mark 4.4) included separately in 
+/QCAL/.
+\subsection{Numbering of magnetic domains}\label{magdoms}
+The $N_m$ orientation domains generated by NSYM operations are numbered 
+by $n_m$ in the order in which the operators appear in the magnetic symmetry table. Then 
+if there are $N_t$ twin matrices given on $N_t$ \cds{R TMAT} numbered $n_t$ with
+ ($1 <=n_t<=N_t$) and $N_c$ chirality domains ($N_c= 1$ or 2) numbered $n_c$. Then
+ the number given to the domain $n_t,n_m,n_c$ is 
+ \[N_d(n_t,n_m,n_c)=N_mN_c(n_t-1) + N_c(n_m-1)+n_c
+\]
+ If 180\degrees\ domains can be distinguished the numbers given to a pair of such domains 
+ differ by $N_tN_mN_c$.
+
+\finchapter
+%\end{document}

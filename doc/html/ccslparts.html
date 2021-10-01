@@ -1,0 +1,58 @@
+<HTML>
+<HEAD>
+<title>CCSL parts</title>
+<LINK REL="STYLESHEET" HREF="ccslweb.css">
+</HEAD>
+<BODY class = "interior">
+<spacer type = vertical size = 20>
+<A name = "CCSLPARTS">
+<h1> Subdivisions of CCSL</h1></a>
+For convenience the library has been divided into <em>parts</em> as follows:
+<dl>
+<dt> LIB
+<dd> The main library which contains routines used by all CCSL programs. It
+should be the last of the CCSl parts to be loaded by the linker.
+<p>
+<dt>MAI
+<dd> A collection of CCSL main programs of general interest. This part should
+<strong>not</strong> be made into a searchable library. Some of the main programs have
+their own special subroutines attached. These are recognised by not being
+preceeded by a C LEVEL line. They will be extracted correctly with the MAIN
+program to which they belong by the <a href="ccsltools.html#GET"> GET 
+</a> procedure.
+<p>
+<dt>PJB, JBF
+<dd> Some special MAIN programs, not of general interest or guaranteed to
+work!
+<p>
+<dt>PIG
+<dd> Graphics routines for driving various different output devices.
+Essentially contains several different versions of the subroutine PIGLET and
+attachments. The different versions are distinguished by the name in the C
+LEVEL line, and may be extracted under this alias by GET. For instance the
+tektronix version is called PIGTEK and the GKS version PIGGKS. Some hints about
+how to load <a href = "ccsltools.html#cslgraf">graphics programs</a> 
+are available.
+<p>
+<dt> PR
+<dd> Subroutines used for profile refinement. Not needed by programs in the MAI
+part of the library.
+<p>
+<dt>PF 
+<dd> Subroutines for profile refinement of time-of-flight data. Mostly
+different types of peak fitting function.
+<p>
+<dt> PMA
+<dd> Main programs for profile refinement. Like MAI this part should not be
+made into a search library. 
+<p>
+<dt> NEW
+<dd> Experimental code, not for general use.
+<p>
+</dl>
+<ADDRESS>
+P.J. Brown - Institut Laue Langevin, Grenoble,  FRANCE. 
+<script type="text/javascript" src="./mailing.js">  </script>
+</ADDRESS>
+</BODY>
+</HTML>

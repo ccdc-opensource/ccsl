@@ -1,0 +1,16 @@
+set terminal  post       eps enhanced color size    8.00,    8.00 font "Helvetica,24"
+set lmargin 8
+set tmargin 4 
+set title       "Co^{2+} Form Factor in LiCoPO_{4}       " font "Helvetica-bold,30"
+set xlabel      "Sin({/Symbol q})/{/Symbol l} (A^{-1})   "
+set ylabel      "Magnetic amplitude ({/Symbol m}_{B})    "
+set size square 0.95,0.95
+set xrange  [    0.00:    0.50]
+set yrange  [    0.00:    4.00]
+set grid xtics ytics lt 0 lw 1 lc rgb "#bbbbbb"
+set key Left spacing    1.50
+set output "grafic_lcpall_00.eps                  "
+set label 1 "{/*0.8 Mon Aug 28 15:14:01 2017}" at graph -0.07, -0.07
+plot "grafda.dat" using  4: 5: 6 with errorbars ps    2.25 pt   7 lc "#0000FF" t "D3 data"\
+,"grafda.dat" using  4: 7: 8 with errorbars ps    2.25 pt   5 lc "#FF0000" t "IN20 data"\
+,"grafda.dat" using  1: 2 with lines lw    2.25 dt   4 lc "#FF00FF" t "Co^{2+} Theory"\

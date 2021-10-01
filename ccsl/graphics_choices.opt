@@ -1,0 +1,5 @@
+#pigpg #version of piglet which uses the pgplot library\
+#/usr/local/lib/libpgplot.dylib  -L/usr/X11R6/lib -lX11 -lpng -L/usr/lib -lz
+#/Library/Frameworks/AquaTerm.framework/Versions/A/AquaTerm -Wl,-framework -Wl,foundation
+piggp # gnuplot version of piglet no extra libraries needed
+#pigps

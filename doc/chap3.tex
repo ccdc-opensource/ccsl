@@ -1,0 +1,2228 @@
+%\usepackage{CCSLman,html,makeidx,color,ifthen,bm}
+%\begin{document}
+%\setcounter{page}{27}
+%\setcounter{chapter}{2}
+%\chapter{THE CRYSTAL DATA FILE}
+%\begin{htmlonly}
+%\usepackage{CCSLman,html,makeidx,color,ifthen,bm}
+%\input{chap3.ptr}
+%\end{htmlonly}
+%\internal{c2}
+%\internal{c1}
+%\internal{c4}
+%\internal{c5}
+%\internal{c6}
+%\internal{c7}
+%\startdocument
+\label{chap:3}
+%\htmladdtonavigation{\htmladdnormallink
+%  {\htmladdimg{../icons/appenx.gif}}
+%  {../appenx/appendix.html}}
+\markboth{The Crystal Data File}{}
+\section{Introduction}\markright{Introduction}
+Users' input to CCSL comes in two main types.  One is a
+\ital{crystallographic data file}, or Crystal Data for short, which is
+required by most CCSL jobs.  Various other input files may contain,
+say, reflection data for the Fourier routines, or profile intensity data,
+in fact, any other set of data which the user wants to be read by
+CCSL.
+\p 
+In this chapter we first describe the Crystal Data. Then, because the file
+is interpreted by CCSL and not directly by FORTRAN, the
+routines which do this are introduced in some detail.  Anyone wishing to
+write CCSL programs should find these routines
+useful.  Details of exactly what is on the Crystal Data cards are given at the
+end of the chapter, in alphabetical order.
+\p 
+Other types of data input are described in \htmlref{Chapter 4}{chap:4}.
+\p
+\section{Input of the Crystal Data File}
+\markright{Input of the Crystal Data File}
+The file holding the Crystal Data contains a sequence of records, each 
+of which will
+initially be read in the FORMAT (A80), and which, for historical reasons, are
+referred to as \ital{ cards}.  They should be held in a named
+file; PREFIN, the routine which reads
+them into the system, will ask for this name.
+\p 
+The first character of every card must be a letter;  PREFIN 
+will stop when it encounters a
+card not starting with a letter (or when it attempts to read beyond the
+last card in the file). It copies the Crystal Data to an internal
+unit, from which cards may be read repeatedly as necessary. Empty lines are
+ignored everywhere in the Crystal Data.
+\p 
+For the first letter on a card, upper and lower case letters are treated
+alike. In general, though, they are distinct.  The character in position
+2 on the card, immediately following the letter, is at present ignored,
+but it should be typed as a space.
+\p 
+The remaining 78 character positions depend on the initial letter. As
+far as possible the initial letters are mnemonic, like \bd{C}
+for cell parameters, \bd{A} for an atomic position, etc.  
+\p 
+\section{CCSL Free Format Input}\markright{CCSL Free Format Input}
+In order to avoid FORTRAN fixed format READ
+statements, CCSL contains a number of \ital{ free format} routines. 
+These routines are used to read information from the Crystal Data.
+Each card is read initially as a string of (up
+to) 80 characters. These are then interpreted by CCSL
+routines like:
+\p
+\begin{list} {} {\setlength{\labelwidth}{2cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{2 cm}}
+\item[RDINTG \hfill] read next \ital{ integer},
+\item[RDREAL \hfill] read next \ital{ real} number,
+\item[RDWORD \hfill] read next \ital{ word}.\end{list}
+\subsection{Definitions for Free Format Items}
+We define three types of item to read: integers, reals and words.
+\p\begin{varindent}{2cm}
+An \ital{ integer} is a (possibly signed) sequence of digits.
+\p 
+A \ital{ real} is a (possibly signed) sequence of digits, possibly containing
+one decimal point, or possibly containing one slash. The exponential format:
+a (possibly signed) sequence of digits, containing
+one decimal point followed by an "E" followed by a (possibly signed integer)
+is now allowed.
+\p 
+A \ital{ word} is a sequence of characters starting with a letter.
+\end{varindent}\p 
+All three items are terminated by a space or the line end;
+integers and reals are also
+terminated by a comma.  Surplus spaces are allowed.
+\p
+\subsection{Examples}
+\begin{list} {} {\setlength{\labelwidth}{3 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}}
+\item[Integers \hfill] \exac{ 6\  \ 10 \ -4 99999,\ 42, 3}
+\item[Reals \hfill] \exac{12.34\ \ \ \ 92\ \ \ \ 5/12\ \ \ \ -6.78904,\ \ -3,
+, -12.E5}
+\item[Words \hfill] \exac{Fred\ \ \ \ Ca14\ \ \ This-is-one-long-word}
+\item[Not integers \hfill] \exac{3.\ \ \ \ 12/4\ \ \ \ -4-3}
+\item[Not reals \hfill] \exac{5./12\ \ \ \ \ 4.E2.5\ \ \ 67.89*}
+\item[Not words \hfill] \exac{1Fred\ \ \ *JIM}\end{list}
+\p 
+\subsection{Special Words}
+Many of the routines in CCSL recognise special \words of up to four characters
+which are found in the Crystal Data. Some commonly used types are:\p
+\begin{list} {} {\setlength{\labelwidth}{ 5cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}}
+\item[\atlab \hfill] A \word used to identify a particular atomic site;
+\item[\scat \hfill] A \word used to identify a particular form factor;
+\item[\cw \hfill] A \word whose meaning is defined within CCSL.\end{list}
+\p
+\section{General Remarks on Crystal Data Cards}
+Cards which have the same initial letter \ital{ must} be placed sequentially,
+but cards within a group with the same initial letter
+may occur in any order. They are usually identified by a \cw of up to 4 characters
+which follows the initial letter on the card (e.g. \bd{CONT},
+\bd{PLOT} for Fourier maps
+ or \bd{FIX},
+\bd{VARY} for Least Squares).
+\p 
+In order to make input more compact, certain cards may (after the initial
+letter) contain sequences of \cwnscomma, as on the \cd{M}:
+\par 
+\verb}M DTYP 4 FTYP 2 SCAL 1000 DELT 0.3}\\
+\par 
+The most common example of this is the \cd{I} described
+below. The facility extends to \bd{M}, \bd{D}, \bd{G} and \cds{L}, but
+\ital{ only} for those
+\cws which expect a \ital{ single number} after them.
+\p 
+The first word on some types of card (e.g. \bd{A} (atom position),
+\bd{F} (form/scattering factor) and \bd{J} (multipole) cards) is an 
+atom-label or scattering-factor-label identifying a particular atom or 
+form-factor. The atom-label or scattering-factor-label 
+may itself be followed by a
+CCSL-word, as for instance on \bd{Q} (magnetic structure)
+and \bd{W} (wave-function) cards.
+\p 
+Almost all cards fit into the scheme in which the first letter
+and a following \cw are used for identification,
+although none of the cards used in the simple example in
+\htmlref{Chapter~1}{chap:1} does.
+\pn 
+The \bd{N} (name of job) card uses all 79 characters as a title for output;
+the \bd{S} (symmetry) cards simply give one symmetry operator
+each.
+\pn
+The \cds{I} give instructions about the details
+of a particular run, and may change from run to run, whereas, say,
+an \cd{S} does not.  An example is: 
+\par 
+\exac{I\ \ MCOR 80\ \ \ \ NCYC 5 \ \ \ CYC1 4}\\
+\par 
+which, when read by a Least Squares Refinement program, says ``for this
+particular run print only correlations above 80\%, and do 5 cycles of
+refinement, labelling the first 4".  The general format is a sequence of
+\cwnscomma.  The words and numbers may be interpreted in any way
+the user wishes, so \cds{I} may drive a variety of different main 
+programs depending on how they are interpreted.
+\p 
+\section{Routines to Read Specific Crystal Data Cards}
+\markright{Routines to Read Specific Crystal Data Cards}
+Most cards have a corresponding simple input routine INPUT\ital{ x} to read in
+one card starting \bd{\ital{ x}}.  Thus, \stlink{i}{INPUTC} reads the \cd{C} and 
+\stlink{i}{INPUTE} reads
+the \cd{E}. There are often also more complicated input routines 
+which then deal with the information
+on the card.  So, e.g., \stlink{s}{SYMOP}\ calls \stlink{i}{INPUTS}\ for 
+every \cd{S} given;
+INPUTS produces a rotation matrix and a translation vector,
+doing a little preliminary checking on the way, then SYMOP adds this new
+operator to its existing list and does further necessary generation of
+operators.
+\p 
+For some initial letters there is an obvious setting-up routine to read
+all cards starting with that letter.  \stlink{a}{ATOPOS}\ reads all \cds{A} via
+\stlink{i}{INPUTA}, checks them and does further setting up (e.g.
+detecting special positions) which the user would almost certainly want
+every time he inputs \cds{A}.
+\p 
+Other cards are of more general application.  For the \cds{I} just
+described, INPUTI reads in all the 
+\cwns but does not interpret any of the words, so other
+setting-up routines (like \stlink{s}{SYMFRI}\ to read \bd{FRIE}, or 
+\stlink{i}{IICD1}\ to read the
+variations from the defaults required in a Least Squares Refinement)
+are free to pick out the words they understand.
+\p 
+It is not essential to read a particular card using the existing CCSL
+routine. If the user wishes to put different numbers on, say, an \cd{E}
+for a new form of extinction correction, he may do this and write
+his own version of INPUTE to read them. He will probably do
+this by taking the existing INPUTE and modifying it. If he presents
+his new INPUTE to the FORTRAN linker, following his main program and
+before it scans the Library, it will accept his and ignore the one in
+the Library. There is further discussion on writing one's own program in
+\htmlref{Chapter~7}{chap:7}.
+\p 
+\section{Crystal Data Card Descriptions}
+\markright{Crystal Data Card Descriptions}
+The card descriptions which follow indicate the data required on
+each type of Crystal Data card, and define how it should be presented.
+\p 
+\subsection{Initial Letters}
+Most initial letters have been assigned.  \bd{Y} and \bd{Z} introduce 
+comment cards. \bd{I} is for general instructions, and \bd{X} has 
+been deliberately left for the user.  The remaining assigned letters are used
+for cards containing specific items of crystallographic data.
+\subsection{Systems of Axes}
+Three systems of axes are used in different places in CCSL. They are:
+\par 
+\begin{list} {} {\setlength{\labelwidth}{1cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{1cm}}
+\item[1. \hfill] the direct space
+crystallographic axes with $x,y,z$ parallel to the cell edges 
+\bd{a,~b,~c}.
+They are used for atomic positions, zone axes etc.
+\item[2. \hfill] The reciprocal space axes with $x,y,z$ parallel to the reciprocal
+cell edges 
+{\bfseries a$^*$,~b$^*$,~c$^*$}.  They are used for reflection indices etc.
+\item[3. \hfill] A standard set of orthogonal axes with:\end{list}
+\begin{varindent}{2cm}$x$ parallel to \bd{a$^*$} (100)\\
+$z$ parallel to \bd{c}\ \  [001]\\
+$y$ making up a right-handed set\\
+\end{varindent}
+These axes are used to describe the crystal form and for
+spin directions. They will be referred to as \ital{ CCSL orthogonal 
+axes.}
+\p
+\cardend\newpage
+\newcard{5}{A}{Atomic positions etc.}
+%\begin{htmlonly}
+%\section{\cardhead{A}{Atomic positions etc.}}
+%\end{htmlonly}
+%
+\cdir{\bd{A}, \atlab, x, y, z, isotropic temperature factor,
+             \scatcomma, site occupation factor.  
+The last two numbers are optional.\\
+\bd{or}\\
+\bd{A SD},\atlab, followed by a parallel list of standard deviations
+(ESD's) in the parameters on the corresponding simple \cd{A}.}
+\cdam{The scattering-factor used will be that labelled with
+          the initial letters (terminated by the first non-letter) of the
+          \atlab, unless a specific label is given after the isotropic
+          temperature factor.
+\p 
+          The site occupation factor is $=1$ \bd{unless}
+          a non-zero number is read after the
+          (possible) scattering-factor-label.} 
+\cdd{The \atlab is 1,2,3 or 4 characters, the first of which is
+          a letter.
+\p 
+          The \scat is not needed at all if the
+          scattering-factor for this atom is labelled (on an \cd{F})
+          with the first letters of the atom-label. (E.g. atoms Ca31 and
+          Ca32 would both have scattering-factor Ca;  atom P would have
+          factor P, and so would atom P5, but atom Pb4 would expect
+          factor Pb).
+\p 
+          If the user wants the \scat to be something
+          other than the first letters of the atom-label, he gives the
+          \scat explicitly;  this again has up to 4
+          characters, starting with a letter.
+\p 
+          The x,y,z coordinates are fractions of a unit cell.  If any of 
+          x,y,z or the isotropic temperature factor is absent, it is assumed 
+          to be 0.
+\p        ESDs need not be  given for coordinates which are fixed,  or 
+          related to a previous one, by symmetry. If given they will be 
+          ignored. If any are ommitted there must be a comma separated spaces in
+          place of them.
+\p 
+          The site occupation factor may be absent, in which case it is
+          assumed to be 1. If the site occupation factor is wanted
+          but the scattering-factor-label is not, the scattering-factor-label
+          may be omitted.
+\p        
+          If an A SD line is given without other data, then it will be filled 
+          in in the new CDF after a least squares refinement of the atomic 
+          coordinates has been made.}
+\cdn{Note also that site multiplicity is taken care of by the
+          system, and need not be artificially put into the site 
+occupation factor by the user.}
+\cdes{
+\ssk
+\exac{A Ca2 .1234 .2334 2/3\ \ 1.9}\\
+\par 
+There is no site occupation factor on the card, and this atom would
+expect a scattering-factor to be given on an \cd{F} with label Ca.
+\p 
+\exac{A\ \ Fe\ \ 0\ \ \ \ 1/2\ \ \ \ 1/2\ \ \ \ 0.6\ \ \ Fe2\ \ \ 
+0.8}
+\ssk
+Here the atom-label is Fe, its scattering-factor is labelled Fe2, its
+position coordinates are (0,$1\over2$,$1\over2$), its isotropic temperature
+factor is 0.6 and its site occupation factor is 0.8.}
+\begin{verbatim}
+A Cu    0.1234  0.3456 1/4 0.5 
+A SD Cu 0.0002  0.0003 
+\end{verbatim}
+The z parameter of Cu is fixed by symmetry so it has no ESD
+\begin{verbatim}
+A O     0.2222 0.2222 0.2476 0.750 0.980
+A SD O  0.0002, ,0.0003 0.05 0.005
+\end{verbatim}
+The y parameter of O is equal to the x parameter so its ESD is ommitted.\\
+\cdr
+ {Routine \stlink{a}{ATOPOS}\ calls \stlink{i}{INPUTA}\ to read each \cd{A} and interprets the
+data furnished.  (Routine \stlink{s}{SETFC}\ also calls ATOPOS).}
+\cardend\newpage
+\newcard{7}{B}{Bond lengths and angles}
+
+
+%\begin{htmlonly}
+%\section{\cardhead{B}{Bond lengths and angles}}
+%\end{htmlonly}
+%
+\ms
+A \cd{B} starts with \bd{B} then a \cwcomma, which determines what else is on
+the card.  There is no predetermined sequence for \cds{B}. They drive 
+the program \mlink{bonds}{BONDS}.
+\p
+\cddf
+\cdsir {SLAK}
+{No further data.\\ 
+The presence of a \cd{B SLAK} indicates to BONDS 
+that a separate output file, the .SLK file, is required. This file can 
+then be used as part of the Crystal Data input to Least Squares programs 
+which allow geometric slack constraints. The presence of a \cd{B~SLAK} 
+alters the meanings of some of the other \cds{B}.}
+\cdsir{BMAX}
+{A real number, $B_{max}$ which is the maximum value for a bond in
+\AA.}
+\cdsam {The default for $B_{max}$ is 2.}
+\cdsir{BMIN}
+{A real number, $B_{min}$ which is the minimum value for a bond in \AA.}
+\cdsam{The default for $B_{min}$ is 0.}
+\cdsn{\bd{BMAX} and \bd{BMIN} may also appear on an \cd{I}.}
+\cdsir{BOND}{A list of \atlabs or \scats followed, if a \cd{B SLAK} is present,
+by four real numbers.\p
+The use of  scattering-factor names is not because \bd{BONDS} has 
+any connection with scattering-factors, but because it enables the user to 
+specify all of: e.g. C1, C2, C3 $\cdots$ etc by giving simply C.
+The first atom-label defines a \ital{ source-atom}. A grid of $5\times 
+5$ unit cells is searched for \ital{ destination-atoms}, symmetry 
+equivalents of the remaining 
+atoms in the list, whose 
+distance from the source-atom is between $B_{min}$ and $B_{max}$. 
+\p
+If a \cd{B SLAK} is present, the last four items on the \cd{B BOND} 
+must be the real numbers $b_1\ \sigma_1\ b_2\ \sigma_2$. The maximum and 
+minimum bonds are taken to be:
+$$B_{max}=b_1+\sigma_1\qquad B_{min}=b_1-\sigma_1$$
+When a bond is found it is written as an \cd{L BOND} to the .SLK file, 
+with bond length = $b_2$ and allowed deviation = $\sigma_2$}
+\cdsam{If only one label is given as data, all atoms are used as destination 
+atoms. If there are no labels, all atoms are used as both source and 
+destination.}
+\p
+\cdsir{BOTH}{Are as for \bd{B BOND.}
+A \cd{B BOTH} will cause
+\bd{both} bonds and interbond angles to be printed. It is not useful in 
+the \bd{B SLAK} context; to produce \cds{L ANGL}, \cds{B ANGL} 
+should be used.}
+\pn
+\cdsir{BERR} {No further data.\\
+The ESDs in the calculated bond lengths 
+are to be calculated and printed with the bond lengths themselves.}
+\cdsir{ANGL} {Three \atlabs followed, if \bd{B SLAK} is present, by four 
+or six real numbers.\p
+If there is no \cd{B SLAK} this simply asks for 
+the calculation of one angle subtended at the second atom, by bonds from it 
+to the other two.\p
+If there is a \cd{B SLAK} the labels may be \atlabs or \scats and they must
+be followed by the four real 
+numbers $\phi_1\ \sigma_1\ \phi_2\ \sigma_2$ and, optionally, $B_\phi$ 
+and $\sigma_{max}$. If $B_\phi$ and $\sigma_{max}$ are 
+present:
+$$B_{max}=B_\phi+\sigma_{max}\quad\mbox{and}\quad B_{min}=B_\phi-\sigma_{max}$$}
+\vspace{-3ex}
+\cdsam{If $B_\phi$ and $\sigma_{max}$ are absent,  values are sought for
+$B_{max}$ and $B_{min}$ on
+ \bd{B~BMAX} and \bd{B~BMIN} cards (or \bd{BMAX}, \bd{BMIN} items on an
+ \cd {I}). If they are not found 
+they default to:
+$$B_{max}={1\over4}a\quad\mbox{where }a \mbox{ is the real cell side}\qquad
+B_{min}=0.$$}
+\vspace{-3ex}
+\cdsn{The $B_{max}$ and $B_{min}$ are applied to the three labelled atoms as 
+though they came from \cds{B BOND}, except that in this case \cds{L 
+ANGL} (with angle = $\phi_2$ and $\sigma=\sigma_2$) are written to the
+.SLK file when the calculated bond angle $\phi$ is in the range
+$\phi_1-\sigma_1<\phi<\phi_1+\sigma_1$.}
+\cdsir{AERR} {No further data.\\
+The ESDs in the calculated bond angles 
+are to be calculated and printed with the bond angles.}
+\cdes{
+\exac{B BOND}\\
+\exac{B BOND Ca3}\\
+\exac{B BOTH O1 O4 O8 C6 C7 C9}\\
+\exac{B ANGL Oxy2  Oxy1  Oxy3}\\
+\par 
+\exac{B SLAK}\\
+\exac{Z}\\
+\exac{Z\ \ \ \ \ \ This will look at all bonds starting from an atom 
+whose}\\
+\exac{Z\ \ \ \ \ \ label starts C}\\
+\exac{Z\ \ \ \ \ \ (e.g. C1  C14 C6A but not Ca3),}\\
+\exac{Z\ \ \ \ \ \ and finishing at atoms whose label starts O.}\\
+\exac{B BOND C O 1.6 0.2 1.61 0.4}\\
+\exac{Z}\\
+\exac{Z\ \ \ \ \ \ This considers only atoms O6, C4, O7 and those 
+related}\\
+\exac{Z\ \ \ \ \ \ to them by symmetry.}\\
+\exac{B ANGL O6 C4 O7 109 0.5 109 0.3}
+\par 
+}
+\cdr{The main program \mlink{bonds}{BONDS}\ reads and interprets \cds{B}.}
+\cardend\newpage
+\newcard{4}{C}{Cell parameters}
+%\begin{htmlonly}\section{\cardhead{C}{Cell parameters}}
+%\end{htmlonly}
+%
+\cdir{\bd{C} $a,\ b,\ c,\ \alpha,\ \beta,\ \gamma$\\
+\bd{or}\\
+\bd{C SD} followed by the ESD's in the corresponding parameters on the
+\cd{C}\\
+\bd{or}\\
+\bd{C SD PROD} followed by the ESD's in the 6 cell quadratic products}
+\cdid{\bd{C}, $a$, and any others of $b,\ c,\ \alpha,\ \beta,\ \gamma$ 
+ which are \bd{not}
+          implied by the space group symmetry (which must have already
+          been set up).}
+\cdam{As zero is not a plausible value for either a cell
+          side or an angle, any of 
+          the 6 values which is read as zero is
+          deduced from the space group symmetry, assuming that it is either
+          fixed or related to one of the values read previously.}
+\cdd{$a,\ b$ and $c$ are cell sides in real space,  normally in \AA,
+           but they need not be.  However note that the units must
+be compatible with \sthl\ units on \cds{F},
+$\lambda$ on \cds{D} etc. $\alpha$, $\beta$
+ and $\gamma$ are the interaxial angles in degrees.
+\p
+The C SD PROD form should be used when the cell dimensions have been 
+determined from d-spacing values only (eg program DSLSQ)
+If a C SD line is given without other data, then it will be filled in
+in the new CDF after a least squares refinement of the unit cell has been made.}
+\cdn{Any change of units from \AA ~may lead to implausible default values
+e.g. for bond lengths used in slack constraints. It will also have consequences 
+on the extinction parameters.}
+\cdes{
+\exac{C 5.4560 5.4560 12.6700 90.0 90.0 120.0}\\
+\exac{C\ \ \ \ 5.4560\ \ \ \ 0\ \ \ 12.6700}\\
+\exac{C\ \ \ \ 5.4560,\ \ \ 0,\ \ 12.6700}\\
+\exac{C 5.4560,,12.6700}\\
+\par  
+with hexagonal symmetry, are all equivalent.  However,
+\par 
+\exac{C 5.456  12.67}\\
+\par  
+would not be;  this says a=5.4560 and b=12.6700}
+\cdr {Routine \stlink{r}{RECIP}\ calls \stlink{i}{INPUTC}\ to read the \cd{C} and then deduces the
+real and reciprocal cells and transformations. 
+(Routine \stlink{s}{SETFC}\ also calls RECIP).}
+%
+\cardend\newpage
+\newcard{5}{D}{Diffraction information}
+%\begin{htmlonly}\section{\cardhead{D}{Diffraction information}}
+%\end{htmlonly}
+%
+A \cd{D} starts with \bd{D} then a \cw
+which determines what else is
+on the card.  There is no predetermined sequence for \cds{D}, although
+it is
+desirable to type all \cds{D} starting with the same 
+\cw consecutively.
+\pn 
+\cddf
+% 
+\cdsir{GEOM} {An integer IGEOM defining the diffraction geometry.\\
+       Values of IGEOM allowed are:}
+\par\begin{enumerate} {\setlength{\labelwidth}{2.5cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{2cm}}
+\item[1 \hfill] Normal beam with Zone-axis vertical
+\item[2 \hfill] Equatorial 3-circle with Zone-axis vertical
+\item[3 \hfill] Equi-inclination
+\item[4 \hfill] Precession
+\item[5 \hfill] Anti-equi-inclination
+\item[6 \hfill] 4-circle bisecting geometry
+\item[7 \hfill] 4-circle general geometry, angles to be given
+\item[8 \hfill] Normal beam general geometry
+\item[9 \hfill] Powder data
+\item[10 \hfill] Powder data, X-ray
+\item[11 \hfill] 4-circle diffractometer, high-chi geometry
+\item[12 \hfill] SXD geometry
+\end{enumerate}
+%
+\cdsir{WVLN}{The wavelength(s) in the same units as
+                   the lattice constants. It may be followed 
+                   by the word LAM2 and the intensity of the
+                   half wavelength contamination (see below)}
+\par  
+\cdsir{LAM2}{The intensity of half wavelength contamination as a fraction of that of the nominal wavelength. It may be given on the WVLN card. If
+not present it is assumed to be negligible.}
+\par 
+\cdsir{UMAT}{The 9 elements of the UB-Matrix relating the
+                   crystallographic axes to the diffractometer axes
+                   thus:}
+\ms
+\begin{center}
+\(\begin{array}{cccccc}
+&&\multicolumn{3}{c}{\mbox{Diffractometer Axes}}\\
+&&X&Y&Z&\\
+&\bf{a}*  &u(1)     &u(2)     &u(3)\\
+&\bf{b}*  &u(4)     &u(5)     &u(6)\\
+&\bf{c}*  &u(7)     &u(8)     &u(9)\\
+\end{array}\)
+\end{center}
+\begin{clist} 
+\item [$X$] is parallel to the incident beam at omega=0,\\
+\item [$Z$] is parallel to the omega axis,\\
+\item [$Y$] makes up an orthogonal right handed set.\\
+\item[Reference:] Busing and Levy \ital{ Acta Cryst} \bd{22} p247, but note the
+       different definition of the diffractometer axes and the 
+        transposition of the matrix.
+\end{clist}
+\par  
+\cdsir{TH2M}{2$\theta$ for the monochromator in degrees
+                  (needed for X-ray  polarisation corrections).}
+\cdsir{L/R}{+ve if the incident beam is diffracted to the right.\\
+ $-$ve if the incident beam is diffracted to the left.\\
+value 1 for angles measured clockwise about $+$ve
+diffractometer axes, or 2 for anticlockwise.}
+\par  
+\cdsir{ROTA}{The zone-axis which is parallel to the rotation axis
+                   for IGEOM = 1,2,3,4,5.}
+\par  
+\cdsir{CHIA}{Three integers and a real number.  For IGEOM = 2 
+the real number is the angle in degrees
+                   between the normal to the Chi circle and the direction
+                   of the reciprocal space vector whose indices are the
+                   3 integers.}
+\cdsir{ANGP}{The precession angle in degrees for IGEOM = 4.}
+\cdcd{\bd{GEOM} and either \bd{UMAT} or \bd{ROTA}
+with possibly \bd{CHIA} or \bd{ANGP}}
+\par 
+\cdtl{The \bd{GEOM, TH2M, L/R} and \bd{ANGP} information may occur
+ together.}
+\cde{
+\exac{D WVLN\ \ \ \ 0.9190}\\
+\exac{D GEOM 8}\\
+\exac{D L/R 1}\\
+\exac{D UMAT\ \ \ 0.20457\ \ -0.00747\ \ -0.01437}\\
+\exac{D UMAT\ \ \ 0.00894\ \  0.20391\ \ \ 0.02125}\\
+\exac{D UMAT\ \ \ 0.01989\ \ -0.03210\ \ \ 0.29975}\\  
+or
+\p 
+\exac{D L/R -2\ \ GEOM 11}\\
+}
+\cdr{Routine \stlink{s}{SETDC}\ calls \stlink{i}{INPUTD}\ to read the \cds{D} and then 
+sets up the diffraction geometry.  \stlink{s}{SETABS}, \stlink{s}{SETLP}\ and
+\stlink{s}{SETPOL}\ all call SETDC.}
+\newpage
+%
+%section 2
+%
+\newcard{6}{E}{Extinction Correction Data}
+%\begin{htmlonly}\section{\cardhead{E}{Extinction Correction Data}}
+%\end{htmlonly}
+%
+\cdir{\bd{E}, followed by the type of extinction correction, the 
+domain radius and the mosaic spread.}
+\cdam{That there is no extinction unless IEXTYP, the type of extinction 
+correction, is  either 1 or 2.}
+\cdd{IEXTYP=1 requests the Becker and Coppens Lorentzian model, and
+          IEXTYP=2 requests the Becker and Coppens Gaussian model.
+For either model, the domain radius (DOMR) and the mosaic
+          spread (MOSC) are required. The units of DOMR and MOSC, depend on
+          those used for the scattering lengths, cell edges, wavelength and
+          crystal dimensions. If the scattering lengths are in $10^{-12}$ cms,
+          cell edges and wavelength in \AA\ and crystal dimensions in mm then
+          DOMR should be in units of nm 
+          ($10^{-7}$ cm), and MOSC in inverse radians.}
+ 
+\cdrf{Becker and Coppens (1974) \ital{ Acta Cryst} \bd{A30} p129.}
+ 
+\cde{\exac{E\ \ \ \ 1\ \ \ 100.0\ \ \ \ \ 17.4}
+\par }
+ 
+\cdr{Routine \stlink{e}{EXTINC}\ calls \stlink{i}{INPUTE}\ to read the \cd{E}.}
+\cardend\newpage
+\newcard{6}{F}{Form or scattering factors}
+%\begin{htmlonly}\section{\cardhead{F}{Form or scattering factors}}
+%\end{htmlonly}
+%
+\cdir{\bd{F},  a \scatcomma, an integer FTYP giving the type
+          of factor, followed by more numbers, depending on the type.}
+\begin{list} {} {\setlength{\labelwidth}{2.5 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{1 cm}}
+\item[FTYP = 0 \hfill] read 1 number to be a simple multiplicative factor.
+\item[FTYP = 1 \hfill] read 1 number to be a neutron nuclear scattering factor
+              (this is distinct from FTYP=0 because FTYP=0 may occur
+               in addition to another type for the same atom, e.g. FTYP=2).
+\item[FTYP = 2 \hfill] read 5, 7 or 9 numbers to be coefficients in an exponential
+              approximation to the scattering factor.
+\item[FTYP = 3 \hfill] read a table of pairs of numbers, \ital{ S}\ and \ital{ f},
+ being a table of values of the factor, \ital{ f}, tabulated versus \ital{ S}=\sthl.
+\item[FTYP = 4 \hfill] as FTYP=2 except that each term of the expansion is multiplied
+by $(\sin\theta/\lambda)^2$. This type is provided for radial integrals $<j_l>$
+with $l\ne0$.
+\item[FTYP = 5 \hfill] Read radial wave functions from \cds{W RADF} and use
+them to calculate the form factor.
+\item[FTYP =$-$1 \hfill] read 2 numbers to be $f'$ and $f''$ of an anomalous scattering
+              factor.\end{list}
+%
+\cdd{Every \cd{F} has the general format \bd{F}, name, type, some
+          number of real numbers.  If there is not room for all the
+          necessary numbers on the first card, other similar cards may
+          follow. But \bd{all} \cds{F} must start \bd{F} name, type.
+\p
+          For types 0,1 and $-$1, one card will suffice for one factor.
+          For type 2 the 5, 7 or 9 coefficients in the expression:  
+              $$a_1 exp(-a_2S^2) + a_3 exp(-a_4S^2) + etc  + a_n$$
+           are given;  it will usually be possible to fit them on to one
+          card. (Reference: International Tables Vol. C Sections 4.4.5 and
+          6.1.1.4, I.U.Cr 1992).
+\p        For type 3 
+          you will almost certainly need more than one
+          card.  The values of \ital{ S}~=~\sthl\ must be in ascending
+          order, but need not be at equal intervals.
+\p
+          The label given on an \cd{F} will usually match one on an
+          \cd{A} (q.v.).  A warning is given if no \cd{A} matches at
+          all, but this may be intentional.
+\p        Note that there is an implicit assumption in some of the library
+          routines that scattering lengths and scattering factors are given in
+          units of $10^{-12}$ cms. Using other units may give anomalous results
+          for extinction corrections and  when combining nuclear and magnetic
+          scattering.
+          } 
+\par \cdes{\ } \vspace {-1ex}
+\begin{list} {} {\setlength{\labelwidth}{4cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{1cm}}
+\item[\exac{F N14  0  100.} \hfill] (a multiplying factor in addition to a form factor) 
+\item[\exac{F\ \ Fe\ \ 1\ \ \ 0.951} \hfill] (note that the 0.951 differs from the
+numbers given on F cards other than type 0, because it is allowed to be a
+                  refinable parameter)\end{list}
+\exac{F OXYG 2 3.048 13.277  2.287  5.701  1.546 0.324 0.867 32.909 .251}\\
+\exac{F\ \ Cr4\ \ 3\ \ 0\ \ 1\ \ .05 .9738 .10 .9 .15 .7917 
+.2 .6655 .25.5372}\\
+\exac{F\ \ Cr4\ \ 3\ \ .35 .3156 .4 .2309 .45 .1638 .5 .112 .6 .0442}\\
+\par
+\cdr{Routine \stlink{s}{SETFOR}\ calls \stlink{i}{INPUTF}\ to read an \cd{F} which it then links to
+the atoms to which it belongs. (Routine \stlink{s}{SETFC}\ calls SETFOR).}
+\cardend\newpage
+\newpage
+\newcard{10}{G}{Data for absorption and extinction corrections}
+%\begin{htmlonly}\section{\cardhead{G}{Data for absorption and extinction corrections}}
+%\end{htmlonly}
+%
+\cl{(The \bd{G} stands for ``Gaussian integration")}
+\ms 
+A \cd{G} starts with \bd{G} then a \cw
+ which determines what else is
+on the card.  There is no predetermined sequence for \cds{G}. It
+would be usual, but not essential, to type all \cds{G} starting with
+the same \cw consecutively.
+\pn 
+\cddf 
+\cdsir{FACE}{The coefficents $a,\ b,\ c,$ and $d$ in the equation for
+          one of the plane faces of the crystal:
+               $$ax + by +cz \ge d$$
+          where $x$, $y$, and $z$ are CCSL orthogonal
+          axes defined near the start of this chapter and $d$ is positive.}
+\cdse{\exac{G FACE\ \ \ 0.312\ \ 0.534\ \ 0\ \ \ 0.86}}
+ 
+\cdsir{MU}{The absorption or depolarisation coefficient, which
+          should be in the same type of units as $d$ in the \cds{G FACE}
+          above (e.g. in inverse mm if $d$ is in mm).}
+ 
+\cdsir{MODE}{the integer NINT indicating which kind of integral
+          is required:}
+\ssk
+\begin{list} {} {\setlength{\labelwidth}{ 2.5cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{3cm}}
+\item[NINT = 1 \hfill] Transmission factor integral: $exp(-\mu(\tau_{in}+\tau_{out}))$
+\item[NINT = 2 \hfill] Depolarisation integral: $exp(-\mu\tau_{in})$
+\item[NINT = 3 \hfill] Derivative integral for extinction:\\
+$(\tau_{in}+\tau_{out}) exp(-\mu(\tau_{in}+\tau_{out}))$
+\item[NINT = 4 \hfill] Means do 1 and 2
+\item[NINT = 5 \hfill] Means do 1 and 3
+\item[NINT = 6 \hfill] Means do 2 and 3
+\item[NINT = 7 \hfill] Means do all three\end{list}
+%
+\cdsir{PNTS}{The number of points for integration in the $x$, $y$,
+          and $z$ directions respectively. The maximum for each is 10.}
+\cdcd{As many \cds{FACE} as the crystal has faces}
+\cdam{For both \bd{MODE} and \bd{MU}, if no \cd{G} is given, 
+the values of NINT and/or the absorption coefficient 
+are expected to be set up in COMMON~/ABSDAT by the
+          calling program.  If no \cd{G PNTS} is given, 5 points are
+set up as default in each direction.}
+ 
+\cdtl{The \bd{MU} and \bd{MODE} information may occur on the same card.}
+ 
+\cdr{Routine \stlink{s}{SETGAU}\ calls \stlink{i}{INPUTG}\ to read and interpret the \cds{G}. Routines 
+\stlink{s}{SETABS} and \stlink{s}{SETPOL}\ call SETGAU.}
+\cardend\newpage
+\newcard{6}{I}{Instructions to programs}
+%\begin{htmlonly}\section{\cardhead{I}{Instructions to programs}}
+%\end{htmlonly}
+%
+An \cd{I} starts with \bd{I} followed by a series of
+\cwnscomma.
+The main program decides how this information is interpreted.
+\p\ms
+For programs like \mlink{arrnge}{ARRNGE}, \mlink{arrinc}{ARRINC} the vocabulary is:\\[0.5ex]
+\begin{list} {} {\setlength{\labelwidth}{2.5cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{0.5cm}}
+\item[\bd{DTYP} \hfill] format for input data (mandatory)
+DTYP=0\ \ User Supplied\\
+DTYP=1\ \ D3 Fixed indices\\
+DTYP=2\ \ Coll5 1 card\\
+DTYP=3\ \ Coll5 2 card\\
+DTYP=4\ \ RACER floating format\\
+DTYP=5\ \ SXD including wavelength and path-length\\
+DTYP=6\ \ LLB format floating indices\\
+DTYP=7\ \ D3 integrated intensities (ext .ROC) Obsolete\\
+DTYP=8\ \ Coll 5 floating format 1 card\\
+DTYP=9\ \ D3 floating indices\\
+DTYP=4\ \ D3 peak heights floating indices\\
+
+\item[\bd{PRIN} \hfill] control of output format (default=1)
+\item[\bd{RNUM} \hfill] control of record number output (default=0)
+\item[\bd{WGHT} \hfill] weighting scheme required (default=0)
+\item[\bd{REJ} \hfill] whether a list of rejections is to be supplied (default=0)\end{list}
+%
+whose meanings are explained in the relevant program specifications.
+Routine \stlink{i}{IICD3}\ interprets the \cd{I} according to the meanings above.
+\p\ms
+For LSQ programs the vocabulary is:\\[0.1ex]
+\begin{list} {} {\setlength{\labelwidth}{2.5cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{0.5cm}}
+\item[\bd{NCYC} \hfill] number of cycles (default 3)
+\item[\bd{CYC1} \hfill] number to be assigned to first cycle (default 1)
+\item[\bd{PRIN} \hfill] frequency at which output lists are printed (default 2)\\ 
+PRIN=0\ \ no printing\\
+PRIN=1\ \ first cycle\\
+PRIN=2\ \ last cycle\\
+PRIN=3\ \ first and last cycles\\
+PRIN=4\ \ every cycle
+\item[\bd{MCOR} \hfill] controls the output of correlations at end of job
+ (default +70)\\
+MCOR=0\ \ \ whole correlation matrix printed\\
+MCOR $-$ve no printing\\
+MCOR +ve correlations above MCOR printed
+\item[\bd{CONV} \hfill] convergence criterion; LSQ cycling is terminated if
+the maximum shift/$\sigma <$ CONV (default 0.01)
+\end{list}
+\p
+Routine IICD1 interprets the \cd{I} according to the meanings above.\\[1ex] 
+\cdr{Routine \stlink{i}{INPUTI}\ reads and stores all the information from \cds{I}
+without interpreting it. LOGICAL FUNCTION \stlink{o}{ONCARD}('I',WORD,X) will
+detect the particular WORD if it has been given on an \cd{I}, and
+set X to the value of the number following it.}
+\cardend\newpage
+\newcard{14}{J}{Data for structure factor calculations using
+ multipole form factors}
+%
+%\begin{htmlonly}\section{\cardhead{J}{Data for structure factor calculations using
+% multipole form factors}}
+% \end{htmlonly}
+All \cds{J} have the format:  
+\bd{J}\ \ital{label} \ \cw\ \ data\\[1ex]
+\ital{label} is a \scat for 
+\cds{J FORM} and an \atlab\ for  
+\cds{J MPOL}\p
+\cddf
+\cdsir{MPOL}{
+\cwns:  the names of the multipoles
+ and their amplitudes.\p
+           Multipole names have the form Y$lms$ where:
+\p\begin{varindent}{1 cm}$l$ and $m$ are digits in the range 0 to 6 with $l\ge m$\\ 
+ $s$ is a sign, being one of $+\ -$ or ``space". \end{varindent}\p
+The amplitude is that of the real combination of the spherical 
+           harmonics $Y_l^m$ and $Y_l^{-m}$. Thus the amplitude of Y$lm$+ 
+           multiplies the combination
+$$\imath^m(Y_l^m~+~Y_l^{-m})/\sqrt2$$
+           Several multipole amplitude pairs for the same atom may be given 
+           on one card.}
+\cdsir{FORM}{ 
+Words which indicate the radial form factors to be used for the different
+L values of multipoles describing the scattering factor with this \ital{label}. 
+The words may be either:\\[0.5ex]
+RADF, in which case the radial wave-function giving this scattering factor 
+should be given on \bd{W} \ital{label} \cds{RADF}.\\[0.5ex]
+\hspace*{1cm}or:\\[0.5ex]
+\scat/\ital{ L-value} pairs (L$\ne$0), where the form factor on the  
+               corresponding \cd{F} applies to the multipoles with 
+               this value of L.\p
+               The form factor for L=0 is that corresponding to \ital{label}.\p
+               No \cds{J FORM}  are needed for scattering factors described by
+               monopoles only}
+\cdes{
+\exac{J Mn2 MPOL Y20 0.25  Y22+ 0.1}\\
+\exac{J Mn  FORM RADF}\\
+These indicate that the quadropole functions $Y_2^0$ and $(Y_2^2+Y_2^{-2})/\sqrt{2}$ are to
+be used to model the density around Mn2, and that the associated radial form
+factors are to be calculated from radial wave functions given on \cds{W Mn RADF} .\\[1ex]
+\exac{J Mn  FORM Mn2j 2 Mn4j 4}\\
+This indicates that the form factors labelled Mn, Mn2j and Mn4j 
+read from \cds{F}
+are to be used for the monopoles quadropoles and octopoles respectively on atoms
+whose normal form factor name is Mn.}
+\cdr{Routines \stlink{m}{MPFORM}\ and \stlink{p}{PFSET}\ call \stlink{i}{INPUTJ}\
+ to read the \bd{J FORM} and
+\cds{MPOL}}
+\cardend\newpage
+%
+%section 3
+%
+\newcard{8}{L}{Least Squares Refinement information}
+%\begin{htmlonly}\section{\cardhead{L}{Least Squares Refinement information}
+%}\
+%\end{htmlonly}
+%
+\cds{L} drive the various Least Squares Refinement programs of CCSL.
+For a general introduction to Least Squares the reader
+is referred to \htmlref{Chapter~5}{chap:5}.
+\p 
+Each \cd{L} has its own format, not particularly connected with any
+other \cd{L}.
+\p 
+An \cd{L} starts with \bd{L} then a \cwcomma, which determines what 
+else is
+on the card.  There is no predetermined sequence for \cds{L}. It
+would be usual, but not essential, to type all \cds{L} starting with
+the same \cw consecutively.
+\p 
+\cddf
+\ms
+The general \cws \bd{MODE, REFI, SCAL, TFAC} and \bd{WGHT}
+ are described first.  Then  the group \bd{FIX,
+VARY, RELA} and \bd{FUDG} concerned with Least Squares parameters,
+followed by the group \bd{SLAK, ATOM, BOND, ANGL, EQUA, EQUB, LINE} and
+\bd{TORS} concerned with geometric slack constraints. Finally there is
+a new (2008 Mark4.4) group comprising \bd{DATA} and \bd{SORC} specific to
+multi-source least squares refinement.
+\p 
+\cdsir{MODE}{\label{mode}An integer, MODE, specifying the mode in which
+          reflection data will be given.  The integer MODER (in the 
+range 0 to 12) is set to MODE modulo 100 and MODOBS to MODE/100. 
+The allowed values of MODER  are fixed by main 
+programs \mlink{sflsq}{SFLSQ}, \mlink{maglsq}{MAGLSQ}\ etc. 
+As of Update 4.22 March 2011 all LSQ input may be given in CCSL free format,
+items separated by commas or spaces and lines not exceeding 80 characters in length. 
+MODER specifies the order of the items to be read as follows:}
+\p
+\begin{list} {} {\setlength{\labelwidth}{ 3 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{1.5cm}}
+\item[MODER=0 \hfill] The user will supply a routine QLSQIN(K,NOMORE), which
+                  will read into COMMON /OBSCAL/ the necessary
+                  quantities.  This is only necessary if the data are
+                  in some order unknown to the system.
+\item[MODER=1 \hfill]  {\em h,k,l,} Gobs, (Scale number) (Code)
+\item[MODER=2 \hfill]  {\em h,k,l,} Gobs, W, (Scale number) (Code)
+\item[MODER=3 \hfill]  {\em h,k,l,} Gobs, $\sigma$, (Scale number) (Code)
+\item[MODER=4 \hfill]  {\em h,k,l,} Gcalc, Gobs, $\sigma$, (as output by several 
+main programs)
+\item[MODER=5 (obsolete)] {\em h,k,l,} Gobs, $\sigma$, C1, C2, C3, C4, (Scale number)\\
+to be used when extinction corrections are applied.
+See Becker and Coppens, \ital{ Acta Cryst} \bd{A30} p129:
+\[\begin{array}{llllll}
+C1 &= &(\lambda^3\overline\tau /V^2 \sin2\theta)\times 10^4&\quad
+&C2 = &\lambda/\sin2\theta\\
+C3 &= &A(\theta)&
+&C4 = &B(\theta)\\[-2ex]
+\end{array}\]
+\item[MODER=6 \hfill]  {\em h,k,l,} Acalc, Bcalc, Gobs, $\sigma$, (Scale number) (Code)
+\item[MODER=7 \hfill] As mode 3 but {\em h,k,l,} are floating point numbers
+\item[MODER=8  (obsolete) ]As mode 5 but {\em h,k,l,} are floating point numbers
+\item[MODER=9 \hfill] {\em h,k,l,} (floating),Gobs, $\sigma$, In,Out,Code
+\item[MODER=10 \hfill] {\em h,k,l,} (fixed),Gobs, $\sigma$, In,Out,Code\\
+Modes 9 and 10 are for SNP polarisation matrix measurements, Gobs is the scattered
+polarisation and $\sigma$ its estimated standard deviation. In and Out are integers which 
+define the incident and scattered polarisation directions ($\pm 1,2,3=\pm x,y,z$). Code=0 if $hkl$ are the same as for the previous observation, Code=1 if they are different.
+\item[MODER=11 \hfill]{\em h,k,l,} (any),2theta,INT(up) ESD(up) INT(down) ESD(down)  for 
+magnetised powder data. GOBS is alternately INT(up) and INT(down) for the same $hkl$ 
+\item[MODER=12 \hfill]{\em h,k,l,} (any) Gobs, $\sigma$,wavelength,path\\
+This is for data collected using TOF or Laue methods (eg. SXD or Vivaldi)
+
+\end{list}
+\begin{varindent}{15mm}Gobs is always the observation to be fitted $\sigma$ its standard deviation,
+          and W the weight to be applied to that observation. In, Out,  Scale
+          number and Code are all integers, and are given in parentheses when they are optional. \\
+If MODOBS = 0, Gobs and $\sigma$  give the value of the structure amplitude and
+            its standard deviation even for IREF=2.\\
+If MODOBS = 1, Gobs and$\sigma$  give the value of the measured integrated intensity
+            and its standard deviation even for IREF=1\\
+         Note that MODOBS=1 is only valid for IREF less than 4.
+\p 
+          The Scale number indicates which of several scale factors applies to
+          this observation.  If it is read as zero it is set to 1, so if there
+          is only one scaling region this number may be  omitted from the
+          data.  In flipping ratio or polarised neutron asymmetry refinements 
+          the scale number may be used to indicate measurements made with different 
+          beam polarisation.\\
+           The Code is at present only used if MODER is 9 or 10, but the user may wish
+          to use it in other cases in his own main program.
+          \end{varindent}
+\p          
+\cdsam{if no \cd{L MODE} is given, MODER=3.}
+\cdsir{REFI}{\label{refi}An integer, IREF, indicating the type of refinement,
+that is, the calculated function which is to be compared with the observed
+data.  IREF is consulted by SFLSQ, MAGLSQ etc.  Currently recognised
+          values are 1, 2, 4 and 5:}
+\ssk
+\begin{varindent}{2 cm}
+IREF=1 refine on the modulus of the structure factor Fc\\
+IREF=2 refine on the square of Fc\\
+IREF=4 refine on signed Fc (centrosymmetric)\\
+IREF=5 refine on polarised neutron flipping ratio R (magnetic only)\\
+IREF=6 refine on ratio of magnetic to nuclear structure factor: gamma
+       from cryopad (magnetic only)\\
+IREF=7 refine on polarised neutron asymmetries (magnetic only)\\
+IREF=8 refine using elements of the polarisation matrix (snp only)\\
+IREF=9 refine using polarized neutron intensities from powder data (paramagnetic only)\\
+IREF = 10 Refine using polarized neutron up-down difference intensity from powder data\\
+IREF = 11 Refine  polarized neutron $\Qv \times \Qv^*$ term with INCM (complex chiral) data\\
+
+\end{varindent}
+\cdsam{If no \cd{L REFI} is given, IREF=1 is assumed.}
+\cdsir{SCAL}{A scale factor for as many scale regions as are
+          required.  These will be indexed 1,2,3 etc as they are read.  
+The scale factor is used to multiply the calculated function.
+          If the numbers will not fit on to the 80-character line,
+          further \cds{L SCAL} may be given.\\
+          For IREF = 5 the scale factors are taken to be depolarisation factors
+          which multiply both the Up and Down polarisations}
+\cdsam{If no \cds{L SCAL} are given, the program
+          assumes that there is one factor, with value 1.0, to be refined.}
+\cdsir{TFAC}{Overall temperature factor $B$ for structure factors,
+          used as $\exp(-B(\sthl)^2)$ assumed units are \AA$^{2}$} 
+\cdsam{If no \cd{L TFAC} is given, no overall
+          temperature factor is used.}
+\cdsir{WGHT}{An integer IWGHT, the number of the weighting scheme
+          required.  At present IWGHT must be 1 or 2:}
+\ssk
+\begin{list} {} {\setlength{\labelwidth}{2 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{2.2cm}}
+\item[IWGHT=1 \hfill] use unit weights (no weighting)
+\item[IWGHT=2 \hfill] use the weight as read with the reflections;  for MODER=2
+                     the weight is W, and for other modes where $\sigma$ is
+                     read, the weight is $1/(\sigma^2)$\end{list}
+%
+\cdsam{vary with the main program, as appropriate.}
+\pagebreak[3]
+\subsection{Words Concerned with LSQ Parameters}
+\hypertarget{ss:fix}{}
+\ssk
+\bd{Please refer also to \htmlref{Chapter~5}{chap:5} for the terminology for
+ naming parameters.}\\
+\cdsir{FIX}{sets of \ital{ parameter specifications}.}\p
+\begin{varindent}{1cm}
+In main programs for single crystal structure refinement like \mlink{sflsq}{SFLSQ}, 
+the following names are defined:\\
+\end{varindent}
+\begin{varindent}{1.5 cm}
+Species in family 1, genus 1    : 
+\exac{TFAC  DOMR  MOSC A* B* C* D* E* F*}
+ (\exac{A*-F*} are for geometric slack constraints)\p
+Genus name for family 1, genus 2: \exac{SCAL}\p
+Species names for family 2, (the structure parameters whose
+                                       genus name is their atom name):\p
+\exac{X Y Z B11 B12 B13 B22 B23 B33 ITF SCAT SITE}\\ and in addition, for magnetic
+structures,\\ \exac{MU MU1 THET THE1 PHI PHI1 PSI1 PSI2 PSI3 PSI4}
+\end{varindent}
+\p
+\begin{varindent}{1cm}A \ital{ parameter specification} is one of the following:
+\begin{list} {} {\setlength{\labelwidth}{ 8 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}}
+\item[genus name, space(s), species name e.g. \hfill] \exac{Ca6 X}
+\item[\  \hfill] \exac{SCAL 4}\ssk
+\item[species name alone for family 1, genus 1 e.g. \hfill]  \exac{TFAC}
+\end{list}
+\begin{list}{}{\setlength{\labelwidth}{ 4.5 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}}
+\item[the \cw \bd{ONLY} \hfill] this means that all defaults are
+                             overridden, and only the parameters which
+                             are explicitly listed are to be fixed.
+\item[the \cw \bd{ALL} \hfill] followed by some family, genus or species
+                             name, as built in to the particular main
+                             program reading the \cds{L}.\\
+\exac{L FIX\ \ ALL SCAL\ \ \ ALL ITF\ \ ALL Nb2}
+\item[the \cw \bd{ALL} \hfill] followed by another \cwcomma;\\
+ for SFLSQ etc the \cws are:\\
+\bd{XYZ}    (= \exac{X} and \exac{Y} and \exac{Z})\\
+\bd{BIJ}    (= \exac{B11, B12, B13, B22, B23} and \exac{B33})\\
+\bd{XYZT}   (= \exac{X} and \exac{Y} and \exac{Z} and \exac{ITF})\\
+\bd{XYZS}   (= \exac{X} and \exac{Y} and \exac{Z} and \exac{SITE})\\
+\bd{XYZB}   (= \exac{XYZ} and \exac{BIJ})\\
+\bd{CELL}   (= \exac{A*, B*, C*, D*, E*} and \exac{F*})\\
+e.g. \exac{L FIX\ \ \ ALL BIJ}\\
+\end{list}
+The parameters specified are \ital{ fixed} in the
+           subsequent refinement.
+\end{varindent}
+\p
+\cdsam{If no \cds{L FIX} are given, the main
+           program's own defaults are taken.} 
+\cdsir{VARY }{An \cd{L VARY} has exactly the same  specification as an \cd{L
+FIX}, except that it causes  the specified  parameters to be \ital{ varied
+}rather than to be fixed.  If the \cw \bd{ONLY}  occurs on any \cd{L VARY},
+only the parameters which are explicitly listed are varied.}
+ 
+\cdsir{RELA}{Each card contains one relationship between parameters
+             (a \ital{ constraint}) which the user wishes to impose in addition
+             to those which the system will impose automatically.
+\pn
+             The integer after \bd{RELA} is LRELA, the type of relation;
+             at present types 1 and 2 are available, as described in
+             \htmlref{Chapter~5}{chap:5}.  The data following LRELA are:}
+ 
+\begin{list} {} {\setlength{\labelwidth}{2 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{1.5cm}}
+\item[LRELA=1 \hfill] $ a_1, p_1, a_2, p_2,$ where the $a$'s are real
+numbers and the $p$'s are \ital{ parameter specifications}.\\
+             Constraint$:\ \ a_1\Delta p_1 = a_2\Delta p_2$
+\item[LRELA=2  \hfill] as many of $a_1\ p_1,\ a_2\ p_2,\ a_3\ p_3\ .\ .$ as necessary,
+ all on one card.\\
+Constraint$:\ \ a_1\Delta p_1 + a_2\Delta p2 +\cdots + a_n\Delta 
+p_n=0$\\
+(Note that the $a_2$  of LRELA=2 is minus that of LRELA=1)\end{list}
+\cdsn{The \cws like \bd{ONLY, ALL} etc. cannot be used here.\\
+Note also that the constraints apply to the \bd{shifts} in the parameters,
+rather than to the parameters themselves}
+\cdse{\exac{L RELA 1\ \ 1 Co SITE\ \ 2\ \ Mn SITE}\\
+\exac{L RELA 2\ \ 1.4 SCAL 1\ \ 2.8 SCAL 3\ \ -1.9 SCAL 5}}
+\cdsam{If there are no \cds{L RELA}, only the
+          constraints which are inherent in the symmetry of the problem
+          are applied.}
+\cdsir{FUDG}{Sets of (\ital{ parameter specification}, Factor), where
+          the \ital{ parameter specification} is as on \bd{FIX} 
+and \cds{VARY}
+          except that the \cw \bd{ONLY} is not used here.  The Factor is
+          either a real number or a \ital{ range indicator.}  If it is a
+real number it is a simple multiplicative factor for the shift on the specified
+parameter.\p
+A range indicator has the
+form \bd{GE} \ital{ limit} or \bd{LE} \ital{ limit} where 
+\bd{GE} means
+``greater than or equal to", \bd{LE} means ``less than or equal to" and
+\ital{ limit} is a real number giving the limiting value.
+          If the information will not fit on to an 80-character line
+          several \cds{L FUDG} may be given.}
+\p
+\cdsn{The calculated shifts for the specified parameters are adjusted
+by the fudge factors before they are
+          applied. In the case of range indicators if, after applying the
+shift, any of the specified parameters are outside the range, it is
+set equal to \ital{ limit}. The specified
+          parameters may be individuals or groups.}
+\cdse{\exac{L FUDG\ \ \ ALL SITE  0.6\ \ \ \ \ Na4 ITF 0.8}\
+\exac{L FUDG\ \ \ Mn SITE  LE 1.0 }}
+\cdsam{If no \cds{L FUDG} are read, no fudge factors are applied.}
+\goodbreak
+\subsection{Words Concerned with Slack Constraints:}
+\par 
+The remaining CCSL-words control the imposition of geometric slack 
+constraints.
+\par   
+\cdsir{SLAK}{The presence of an \cd{L SLAK} asks for geometric slack
+          constraints to be used. The card gives an integer,
+          STYP and a real number, SWGHT.}
+\begin{varindent} {1.5 cm}
+The units digit of STYP=1 means ``use only slack constraints,
+and none of the conventional LSQ observations."\\
+The units digit of STYP=2 means ``use both LSQ observations and
+slack constraints."\\
+The tens digit of STYP gives the weighting scheme required for
+slack constraints;  1=unit weights, 2=use weight as read,
+and 3=read $\sigma$, use $1/\sigma^2$.
+\end{varindent}\p
+\begin{varindent}{1 cm} 
+Each slack constraint is weighted by its own individual weight,
+          usually read from the card which specifies the constraint.  
+If the units digit of STYP=2
+it will be weighted, in addition, by multiplication by SWGHT.\\
+\end{varindent}
+\cdsir{ATOM}{A new atom name and an \ital{ Atom Specification}.}
+\ssk
+\begin{varindent}{1 cm}
+An \cd{L ATOM} is used to assign a name to an atomic position which is
+equivalent to, but not identical with, one on an \cd{A}.  
+Cards like \bd{L BOND,
+L ANGL} etc can then refer to this new atom by name.  The Atom Specification
+          can be given in one of two formats.  In either case it starts with
+the atom name.\p
+In the first format the new atomic position is specified by
+          5 integers, $s, l, c_x, c_y, c_z$. $s$ is the serial number of the 
+          symmetry operator producing the required position from that on 
+          the \cd{A};  it is given negatively if the centre of symmetry
+          is also involved, and can be found by running a CCSL job which 
+          calls SYMOP and OPSYM(1).  $l$ is similarly the number of the lattice 
+translation used.  $c_x$, $c_y$, $c_z$ are cell translations 
+in the $x$, $y$ and $z$ 
+          directions enabling the position generated by $s$ and $l$ to be put 
+          into any of the neighbouring unit cells;  their values would 
+          usually be 0, +1 or $-$1.\p
+          In the other format the atom name is simply
+          followed by the actual $x$ $y$ and $z$ fractional coordinates to be
+          used, and the CCSL works out the values of $s$, $l$ etc.\p
+          The two types of format are distinguished by the presence or absence 
+of a
+          decimal point in the x coordinate.
+\end{varindent}\p          
+\cdse{\exac{L ATOM Na1A\ \ Na1 2 0  0 0 1}\\
+\exac{L ATOM Mn99\ \ Mn3\ \ \ .1234  .2345  .5}}
+\p
+\cdsir{BOND}{A \ital{ bond name} followed by two atom names, and, optionally,
+a bond length $b_{opt}$ and its allowed deviation $\sigma$. 
+The atom names 
+must occur on either an \cd{A} or a \cd{L ATOM}. If no bond length
+is given, this card simply defines the bond name for subsequent use by
+\bd{L ANGL, L EQUB} etc cards.\p
+If $b_{opt}$ and $\sigma$ are given, this is a request
+to apply a \ital{ slack constraint} to the calculated length of the 
+bond $b_{cal}$ of the form:
+$$b_{cal} = b_{opt} \pm \sigma$$}
+\cdse{\exac{L BOND\ \ \ B04\ \ \ C1\ \ C2}
+\exac{L BOND BMn9\ \ Mn99\ \ Mn9\ \ 2.3\ \ \ 0.05}}
+\cdsir{ANGL}{An \ital{ angle name} followed by the bond names of 
+two bonds to a common atom and, optionally, an
+angle $\phi_{opt}$ in degrees and its $\sigma$.  The bond names must occur 
+on \cds{L BOND}.
+If $\phi_{opt}$ is not given, this card simply defines the angle
+name for subsequent use by \bd{L EQUA, L TORS} cards.\p
+If $\phi_{opt}$ and $\sigma$ are given, this is a request to
+apply a \ital{ slack constraint} to the calculated bond angle of the form:
+$$\phi_{cal} = \phi_{opt}\pm \sigma$$}
+\cdse{\exac{L ANGL PHI6\ \ \ Bnd1\ \ Bnd2\ \ 109.5\ \ 0.3}}
+\cdsir{EQUA}{Two angle names and a $\sigma$.  The angle names must occur on
+\cds{L ANGL}. This card defines a \ital{ slack constraint} on the
+values $\phi_1$, $\phi_2$ of the two angles of the form:
+$$\phi_1 = \phi_2 \pm \sigma$$}
+\cdse{\exac{L EQUA\ \ \ Phi4\ \ Phi5\ \ 0.4}}
+\cdsir{EQUB}{Two bond names and a $\sigma$.  The bond names must occur on
+\cds{L BOND}. This card defines a \ital{ slack constraint} 
+on the values $b_1$, $b_2$ of the two bonds of the form:
+$$b_1=b_2\pm \sigma$$}
+\cdse{\exac{L EQUB\ \ Bon1\ \ Bon2 0.001}}
+\cdsir{LINE}{Two bond names and a $\sigma$.  The bond names must occur on
+\cds{L BOND} and must have one atom in common.  
+If $b_1\ b_2$ are the lengths of the two bonds and $b_3$ the length of
+the third bond in the triangle,
+this card defines a \ital{ slack constraint} of the form:
+$$b_1+b_2 = b_3\pm\sigma$$}
+\cdse{\exac{L LINE\ \ Bon1\ \ Bon2\ \ 0.001}}
+\cdsir{TORS}{A \ital{ torsion angle name}, 3 bond names, a torsion angle in 
+degrees
+$\theta_{opt}$ and its allowed deviation $\sigma$.  
+The bond names must occur on
+\cds{L BOND}. The torsion angle is defined to be the angle between
+the plane of bonds 1 and 2 and the plane of bonds 2 and 3.
+This card defines a \ital{ slack constraint} on the calculated torsion angle
+$\theta_{cal}$ of the form:
+$$\theta_{cal}= \theta_{opt}\pm \sigma$$}
+\cdse{\exac{L TORS\ \ B1\ \ \ B47\ \ B23\ \ 99.9\ \ .1}}
+\p
+\subsection{Words Used in Multi-Source Least Squares (single-crystal)}
+\cdsir{DATA}{A \cw {$<name>$} which identifies a set of data. 
+The name of the file containing the data may follow or, if absent, will be asked
+for interactively.\\
+ File names given on the \cd{L DATA} card are either absolute path
+names or are relative to the current working directory. Environment variables are
+recognised at the start of a path name.}\hypertarget{Q:sorc}{}
+\cdsir{SORC}{A \cw $<name>$ which must be the same as one appearing on a \cd{L DATA}. The identifier {$<name>$} should be followed by one or more \cwnscomma.}
+\begin{list} {} {\setlength{\labelwidth}{ 3 cm}
+                 \setlength{\parsep}{-1ex}
+                 \setlength{\leftmargin}{\labelwidth}}
+\item[REFI] the number gives the refinement type as defined \htmlref{above}{refi}.
+\item[MODE] the number gives the data format as defined  \htmlref{above}{mode}.
+\item[WGHT] the number gives the weight to be given to this set of data.
+\item{} REFI. MODE and WGHT may all be on the same \cd{L SORC}.
+\item[or]
+\item[SCAL] followed by a list of scale-factors for the data set.
+\item[DPOP] followed by a list of magnetic domain populations for the  data set.
+\end{list}
+The \htmlref{numbering of magnetic domains}{magdoms} is explained in chapter~\ref{magdoms}.\\
+When used as least squares parameters the scales and domain populations have genus 
+names which are the data set identifiers and species names starting with either
+\bd{SC} or \bd{DP} and ending with two digits corresponding to the position of the
+scale factor in the list (SC) or to the domain number (DP). 
+\cdse{
+\exac{L DATA PA27 \$TT/khe27k.pal }\\
+\exac{L SORC PA27 MODE 9 REFI 8 WGHT 1.0 }\\
+\exac{L DATA SF30 \$TT/khe30k.sf }\\
+\exac{L SORC SF30 MODE 7 REFI 1 WGHT 0.3 SCAL 7.16}\\
+\exac{L SORC SF30 DPOP 0.25 0.25 0.25 0.25}\\
+\exac{L SORC PA27 DPOP  0.18  0.07  0.07 0.18  0.18 0.07 0.07 0.18  }\\ 
+\exac{Z Domain constraints for PA data}\\
+\exac{L RELA 1 1 PA27 DP08 1 PA27 DP01}\\
+\exac{L RELA 2 1 PA27 DP01 1 PA27 DP02 1 PA27 DP03 1 PA27 DP04}\\ 
+\exac{Z Domain constraints for SF data}\\
+\exac{L RELA 1 1 SF30 DP07 1 SF30 DP01 }\\ 
+\exac{L RELA 1 1 SF30 DP05 1 SF30 DP03}\\
+\exac{L RELA 2 1 SF30 DP01 1 SF30 DP03 1 SF30 DP05 1 SF30 DP07  }\\ 
+\exac{L FIX  SF30 SC01}\\
+}
+\p
+\cdtl{The \bd{REFI}, \bd{MODE} and \bd{WGHT} information may all
+       occur on the same \cd{L}.}
+ 
+\cdse{\exac{L WGHT 2\ \ MODE 1\ \ REFI 4}}
+\cdr{Routines whose names start SFLS in general set
+       up LSQ programs, which includes the reading of \cds{L}. Routines
+       with names starting INPL read a subset of \cds{L}, omitting the
+\bd{FIX, VARY, RELA} and \cds{FUDG} and all the cards for geometric
+constraints.
+\p
+\begin{list} {} {\setlength{\labelwidth}{2cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{1.5cm}}
+\item[RDFV \hfill] reads \bd{L FIX} and \cds{L VARY}.
+\item[RDRELA \hfill] reads \cds{L RELA}.
+\item[FUDGIN \hfill] reads \cds{L FUDG}.
+\item[GEOMIN \hfill] reads \bd{L SLAK, L ATOM, L BOND, L ANGL, L EQUA, L EQUB,
+L LINE} and \cds{L TORS}.\end{list}
+\p
+       Called from within routine INPLSF there are:
+\begin{list} {} {\setlength{\labelwidth}{2cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{1.5cm}}
+\item[LLTFAC \hfill] to read \cds{L TFAC}.
+\item[LLSCAL \hfill] to read \cds{L SCAL}.\end{list}
+\p}
+\cdn{See also \cds{I} in their application to driving LSQ 
+programs.\p
+Example \cd{I} for LSQ:
+\p
+\exac{I\ \ NCYC 3\ \ \ CYC1 10\ \ \ MCOR 50\ \ \ CONV 0.05}}
+\cardend\newpage
+%
+%Last section
+%
+\newcard{8}{M}{Map-drawing information}
+%\begin{htmlonly}\section{\cardhead{M}{Map-drawing information}
+%}
+%\end{htmlonly}
+%
+An \cd{M} starts with \bd{M } then a \cwcomma,
+which determines what else is
+on the card.  There is no predetermined sequence for \cds{M}.  It
+would be usual, but not essential, to type all \cds{M} starting with
+the same \cw  consecutively.\par
+\cddf
+\cdsir{AXES}{9 elements of an orientation matrix U to rotate
+          the Fourier map during  calculation or plotting.}
+\cdsam{If no \cd{M AXES} is present, the unit matrix is used.
+         If the numbers read include decimal points, it
+          will be assumed that the general plane Fourier routine is wanted.}
+\cdsn{There is a main program GPCARD to generate M AXES for sections
+ passing through three designated atoms.}
+\cdsd{The 3 sets of 3 numbers may also be viewed as the zone
+          axis symbols of the $x$, $y$ and $z$ axes of the computed map.}
+\cdse{\exac{M AXES 0,0,1\ \ 1,0,0\ \ 0,1,0}}
+\cdsir{AXME}{9 elements of an orientation matrix U to rotate
+          a maximum entropy map during its reconstruction.}
+\cdsd{The 3 sets of 3 numbers on AXES or AXME cards may also be viewed as the zone
+          axis symbols of the $x$, $y$ and $z$ axes of the computed map.}
+\cdsir{CM/A}{Number of centimetres per Angstrom if graphical output
+          on a plotter (not a screen) is required.}
+\cdsam{If no \cd{M CM/A} is read, the scale=2.5}
+\cdsir{CONT}{Real numbers on one or more cards which give the contour 
+levels to be plotted. The \cw \bd{STEP} allows a range of equally spaced contour
+levels to be specified; it is followed by 3 numbers, which
+             are the first value, the last value and the step.}
+\cdsd{The values will be sorted into ascending order.
+             Each contour value is sought and plotted in turn.}
+\cdse{\exac{M CONT\ \ 10,25,40, STEP 50,210,20 235}\\
+\exac{M CONT\ \ 0.5\ \ 0.8\ \ 1.4}}
+\cdsir{DELT}{$\Delta$, the resolution length for Fourier calculation.}
+\cdsam{No \cd{M DELT} implies no resolution function.}
+\cdsd{The density is averaged over a cube of side $2\Delta$.}
+ 
+\cdsir{DTYP}{(\bd{Mandatory if Fourier or Maxent}) an integer (MODED) specifying the
+type of data input.}
+\p
+\begin{list} {} {\setlength{\labelwidth}{3 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{ 1cm}}
+\item[MODED=0 \hfill] the user will provide his own data input routine
+                  QFOUIN(K,F,PH) to read $h,k,l$ into array
+                  K (dimension 3), the
+                  modulus of the Fourier coefficient to F and its phase in
+                  radians to PH.  QFOUIN may use the
+                  free format input routines.
+\item[MODED=1 \hfill] $h,k,l$, F(calc), F(obs), (esd(Fobs))
+\item[MODED=2 \hfill] $h,k,l$, $\mid$(F(calc)$\mid$, phase, F(obs), (esd(Fobs))
+\item[MODED=3 \hfill] $h,k,l$, A(calc), B(calc), F(obs), (esd(Fobs))
+\item[MODED=4 \hfill] $h,k,l$, any F, (esd(F))\end{list}
+%
+\par 
+\begin{varindent} {1cm}
+For modes 1-4 the reflection data are read in fixed format
+3I5, several F10.\\
+\cdsn{The esd is mandatory for maximum entropy calculations}
+\end{varindent}\p 
+\cdsir{FTYP}{(\bd{Mandatory if Fourier or Maxent}) an integer MODEF specifying
+the type of Fourier to be calculated.}
+\p
+
+\begin{list} {} {\setlength{\labelwidth}{3 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{ 1cm}}
+\item[MODEF=1 \hfill] coefficients are F(calc), 
+complex if non-centrosymmetric.
+\item[MODEF=2 \hfill] coefficients are F(obs) and are given with their signs;
+this can only be used with a centrosymmetric structure and MODED=1 or 4.
+\item[MODEF=3 \hfill] coefficients are $\mid$(F(obs)$\mid$ with the phase (or sign)
+                  of the F(calc); this cannot be used  with MODED=4.
+\item[MODEF=4 \hfill] coefficients are F(obs)$-$F(calc), both as read, and so
+                  can only be used with a centrosymmetric structure 
+and MODED=1.
+\item[MODEF=5 \hfill] coefficients are 
+($\mid$F(obs)$\mid$-$\mid$F(calc)$\mid$)$\times$phase (or
+                  sign) of F(calc); this cannot be used with MODED=4.
+\item[MODEF=6 \hfill] coefficients are F(obs)\supsc{2} (Patterson function).\\
+                  If used with MODED=4 this will use whatever numbers are typed as
+                  coefficients, so these could be F(calc) if the user wishes.
+\item[MODEF=7 \hfill] calculate the standard deviation of the 
+                  density (using the routine ERRMAP).\\
+                  All MODED values are allowed, but the coefficient
+                  used in the calculation will be esd(F(obs)  
+\end{list} 
+\cdsir{GET}{Some number of $z$ values of maps which have already been
+calculated.\\
+       \cds{M GET} have the same syntax as \bd{M PLOT} 
+       and \cds{M PRIN} (below).  In this case the $z$ values 
+       refer to maps which have already been
+       computed in a previous run, and saved on a file using an \cd{M SAVE}.}
+% 
+\cdsn{The name of the saved file
+       must be provided in answer to a
+       request from a Fourier program (e.g. \mlink{fourpl}{FOURPL}).\p
+Saving a map means that if the same map is wanted again it need
+       not be recomputed;  the most obvious application for this is the
+       contour plotting of the map using a different scale, or new
+       contours, etc.\p
+       There are a limited number of things which may be changed
+       if a map is retrieved with \bd{GET} after having been 
+\bd{SAVE}d.  It would not make sense to
+       change the symmetry, or the \bd{MESH}, the \bd{AXES}, the 
+       \bd{FTYP} etc.  The only
+       cards it makes sense to change are at present 
+\bd{M CM/A} and \bd{M CONT}
+\p
+       When routine PREFIN meets an \cd{M GET}, it calls routine MAJUST
+       which replaces almost all the current Crystal Data by the
+       previously dumped Crystal Data which matches the saved maps.
+       It accepts new \bd{M PLOT}, \bd{M PRIN}, \bd{M GET} and 
+\cds{M SAVE} and
+       ignores any old ones;  and it replaces any old \bd{M CM/A} 
+or \cds{M CONT}
+by new ones if given.  It would also accept a new \cd{N}.\\}
+\cdse{\exac{M GET\ \ \ 0.4\ \ STEP 0.9 0.93 0.01}
+          used with:\\
+\exac{M CM/A\ \ 2.54}\\
+\exac{M PLOT\ \ STEP 0  0.4  0.1\ \ STEP 0.9 0.93 0.01}\\
+       would first undump the Crystal Data from the named file, and
+       add to it the above 3 cards (losing its own \cd{M CM/A}).
+       It would compute the maps for z=0, 0.1,0.2 and 0.3 (because they are
+       not dumped), then use dumped maps for 0.4, 0.9, 0.91,0.92,0.93;
+       it would contour plot all of them, at a scale of 2.54 cm/\AA,
+       using the contour values it found in the undumped Crystal Data.}
+% 
+\cdsir{GRID}{(\bd{Mandatory for maximum entropy calculations}): 6 (2D) or
+9 (3D) numbers defining the grid on the $x$, $y$, and $z$ axes defined
+by  AXME, over which a maximum entropy reconstruction is  to be made.}
+\cdsn{Note that for MAXENT the calculated points are at the centres of the cells
+whereas the fourier calculation is made for the corners.}
+%
+\cdsir{LABL} {Definition of symbols with which to label atomic positions in the map.}
+\cdsd{Each card  gives an atom name, the symbol size, a colour, a symbol shape and type}
+\cdse{\exac{M LABL\ \ \ Co\ \ 1.5 red circle filled}}
+%
+\cdsir{MAXE}{Options for driving a maximum entropy calculation (if this card
+is not present the options are obtained interactively): 2 integers MSTOP the stopping
+criterion and MODEL the type of default model}
+\begin{list} {} {\setlength{\labelwidth}{3 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{ 1cm}}
+ \item [MSTOP = 0] Historic maximum entropy.
+ \item [MSTOP = 1] Classic maximum entropy.
+ \item [MSTOP = 2] Classic automatic, noise scaling.
+ \item [MSTOP = 3] Ad hoc; alpha fixed.\\[2ex]
+ \item[MODEL = 0]  Default model is constant with positive entropy
+ \item[MODEL = 1] User supplied model (positive).
+ \item[MODEL = 2] Default model is constant with posi/nega entropy.
+ \item[MODEL = 3] User supplied model (pos/neg)..
+\end{list}
+ \cdsn{If MSTOP=3 the third number on the card is the fixed value for alpha (
+ smaller values fit better)\\
+ if MODEL=0 or 2 a third (or fourth) is the constant default value\\
+ if MODEL = 1 or 3 the the default model should be in a file (Numbers in format 8E10.3}
+% 
+\cdsir{MESH}{(\bd{Mandatory if Fourier}): 6 numbers defining the points
+at which the map will be calculated. They are the initial value, the final
+ value and the step in fractional coordinates, first for $x$ then for $y$.
+ In this context $x$, $y$, and $z$ are the axes defined by the \cd{M AXES}.}
+\goodbreak
+\cdsn{SETFOU checks that the step is strictly
+ positive, and that the final value is greater than the initial value.\p
+              There are also checks on the allowed storage space in
+              FOUR1Z;  if
+\begin{varindent}{2 cm}
+$n_x =$ no. of $x$ points\\
+                  $n_y =$ no. of $y$ points\\
+                  $n_h = 2(h_{max} + 1)$   and\\
+                  $n_k =  k_{max} + 1$ 
+\end{varindent}
+   then none of:
+\begin{varindent}{2cm}   
+$n_xn_y$, \  $n_hn_k$, \ or $n_xn_k$  must exceed a maximum which has been set
+in the program, and is by default 10201 ($=101\times 101$)\\
+It is possible to alter this number using
+the variable array dimensions facility of CCSL 
+\end{varindent}}
+\cdse{\exac{M MESH\ \ \ 0\ \ 1\ \ 0.2,\ \ \ 0.5\ \ 1\ \ 0.2}}
+\cdsir{NDIM}{Number of dimensions for Fourier, 2, 3 or 4}
+\begin{list} {} {\setlength{\labelwidth}{ 3cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}}\item[NDIM=2 \hfill] produces a projection, using 2-D data.
+\item[NDIM=3 \hfill] produces sections of a 3-D Fourier map.
+\item[NDIM=4 \hfill] produces ``bounded" sections i.e. the density between two given
+$z$ values projected on the $xy$ plane.  (This is useful when data of limited
+resolution in one direction only are available.)\end{list}
+
+\cdsam{If no \cd{M NDIM} is present, NDIM=3 is assumed.}
+ 
+\cdsir{PLOT} {Some number of map $z$ values at which contoured plotted
+          maps are required.  If NDIM=2, no numbers are given;
+          for NDIM=3 a set of map $z$ values is given, extending to more
+          than one \cd{M PLOT} if necessary. For NDIM=4 alternate 
+positive and negative $z$ values are given to indicate the limits of the 
+bounded sections.}
+\goodbreak
+\cdsam{If no \cd{M PLOT} is given, no plotting is wanted.}
+\cdsd{The $z$ values are given as a list, and the
+ use of \bd{STEP} (see \bd{M CONT}) is allowed.  They are sorted into 
+ascending order.}
+\cdse{\exac{M PLOT 0.5\ \ 0.8\ \ STEP 0.9 0.95 0.01}}
+ 
+\cdsir{PRIN}{These cards are exactly similar to \bd{M PLOT}, but cause
+the values of the Fourier map to be printed, rather than to be plotted.
+       Printing is via routine PRNTMP, which writes 21 integers each of
+       width 5 to a printer line, but could easily be changed to suit
+individual requirements.}
+ 
+\cdsn{The map $z$ values involved need not be the same as,
+ say, on an \cd{M PLOT}. The use of \bd{STEP} (see \bd{M CONT}) is allowed.\\
+ Since the numbers printed are integer, they may all turn out to be zero if the
+ number on the M SCAL card is not big enough.}
+\cdse{\exac{M PRIN 0\ \ 0.1\ \ 0.3564}}
+\p 
+\cdsir{READ}{Numbers with the same syntax as those on 
+\bd{M PLOT}, \bd{M PRIN} and \cds{M GET}
+       giving map $z$ values.   The relevant maps are assumed to have
+       been previously dumped on to a file, whose name will be requested
+       interactively  (if a Fourier program like \mlink{fourpl}{FOURPL}\ is being
+       used.)\\[1ex]
+       Unlike \bd{M GET} maps, no more information is expected on the
+       dumped file;  the user must match his current Crystal Data to the
+       dumped maps.  These maps are then used as though they had just been
+       computed.\\[1ex]
+       The routine READMP reads back such a map into array DENS in
+       COMMON /MAPDA/.  The reading is unformatted, a line at a time.
+       Essentially, the map must be read back in the same chunks as
+       that in which it was written, so if the existing reading is
+       not adequate, READMP should be adjusted.}
+\p       
+\cdse{\exac{M READ 0.1234}} 
+\cdsir{SAVE}{Numbers with the same syntax as those on
+\bd{M PLOT}, \bd{M PRIN} and \cds{M READ},
+       giving map $z$ values.   The relevant maps will be dumped on to
+       a file whose name will be requested interactively  (if a
+       Fourier program like \mlink{fourpl}{FOURPL}\ is being used), together with
+       enough information to retrieve them (using an \cd{M GET})
+       and then use them as though they had just been computed.\p
+       \bd{M SAVE} may be used in the same run as \bd{M PLOT}, \bd{M PRIN} etc.,
+       and its $z$ values may occur on those cards also, or they may be
+       peculiar to the \cd{M SAVE}(s).\p
+       \bd{M SAVE} and \bd{M GET} may also both occur in the same run, as they
+       write to and read from different units.}
+\cdse{\exac{M SAVE STEP 0.025\ \ 0.325\ \ 0.025}}
+ 
+\cdsir{SCAL}{A real number which is the Scale factor by which
+the Fourier coefficients will be multiplied.}
+\cdsam{If no \cd{M SCAL} is given, the scale factor is unity}
+ 
+\cdsir{SMAX}{(\bd{Mandatory for Fourier maps}): Maximum value of
+          \sthl\ for data to be included.
+Input data for which \sthl\ exceeds this value
+          are not used in the Fourier calculation.}
+ 
+\cdtl{\bd{CM/A, DELT, DTYP, FTYP, NDIM, SCAL} and \bd{SMAX}
+may be put together on the same \cd{M}.}
+ 
+\cdr{\stlink{i}{INPUTM}\ reads and interprets all the \cds{M} given.
+\stlink{s}{SETFOU}\ then deals with default values, and sets
+the system up to perform Fourier calculations.}
+ 
+\cde{
+\exac{M DTYP 1\ \ \ FTYP 1\ \ \ DELT 0.25\ \ \ CM/A 1.5\ \ \ SCAL 1000}\\
+\exac{M SMAX 0.75}\\
+\exac{M AXES 0 0 1,\ \ 1 1 0, -1 1 0}\\
+\exac{M MESH -.5\ \ .5\ \ .02\ \ \ 0\ \ 1\ \ .01}\\
+\exac{M PLOT 0}\\
+\exac{M CONT STEP -9 17 2}}
+\cardend\newpage
+\newcard{5}{N}{Title for job}
+%\begin{htmlonly}\section{\cardhead{N}{Title for job}}
+%\end{htmlonly}
+%
+\cdir{\bd{N}, any number (up to 79) of characters to form a title.}
+\cdam{If no \cd{N} is given, and a title is called for (e.g.
+            over a plotted contoured map) the word ``UNTITLED" will be used.}
+ 
+\cdd{The first time a call of INPUTN is made, the title is read and
+            stored from an \cd{N} (or ``UNTITLED" is held).  INPUTN also
+            has an input parameter giving the number of an output unit,
+            and the title is output to that unit.  Subsequent calls of
+            INPUTN would merely output a copy of the title.\p
+            When a title is plotted above a map, it is taken as A1 characters 
+            from its COMMON /TITLE/.}
+ 
+\cdr{\stlink{i}{INPUTN}}
+ 
+\cde{
+\exac{N Mn2CoSn at room temperature - trial 1}}
+\cardend\newpage
+\newcard{7}{P}{Polarisation Data}
+%\begin{htmlonly}\section{\cardhead{P}{Polarisation Data}}
+%\end{htmlonly}
+%
+% 
+\cdir{\bd{P}, followed by:
+\begin{varindent}{1 cm}
+the \cw \bd{UP} and two numbers which are the polarisation,
+for the spin ``up'' state and its standard deviation,
+then the \cw \bd{DOWN} followed by the polarisation 
+for the spin ``down'' state and its standard deviation.\\
+The ``up'' and ``down'' polarisations can be given in either order.
+Optionally the  \cw \bd{DEPO} followed by an integer MODE. If
+MODE=2 depolarisation will be calculated as a volume effect
+using the data on \cds{G} to calculate the incident path length.
+
+\end{varindent}}
+\cde{\exac{P\ \ POLD\ \ 0.986\ \ 0.005\ \ POLU\ \ 0.978\ \ 0.005}}
+\cdr{\stlink{s}{SETPOL}}
+\cardend\newpage
+\newcard{13}{Q}{Data for magnetic structure factor calculations}
+%\begin{htmlonly}\section{\cardhead{Q}
+%{Data for magnetic structure factor calculations}}
+%\end{htmlonly}
+%
+\begin{list} {} {\setlength{\labelwidth}{ 5 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}}
+\item[\cds{Q} have the format: \hfill] \bd{Q} \cw data
+\item or
+\item \bd{Q} \cclabel data\\
+where \cclabel is an \atlab or a \scatcomma.
+\end{list}
+\cddf
+In the first case the \cw may be one of
+\bd{STYP PROP MSYM NSYM}, or \bd{PSYM},
+and in the second one of \bd{FORM MU SDIR CHI} or \bd{PSI}.\\
+\cdsir{STYP}{A \cw describing the magnetic structure type.
+The types defined are:}
+\ssk
+\begin{list} {} {\setlength{\labelwidth}{2 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{15mm}}
+\item[\bd{ANTI} \hfill] ordinary comensurate antiferromagnetic structure
+\item[\bd{AMOD} \hfill] incommensurate amplitude modulated antiferromagnetic structure
+\item[\bd{INCM} \hfill] incommensurate antiferromagnetic described by the complex fourier components
+of the magnetisation distribution.
+\item[\bd{FANI} \hfill] Magnetised anisotropic ferromagnet. The magnetisation direction
+is in the plane containing the field direction and the easy axis.
+\item[\bd{FERO} \hfill] unmagnetised ferromagnet with equal population of all domains 
+\item[\bd{FERA} \hfill] aligned ferromagnet with spins in the direction given by the
+the $z$ diffractometer axis.
+\item[\bd{HELI} \hfill] helical spin structure
+\item[\bd{PARA} \hfill] aligned paramagnet: moments calculated from
+susceptibilities (used by program \mlink{chilsq}{CHILSQ}) \end{list}
+ 
+\cdsir{PROP}{The three components of the
+                propagation vector in reciprocal space coordinates.}
+% 
+\cdsir{MSYM}{Pairs of integers defining the magnetic space-group.
+The first number of a pair is
+the identifying number of one of the generating elements of the
+group, and the second is $-1$ if the symmetry operation is
+combined with time-reversal, and 1 if not. The special 
+operator number $-1$ is used to refer to a centre of symmetry.
+\p
+There must be one such pair of integers for each of the 
+generating elements of the  magnetic group.\\}
+\cdsn{In CCSL the space group symmetry operators
+are assigned identifying numbers which can be printed out using OPSYM. 
+It is these numbers which are used to refer to individual operators when defining 
+their magnetic symmetry.}
+\cdsir{NSYM}{Operators for symmetry elements not in the magnetic
+space group.\p
+The magnetic space group \bd{M} may or may not
+coincide with the nuclear group \bd{N} but \bd{M} must be a
+      subgroup of \bd{N}.
+\p
+In the case that \bd{M}$\ne$\bd{N} then some \cds{NSYM} are needed
+      to describe how each symmetry element which  is \bd{not}
+      in the magnetic group acts on the directions of the magnetic moments.
+There is one \cd{NSYM} for each element of the factor group
+\bd{F} where \bd{M}$\times$\bd{F}= \bd{N}.
+\p
+The data given on the \cds{NSYM} are
+the integer label which has been assigned to the operator,
+followed by nine real numbers.  These specify the
+matrix describing the rotation with respect to the representative atom, of 
+the moment on the atom generated from the representative atom, by the 
+operator. The matrix is expressed in the CCSL orthogonal 
+axes.} 
+\cdsir{PSYM}{1 or 18 integers to define the symmetry of the polarisation matrix}
+\bd{PSYM} is not used for structure factor calculations, but is needed to 
+define the symmetry used in averaging  measurements of the polarisation matrix elements.\\ 
+If there is a single integer following \bd{PSYM} on the card it must be in the range
+1-4 and selects one of the standard options.
+\begin{description}
+\item{PSYM = 0} No averaging: all matrix components are independent
+\item{PSYM = 1} Simple antiferromagnetic structures with non-zero propagation vectors 
+\(\begin{array}	{lllllllll}
+							 xx&=-(-xx)&=-1\\
+                               yy&=-(-yy)&=-zz&=-(zz)\\
+                               yz&=-(-yz)&=zy&=-(-zy)\\
+                               xy&=-xy&=yx&=-yx&xz&=zx&=-xz&=-zx&=0 \\
+\end{array} \)    
+							                           
+\item{PSYM =2} Chiral structures with  non-zero propagation vectors\\
+\(\begin{array}	{lllll}
+							  xx&=-(-xx)&=-1\\
+                                xy&=\msp xz&=-xy&=-xz&=0\\
+                                yx&=-yx\\
+							   zx&=-zx\\
+                               yy&=-(-yy)&=-(zz)&=-zz\\
+                                yz&=\msp zy&=-(-yz)&=-(-zy)\\	
+\end{array} \)                              
+                                
+\item{PSYM = 3} Zero propagation vector Magnetic scatteringin quadrature with nuclear
+\(\begin{array}	{llll}
+					xx&=-(-xx)\\
+                   xy&=-yx&=-(-xy)&=(-yx)\\
+                                xz&=-zx&=-(-xz)&=(-zx)\\
+                                yy&=-(-yy)\\ zz)&=-(-zz)\\
+                                yz&=\msp zy&=-(-yz)&=-(-zy)\\
+\end{array} \)                              
+
+\item{PSYM = 4} Zero propagation vector Magnetic scattering in phase  with nuclear, phase difference 0 or 180\degrees\\  
+\(\begin{array}	{lllllllll}   
+					 xx&=-(-xx)\\     				 
+					 yx&=-zx&=-yx&=-yx&=0\\
+                                xy&=-xy\\
+                                xz&=-xz\\
+                                yz&=\msp zy&=-(-yz)&=-(-zy)\\
+\multicolumn{8}{l}{yy,\msp yz,\msp zy,\msp zz,-yy,-yz,-zy,-zz \quad\mbox{all independent}}\\
+ \end{array} \) 
+\end{description}                            
+Further options are defined by giving 18 itegers on the \cd{Q PSYM} to indicate which elements should be equated. The integers $k_i$ should be such that if 
+\[P_{ij}=\pm P_{mn}\quad\mbox{then}\quad k_I=\pm k_M=\pm I \]
+with elements $ij=I$ $mn=M$  and numbered\\
+\(xx=1\ yx=2\cdots zz=9\ -xx=10\ -yx=11 \cdots -zz=18\)
+%
+\cdsir{FORM}{A \scat appearing on an \cd{F}, followed by \bd{FORM}, followed by a
+list of atom-names.\p
+Not all atoms appearing on \cds{A} are necessarily magnetic. They
+are defined to be magnetic if their names appear to the
+right of \bd{FORM} on a \cd{Q}.\p
+The form factor will
+be used as the \ital{ magnetic} form factor applying to all the atoms whose
+\atlabs appear to the right of \bd{FORM} on the card.}
+\cdsir{ORDP}{For INCM structure type only. \bd{ORDP} followed by an integer 
+labelling the partner, and two numbers giving the complex order parameter
+for that partner in the representation of the magnetisation distribution.}
+\cdsir{MU}{An \atlab corresponding to one on an \cd{A}, followed ny \bd{MU} 
+and, unless the structure type is HELI, 
+a single number giving its magnetic moment in Bohr magnetons.\p
+The \cws \bd{MU} and \bd{SDIR} refer to individual magnetic atoms.
+There must be one of each of these cards for each of the \cds{A} 
+which refer to magnetic atoms.\p
+ If the structure type is HELI two numbers are required
+which are the major and minor axes of the elliptical envelope of the helix
+in Bohr magnetons.}
+\cdsn{The moment values are referred to as \exac{MU} and \exac{MU1} in the 
+Least Squares programs.}
+\cdsir{RVEC}{An \atlab corresponding to one on an \cd{A} followed by
+\bd{RVEC}, a single integer giving the number of the partner in the representation 
+ and the three CCSL orthogonal components of a complex vector  
+giving the fourier component of the magnetisation distribution associated 
+with that partner of the representation for that atom in Bohr magnetons.\\
+ (Note: for INCM structure type only)}
+\cdsir{SDIR}{An \atlab corresponding to one on an \cd{A} followed by
+ \bd{SDIR} and
+the spherical polar angles $\theta$ and $\phi$ of the moment direction
+of the atom with respect to CCSL orthogonal axes.\p
+If the structure type is HELI a second pair of angles is required; the first
+pair give the orientation of the major axis of the elliptical envelope
+and the second pair the direction of the minor axis (the two directions
+must be perpendicular).}
+\cdsd{The angles are given in degrees.\p
+The vector describing a moment direction or one of the axes of the elliptical
+envelope thus has components:\\
+\begin{varindent}{1 cm}
+$\mu \sin\theta \cos \phi$, $ \mu \sin\theta \sin\phi$ and $\mu \cos\theta$
+on the orthogonal CCSL axes \end{varindent}}
+\cdsn{These angles are referred to by the names \exac{THET, PHI, THE1,
+PHI1} respectively in the Least Squares Programs.}
+\cdsir{CHI}{If STYP = PARA: an \atlab corresponding to one on an \cd{A}
+followed by \bd{CHI} and up to 6 numbers which are the coefficients X of the
+anisotropic magnetisation tensor for that atom in the order $X_{11}$, $X_{22}$,
+$X_{33}$, $X_{23}$, $X_{31}$ and $X_{12}$ in that order. If only one number is given
+the refinement will start from an isotropic magnetisation of that value.}
+\cdsn{The coefficients are referred to as CH11, CH22 \ldots etc. by the 
+least squares programs.}
+%
+\cdsir{PSI} {An \atlab corresponding to one on an \cd{A}
+followed by up to four pairs of numbers. The first number
+of each pair is the integer label of an operator and the second 
+is the phase shift in degrees
+to be applied to the sublattice generated by that operator.}
+\p\cdsn{One or more \cds{PSI} will be required for each magnetic atom
+when the structure type is AMOD or HELI and the magnetic symmetry
+is less than the nuclear symmetry, i.e. there are one or more \cds{NSYM}.
+\p
+Phase shifts must
+be defined for operators not in the magnetic group which relate different
+atomic positions of an equivalent set. At present there is space for only
+four phase shifts per atom which means that the programs can not deal with
+structures in which magnetic atoms occur on sites whose multiplicity due to
+symmetry operators not in the magnetic group is greater than four.}
+\p
+\cdes{
+The following is an example of part of the Crystal Data describing the
+magnetic structure of Mn\subsc{3}Sn:
+\par 
+\exac{A Mn\ \ \ \ \ 0.8415\ \ \ 0.68291\ \ \ 0.25000\ \ \ 0.00000}\\
+\exac{S x-y, x, 1/2+z}\\
+\exac{S x, y, 1/2-z}\\
+\exac{S y, x, 1/2+z}\\
+\exac{F Mn\ \ \ \ \ \ 1\ \ -0.37300}\\
+\exac{F MnM\ \ 2\ \ 0.4220 17.6840  0.5948  6.0050  0.0043 -0.6090 -0.0219}\\
+\exac{Q PROP 0 0 0}\\
+\exac{Q STYP ANTI}\\
+\exac{Q MnM FORM Mn}\\
+\exac{Q MSYM -1 1  4 -1  8 -1}\\
+\exac{Q NSYM 2 -.5 .866 0 -.866 -.5 0 0 0 1}\\
+\exac{Q NSYM 3  -.5 -.866 0 .866 -.5 0 0 0 1}\\
+\exac{Q Mn MU\ \ \ \ \ 3.0}\\
+\exac{Q Mn SDIR\ \ \ 90.0\ \ 60.0}\\
+\par 
+The first two \cds{Q} indicate an antiferromagnetic structure 
+with zero propagation vector (nuclear and magnetic cells are the 
+same).\\
+ The \cds{S} define space group $P6_3/mmc$ and the output from OPSYM(1) 
+is:}
+\begin{varindent}{1 cm}
+\exac{~~~~~~~~~~ General equivalent positions are:}\\
+\exac{~~~~~~~~~0~~~~~~~~~~~~~~~~~~~0~~~~~~~~~~~~~~~~~~~0~~~~~~~+-}\\
+\exac{~~1~~~~~~x~~~~~~~~~~~~~~~~~~~y~~~~~~~~~~~~~~~~~~~z}\\
+\exac{~~2~~~~~~x-y~~~~~~~~~~~~~~~~~x~~~~~~~~~~~~~~~~~~1/2+z}\\
+\exac{~~3~~~~~-y~~~~~~~~~~~~~~~~~~~x-y~~~~~~~~~~~~~~~~~z}\\
+\exac{~~4~~~~~-x~~~~~~~~~~~~~~~~~~-y~~~~~~~~~~~~~~~~~~1/2+z}\\
+\exac{~~5~~~~~-x+y~~~~~~~~~~~~~~~~-x~~~~~~~~~~~~~~~~~~~z}\\
+\exac{~~6~~~~~~y~~~~~~~~~~~~~~~~~~-x+y~~~~~~~~~~~~~~~~1/2+z}\\
+\exac{~~7~~~~~~y~~~~~~~~~~~~~~~~~~~x~~~~~~~~~~~~~~~~~~1/2+z}\\
+\exac{~~8~~~~~-x+y~~~~~~~~~~~~~~~~~y~~~~~~~~~~~~~~~~~~~z}\\
+\exac{~~9~~~~~~x~~~~~~~~~~~~~~~~~~~x-y~~~~~~~~~~~~~~~~~z}\\
+\exac{~10~~~~~-x~~~~~~~~~~~~~~~~~~-x+y~~~~~~~~~~~~~~~~1/2+z}\\
+\exac{~11~~~~~~x-y~~~~~~~~~~~~~~~~-y~~~~~~~~~~~~~~~~~~1/2+z}\\
+\exac{~12~~~~~-y~~~~~~~~~~~~~~~~~~-x~~~~~~~~~~~~~~~~~~~z}\\
+\end{varindent}\ms
+\begin{varindent}{1 cm}
+This information is needed to understand the \bd{Q MSYM} and 
+\cds{Q NSYM}.
+The interpretation of the card \exac{Q MSYM -1 1 4 -1  8 -1} is as follows:
+\end{varindent}
+\begin{list} {} {\setlength{\labelwidth}{25mm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{1cm}}
+\item[Operator $-$1: \hfill] (the centre of symmetry) is not combined with 
+time reversal so that
+the spins on atoms related by the centre of symmetry are parallel.
+\item[Operator 4: \hfill] $-x,-y,1/2+z$ (a screw diad parallel to $z$) is combined
+with time-reversal and atoms related by this operator have parallel $x$
+and $y$
+components and anti-parallel $z$ components.
+\item[Operator 8: \hfill] $-x+y,y,z$ (a mirror plane 
+bisecting the angle between $x$ and $y$) is also
+time-reversing and, since spins are axial vectors, the components parallel
+to the plane, of spins which it relates, are parallel to one-another
+whereas those perpendicular
+to the plane are anti-parallel.\end{list}
+\p
+\begin{varindent}{1 cm}
+The \cds{NSYM}\p
+\exac{Q NSYM 2 -.5 .866 0 -.866 -.5 0 0 0 1}\\
+\exac{Q NSYM 3  -.5 -.866 0 .866 -.5 0 0 0 1}\\
+indicate that the operators 2 and 3 which describe the screw hexad 
+(6\subsc{3}) and triad operations respectively are not in the magnetic 
+space group. The matrix on the \bd{NSYM} 2 card implies that atoms 
+related by the screw hexad have spin directions rotated with respect 
+to one-another by 60\degrees\ about $z$ but with the rotation direction 
+opposite to that of the symmetry axis. The matrix acompanying element 
+3 implies that the spin rotation associated with the triad axis is
+also opposite to that of its symmetry operation.\\[0.5ex]
+The \bd{MU}, \bd{SDIR} and \cds{FORM} indicate
+that the Mn atom is magnetic with 
+a spin of 3.0 $\mu_B$. The representative Mn atom (that whose position 
+is given on the \cd{A}) has its spin direction in the $x-y$ 
+plane ($\theta=90^\circ$) at $60^\circ$ to orthogonal $x$ 
+($10\overline10$). The magnetic form factor for Mn is MnM.
+\\[0.5ex]
+A second example desribes the magnetic structure of the helical 
+phase of monoclinic CuO:\\
+\exac{S 1/2+x, 1/2+y, z}\\
+\exac{S 1/2+x, 1/2-y, 1/2+z}\\
+\exac{ZS -x, -y, -z}\\
+\exac{A Cu\ \ \ \ \ 0.25000\ \ \ 0.25000\ \ \ 0.00000\ \ \ 0.00000}\\
+\exac{Q CuM FORM Cu}\\
+\exac{Q PROP .507 0 -.482}\\
+\exac{Q STYP HELI}\\
+\exac{Q Cu MU\ \ \ \ \ 0.5013\ \ \ \ 0.4860}\\
+\exac{Q Cu SDIR\ \ \ \ 90.0000\ \ \ 90.0000\ \ \ 28.2215\ \ \ \ 0.0000}\\
+\exac{Q NSYM 2 1 0 0 0 1 0 0 0 1 }\\
+\exac{Q Cu PSI\ \ \\ 1\ \ \ 0 \ \ 2\ \ \ 4.5}\\
+\par 
+Note the irrational values on the \cd{Q PROP} for this incommensurate
+structure. In this example neither the twofold axis (operator 2) nor the centre 
+of symmetry is in the magnetic group.
+The centre of symmetry is not compatible with the propagation vector because
+it would relate the Cu atoms at (${1\over4} {1\over4} 0$) and (${3\over4} {3\over4} {1\over 2}$)
+But these positions are also related by the C face centreing lattice vector $\frac12\frac12 0$ and their relative orientations are therefore dictated by the incommensurate propagation vector. 
+The diad axis (operator 2) not in the magnetic group since the atoms it relates have have parallel spins but are neither parallel of perpendicular to the axis. The major and minor axes of the elliptical 
+envelope of the spin helix are 0.5013 and 0.4860 $\mu_B$,  oriented 
+parallel to \bd{b} and at $28.2^\circ$ to \bd{c} in the (010) 
+plane, respectively. The phase of the spiral based on the Cu atom at 
+(${3\over4} {3\over4} {1\over 2}$) leads that on the representative Cu atom 
+(${1\over4} {1\over4} 0$) by 4.5\degrees.
+\end{varindent}
+\cardend\newpage
+\newcard{6}{S}{Space group symmetry}
+%\begin{htmlonly}\section{\cardhead{S}{Space group symmetry}}\n\end{htmlonly} 
+%
+\cdir{\bd{S} followed by  3 items giving general equivalent positions which make
+         crystallographic sense, producing a 3x3 rotation matrix and a
+         1x3 translation vector.}
+ 
+\cdam{If no \cds{S} are present at all, the space group
+         is assumed to be P1.  The x,y,z operator is always assumed to
+         be present.}
+  
+\cdd{  For each item one or two letters (x,y,z,X,Y or Z) will be
+         present.There may also be a fraction, typed as n/m where n may
+         be 1, 2, 3 or 5 and m may be 2, 3, 4 or 6.  Letters and fractions
+         may be preceded by a sign, + or $-$, and an initial + is
+         optional.
+\p 
+         There need only be enough \cds{S} to give the generators of
+         the group, but redundant cards are not faulted.  When SYMOP
+         reads the \cds{S} and has formed the whole group, it will identify and
+         print out a set of generators.
+\p 
+         SYMOP also checks that the rotation matrix has no zero row or
+         column.  The new operator is added to an existing list, and the
+         resulting set of  operators is augmented (if necessary) to form
+         a group.  If more than 48 (primitive) operators are found in
+         this way an error is reported.}
+ 
+\cdn{It is now also possible to specify the space group on an \cd{S GRUP},
+using either its short
+symbol or an integer in the range 1-230, all of which refer to the listings in 
+the International Tables for X-Ray Crstallography, Vol I, 1952.  Spaces must be
+inserted in the symbol in the obvious places, e.g. P21/c, Ab~m 2, P-3~1~m.  The
+user is advised to check that such \cds{S} have produced the operators
+he expects.}
+\par 
+\cdwr{The maximum permitted number of operators stored is usually 24 not 48. 
+          A centre of symmetry found other than at the origin will cause
+          the structure to be treated as non-centrosymmetric.  If this
+          means that there are finally 48 operators a specially compiled
+          version of CCSL with space for these must be used.}
+\cdes{
+\exac{S -x, -y, -z}\\
+\exac{S 1/2+X,\ \ \ 1/2+Y,\ \ \ 1/2+Z}\\
+\exac{S\ \ \ y,\ \ \ y-x,\ \ \ z + 5/6}\\
+\exac{S GRUP P21 21 2}\\
+\exac{S GRUP 42}\\
+}
+\cdr{\stlink{i}{INPUTS}\ reads one \cd{S}, and \stlink{}{}, and \stlink{s}{SYMOP}\ calls
+         \stlink{i}{INPUTS}\ repeatedly to read all the \cds{S} and form the group.
+         \stlink{s}{SETFC}\ also calls SYMOP.\p
+The complete set of operators generated by SYMOP may be printed out
+by calling OPSYM(IS) where IS is 1 for output of equivalent positions
+and 2 for output of equivalent reflections with their relative phases.}
+\cardend\newpage
+\newcard{7}{T}{Anisotropic temperature factors}
+%\begin{htmlonly}\section{\cardhead{T}{Anisotropic temperature factors}
+%}\n\end{htmlonly}
+%
+\cdir{\bd{T }, an \atlab, an integer TTYP indicating
+the the units in which the constants are given, and the 6 coefficients,
+$B_{11},\ B_{22},\ B_{33},\ B_{23},\ B_{13}$ and $B_{12}$, \bd{in that
+ order}.}
+ 
+\cdam{If there is no \cd{T} for a particular atomic
+             position,  there is no anisotropic temperature factor for
+             that atom.}
+  
+\cdd{The atom label must match one on an \cd{A}. TTYP is an
+             integer with the following interpretation:}\p
+\begin{list} {} {\setlength{\labelwidth}{ 2 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{1.5cm}}
+\item[TTYP=0 \hfill] make an anisotropic temperature factor from the existing
+            isotropic factor.  The new factor will be type 2.
+\item[TTYP=1 \hfill] is not used
+\item[TTYP=2 \hfill] uses the expression:
+  \(\exp(-\frac{1}{4}(B_{11}h^2a^{*2} + . . + 2 B_{23} kb^* lc^* + \cdots \mbox{ etc}))\)
+\ \          (note the ``2")
+\item[TTYP=3 \hfill] uses the expression:
+        \(\exp(-2 \pi ^2(B_{11} h^2a^{*2} + . . + 2 B_{23} kb^* lc^* + \cdots \mbox{ etc}))\)
+\ \     (note the ``2")
+\item[TTYP=4 \hfill] uses the expression:
+       $ \exp(-(B_{11} h^2 + . . + B_{23} k l +  \cdots \mbox{ etc}))$
+\item[TTYP=5 \hfill] uses the expression:
+     $\exp(-(B_{11}  h^2 + . . + 2 B_{23} k l +  \cdots \mbox{ etc}))$ \ \ (note the ``2")
+           which is also the form used internally in the program.
+\end{list}\p
+\cdes{
+\exac{T CA2\ \ 0}
+\exac{T Cu11 2\ \ 1.43\ \ 1.58\ \ 1.89\ \ 0.65\ \ 0.50\ \ 0.37}
+}
+\cdr{\stlink{i}{INPUTT}\ reads one \cd{T}.
+    \stlink{s}{SETANI}\ reads all the \cds{T} which the user gives.
+    \stlink{s}{SETFC}\ also calls SETANI.}
+\cardend\newpage
+\newcard{9}{U}{Asymmetric unit definition}
+%\begin{htmlonly}\section{\cardhead{U}{Asymmetric unit definition}}\n\end{htmlonly} 
+ %
+\begin{list} {} {\setlength{\labelwidth}{ 2 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}}\item[\bbold NOTE: \hfill] It is not usually necessary to give
+ a \cd{U}.\end{list}
+\cdir{\bd{U} and 3 indices $h,k,l$}
+\cdam{If no \cd{U} is provided, the typical reflection
+          indices are taken to be 13,11,10.  These have the property
+          of being all positive, with $h > k > l$.}
+ 
+\cdd{The indices $h,k,l$ are used by routine SYMUNI to select which
+          of the possible asymmetric units it will choose.  SYMUNI
+          finds one unit, then transforms it using the space group
+          symmetry until it contains the given $h,k,l$.
+\p 
+          This means that $h,k,l$ must be properly inside a unit, not on a
+          face or edge.  Routine TRYUNI will give an error if this is
+          not so.
+\p 
+          Note that, although in general the provision of a \cd{U} will
+          force the asymmetric unit which you intended, in some cases,
+          notably for tetragonal groups, there are (at least) two ways
+ of chopping
+          reciprocal space into asymmetric units, and the user will not
+          be able to impose one if the program has chosen the
+          other.}
+\cde{
+\ssk
+\exac{U\ \ -1,4,5}}
+\cdr{\stlink{i}{INPUTU}\ reads one \cd{U}, and is called by
+          \stlink{s}{SYMUNI}}
+\cardend\newpage
+\newcard{9}{V}{Space group representations}
+%\begin{htmlonly}\section{\cardhead{V}{Space group representations}
+%}
+%\end{htmlonly}
+%
+\ms
+Details of \cds{V} are not yet finalised.\\
+\cardend\newpage
+\newcard{9}{W}{Information about atomic wave-functions}
+%\begin{htmlonly}\section{\cardhead{W}{Information about 
+%atomic wave-functions}}
+%\end{htmlonly}
+%
+A \cd{W} has the form \bd{W}, \cclabel, \cwcomma, data.
+\begin{description}
+\item[The \ital{ label} is either] an \atlab appearing on an \cd{A}
+\item[ or] a \scat appearing on an \cd{F}. 
+\end{description}
+Which of the two it is 
+        depends on the \cw which follows.\p
+The \cw may be one of \bd{AMP FUNC PROD RADF ROTN.}\\[1ex]
+\cddf
+\cdsir{AMP}{A \ital{ product-name} (see \bd{PROD} below) followed by two
+real numbers giving the complex amplitude of the given many-electron 
+configuration labelled \ital{ product-name}.}
+
+\cdsir{FUNC}{The description of a molecular orbital wave function
+          for atom \ital{ label}.  The data are:\p
+\begin{varindent} {0.5cm} A \ital{ name} (up to 4 characters, with which to label 
+               the function).\p
+Two integers, $l$ and $m$, for the spherical harmonic term in 
+               the function.\p
+Either two ($m=0$) or four ($m>0$) real numbers, being the 
+               complex amplitudes of $Y_l^m$ and $Y_l^{-m}$ repectively.
+               \end{varindent}}
+
+\cdsir{PROD}{A \ital{ product-name} of up to 4 characters followed by
+two real numbers giving a complex amplitude, then $n$  coded labels
+ defining the one-electron functions
+in one Slater determinant for an $n$-electron or $n$-hole orbital. At
+present this can only be used for d-electrons($l$=2). Each label consists
+of a signed integer $m$ in the range $-l\le m\le l$ indicating the
+$z$ component of the angular momentum of the electron on the quantum axes
+followed without an
+intervening space by either $+$ or $-$ to indicate whether the spin state
+is parallel or antiparallel to quantum $z$.\p
+There may be several \cds{W PROD} with the same \ital{ product-name}
+where they are the different one-electron products making up a single
+configuration of the $n$ electron wave-function. }
+\cdsn{The routines which read these cards are experimental and 
+are not yet in the main Library.}
+
+\cdsir{RADF}{In this case the \ital{ label} is a \scatcomma.\p
+Then on each \cd{W RADF} there are two integers ITYP and NVAL,
+followed by the coefficients $A$ and $\xi$ in the expansion of the radial wave 
+          function.
+\p  
+          ITYP indicates the type of wave function being used:}\pn
+\begin{list} {} {\setlength{\labelwidth}{2 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{ 1.5cm}}
+\item[ITYP=1 \hfill] is not normalised (e.g. E Clementi \& C Roetti,
+                     \ital{ Atomic Data \& Nuclear Data Tables,} \bd{14} 183)
+\item[ITYP=2 \hfill] is normalised (e.g. R E Watson, \ital{ Report Solid-State
+ Molecular Theory Group M.I.T., No. 12})\end{list}
+ \p
+\begin{varindent}{1cm}NVAL is the power n in the Slater expansion of the form:
+                           $$U(r)=\sum_ir^{n_i}A_ie^{-\xi_i r}$$  
+                           \end{varindent}
+\cdsns{The units of length for $A$ and $\xi$ should be atomic units.\\
+As many \cds{W RADF} are needed as there are terms in the 
+          expansion.}
+
+\cdsir{ROTN}{The elements of a matrix relating the quantum axes 
+          for atom with the given \atlab to
+          the CCSL orthogonal axes.  The data are an axis
+          label (\bd{X Y} or \bd{Z}) followed by the direction cosines of the 
+          corresponding quantum axis with respect to the 
+          crystallographic axes.  All three cards are needed for each
+          relevant atom. If no \cds{W ROTN} are given for an atom that needs
+          them the unit matrix is assumed by default. }
+\cdes{
+\ssk
+\exac{W Mn1 FUNC x2y2 2 2 .70711 0.0 0.70711 0.0}\\
+\exac{W Mn RADF 1 2 .27716 3.65559}\\
+\exac{W Mn RADF 1 2 .03372 10.72370}\\
+\exac{W Mn RADF 1 2 .29360 5.53874}\\
+\exac{W Mn RADF 1 2 .45627 2.37383}\\
+\exac{W Mn RADF 1 2 .08058 1.48214}\\
+\exac{W Mn1 ROTN\ \ \ \ X\ \ \ \ 0.0000\ \ \ \ 0.0000\ \ \ \ 1.0000}\\
+\exac{W Mn1 ROTN\ \ \ \ Y\ \ \ \ .7071\ \ \ -0.7071\ \ \ \ 0.0000}\\
+\exac{W Mn1 ROTN\ \ \ \ Z\ \ \ \ .7071\ \ \ \ 0.7071\ \ \ \ 0.0000}\\
+\ssk
+These cards define a one electron wave-function to be applied to the atom 
+whose label is Mn1 and whose form-factor label is Mn. The angular part of
+the wave-function is labelled x2y2 and defined as:
+${1\over\sqrt2}(Y_2^2+Y_2^{-2})$ with the $x$, $y$ and $z$ axes of the 
+spherical harmonic functions having the direction cosines given by the
+\bd{ROTN X},\bd{Y}, and \cds{Z} with respect to the CCSL orthogonal 
+axes.\\ The radial wave-function to be used is defined by the \cds{RADF}
+as a sum of 5 terms of the unnormalised (Clementi Roetti) type.
+\\[0.5ex]
+\exac{W\ \ \ Fe PROD PS12\ \ \ \ 0.8150\ \ \ \ 0.0000\ \ \ 
+2+~~~1+~~-1+~~-2+}\\
+\exac{W\ \ \ Fe PROD PS12\ \ \ \ 0.4101\ \ \ \ 0.0000\ \ \ 
+2+~~~1+~~~0+~~-1+}\\
+\exac{W\ \ \ Fe PROD PS12\ \ \ \ 0.4101\ \ \ \ 0.0000\ \ \ 
+1+~~~0+~~-1+~~-2+}\\
+\exac{W\ \ \ Fe PROD PS32\ \ \ \ 0.7071\ \ \ \ 0.0000\ \ \ 2+~~~1+~~ 0+~~-1+}\\
+\exac{W\ \ \ Fe PROD PS32\ \ \ -0.7071\ \ \ \ 0.0000\ \ \ 
+1+~~~0+~~-1+~~-2+}\\
+\exac{W\ \ \ Fe AMP\ \ PS12\ \ \ \ 0.9577}\\
+\exac{W\ \ \ Fe AMP\ \ PS32\ \ \ \ 0.2729}\\
+\ssk
+In this second example the cards describe a 4 electron
+wave-function for Fe. It is made up of two
+terms named PS12 and PS32. \bd{W Fe ROTN}
+and \cds{W Fe RADF} would also be needed
+to define the function completely.}
+\cdr {The input of \cds{W} is directed by various setting up routines such
+as \stlink{w}{WAVSET}, MSETUP (not in main Library) and \stlink{p}{PFSET}\ or 
+by main programs
+ such as \mlink{forfac}{FORFAC}.
+These call \stlink{i}{INPUTW}\ to read the \cds{W} and subsequently special routines
+to interpret the data on each type of card: \stlink{m}{MOLORB}\ for FUNC,
+\stlink{r}{RADFUN}\ for RADF and \stlink{r}{READRT}\ for ROTN.}
+\cdn {\bd{W ROTN} and \cds{W RADF} are also used 
+to define orientations and form-factors used in multipole calculations.}
+\cardend\newpage
+\newcard{7}{X}{Left free for the user}
+%\begin{htmlonly}\section{\cardhead{X}{Left free for the user}}
+%\end{htmlonly}
+ %
+No routine in the Library assumes that it will find anything on an \cd{X},
+so the user is free to put any information he wishes there.  To
+read and interpret information from a set of \cds{X}, see the
+specifications of:
+\ssk
+\begin{varindent} {1.5 cm}
+\exac{SUBROUTINE CARDIN} \ \ read requested card, A80, to COMMON /SCRACH/\\
+\exac{SUBROUTINE RDINTG} \ \ read integer\\
+\exac{SUBROUTINE RDREAL} \ \ read real number\\
+\exac{SUBROUTINE RDWORD} \ \ read word\\
+\exac{SUBROUTINE RDWRDS} \ \ read all remaining words on a card\\
+\exac{SUBROUTINE RDNUMS} \ \ read all remaining numbers on a card.
+\end{varindent}\p 
+In the COMMON /CARDRC/ INREAD(24) holds the position in the temporary
+file (unit IO10) at which \cds{X} start, if there are any, and
+ICDNO(24) holds the number of \cds{X} read by PREFIN.
+\p 
+So, having declared COMMON /CARDRC/ and COMMON /SCRACH/ at the start, the 
+sequence:
+\ssk
+\begin{verbatim}
+      N=ICDNO(24)
+      IF (N .GT. 0) THEN
+      ID=INREAD(24)
+      DO 1 I=1,N
+      CALL CARDIN(ID)
+      ID=ID+NYZ
+      ........
+\end{verbatim}
+\begin{varindent}{1 cm}\ital{ a piece of code to extract your information 
+off the card}\end{varindent}
+\ssk\begin{verbatim}
+      ........
+   1  CONTINUE
+      ENDIF
+\end{verbatim}
+\ssk\begin{varindent}{1 cm}\ital{etc}\end{varindent}
+\ssk
+will read and interpret a set of \cds{X}.
+\p 
+If the user wants to use \cds{X} for more elaborate input, in the same
+way, for example, as \bd{L} or \cds{M}, he could use
+FUNCTION ONCARD which looks for an \cd{X} with a given \cwcomma, or SUBROUTINE
+FINDCD which will read the next \cd{X} with a given \cwcomma.\p
+\cdn{The instruction \exac{ID=ID+NYZ} rather than \exac{ID=ID+1} is
+needed to skip over any \bd{Y} or \cds{Z} which may be interleaved with the
+\cds{X}.}
+\cardend\newpage
+\newcard{6}{Y and Z}{Comments}
+%\begin{htmlonly}\section{\cardhead{Y and Z}{Comments}}
+%\end{htmlonly}
+ %
+A card starting \bd{Y} is copied to the printer output as soon as it is
+read by PREFIN, then ignored.  It can be used to put comments, 
+which the user wishes to appear on his output, into
+the Crystal Data. 
+\cde{
+\exac{Y\ \ RUN WITH LOW FUDGE FACTORS ON ALL TEMPERATURE FACTORS:}}
+\p 
+A card starting \bd{Z} is ignored on input, and so can be used to
+intersperse comments in the Crystal Data.
+\cde {
+\exac{Z Note this atomic position not as in literature}}
+\p
+\cdn{Most Crystal Data cards must appear in blocks, with all cards of the 
+same letter together, but  \bd{Y} and \cds{Z} may appear anywhere.}
+\cardend
+\finchapter
+%\end{document}

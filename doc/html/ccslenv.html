@@ -1,0 +1,55 @@
+<HTML>
+<HEAD>
+<title>CCSL tools</title>
+<LINK REL="STYLESHEET" HREF="ccslweb.css">
+</HEAD>
+<BODY class = "interior">
+<spacer type = vertical size = 20>
+<h1>CCSL environment variables </h1>
+<table border=1 cellspacing=3 cellpadding = 3>
+<caption>CCSL environment variables with their usual values defined relative to
+the CCSL root directory $CCSL</caption>
+<tr><th>Description</th><th>Variable</th><th>Usual location</th></tr>
+<tr><td>Root directory for documentation</td>
+<td>CCSL_DOC </td><td> $CCSL/doc</td></tr>
+<tr><td>Directory containing executable programs</td>
+<td>CCSL_EXE </td><td> $CCSL/exe</td></tr>
+<tr><td>Graphics directory</td>
+<td>CCSL_GRAF </td><td> $CCSL/graf</td></tr>
+<tr><td>Directory containing linkable libraries</td>
+<td>CCSL_LIB </td><td> $CCSL/lib</td></tr>
+<tr><td>Directory in which to place linkable libraries</td>
+<td>CCSL_LIBDEST </td><td> $CCSL/lib</td></tr>
+<tr><td>Directory for files defining system choices</td>
+<td>CCSL_OPT </td><td> $CCSL/options</td></tr>
+<tr><td>Directory containing perl scripts</td>
+<td>CCSL_PERL </td><td> $CCSL/perl</td></tr>
+<tr><td>Directory for Fortran source and master files</td>
+<td> CCSL_SRC</td><td> $CCSL/source</td></tr>
+<tr><td>Directory containing TeX files</td>
+<td>CCSL_TEX </td><td> $CCSL/doc/texes</td></tr>
+<tr><td>Main library file</td>
+<td>CCSLIB </td><td> $CCSL/lib/libmk4.a</td></tr>
+<tr><td>	Directory from which to read Fortrans source files</td>
+<td>CCSL_FSRC </td><td> unset </td></tr>
+<tr><td>	Directory in which to place Fortran source files</td>
+<td>CCSL_FDEST</td><td>unset</td></tr>
+</table>
+<p>
+If the system is installed using the <b>Install</b> script a file "environment"
+will be created in the CCSL root directory which contains commands to set these
+CCSL environment variables.
+"Sourcing" this file will set them and report what it set.
+The CCSL base directory should be set as the environment variable $CCSL
+in the user's .login file eg :
+<pre>
+# Set CCSL things
+setenv CCSL /hosts/simoun/users/brown/CCSL/use
+source $CCSL/environment
+</pre>
+<ADDRESS>
+P.J. Brown - Institut Laue Langevin, Grenoble,  FRANCE. 
+<script type="text/javascript" src="./mailing.js">  </script>
+</ADDRESS>
+</BODY>
+</HTML>

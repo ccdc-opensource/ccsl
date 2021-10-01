@@ -1,0 +1,236 @@
+%\documentclass[onecolumn,twoside,11pt,a4paper]{report}
+%\usepackage{CCSLman,html,makeidx,color,ifthen,bm}
+%\begin{document}
+%\chapter{USING THE SYSTEM}
+%\begin{htmlonly}
+%\usepackage{CCSLman,html,makeidx,color,ifthen,bm}
+%\input{chap7.ptr}
+%\end{htmlonly}
+%\internal{c2}
+%\internal{c3}
+%\internal{c4}
+%\internal{c5}
+%\internal{c6}
+%\internal{c1}
+\startdocument
+\label{chap:7}
+\markboth{Using the System}{}
+We assume first that the user has access to a computer or network
+on which CCSL has already been compiled and made into a Library.\p
+Any discussion of the details of running jobs must naturally refer to
+specific items such as file names, which differ on different computers.
+Many current users of CCSL use  LINUX or UNIX
+and the examples in general refer to them. Users of other operating
+systems such as WINDOWS or DOS should take them only as a rough guide. 
+\section{Running \emph{Black Box} Jobs}\markright{Running \emph{Black Box} Jobs}
+A standard main program such as \mlink{arrnge}{ARRNGE}\ (which groups together the
+results of single crystal diffraction measurements) will have been
+precompiled and linked using CCSL as a search Library.  An executable file
+such as ARRNGE.EXE should therefore exist.
+The user wishing to run this as it stands, as a \ital{black box}, first puts
+his Crystal Data into some file, named, for example, TESTAR.CRY.
+\pn
+He would also have files containing data to arrange, called, 
+say, \mbox{refln2.c5}, \mbox{refln1.c5}
+and \mbox{refln3.c5}, and a list of the numbers of reflections to 
+reject in, say, \mbox{badref.rej}.\p
+The following sequence would run the program.
+The dialogue in italics is to be typed by the user.\p
+\begin{list} {} {\setlength{\labelwidth}{25mm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{5mm}}
+\item\texttt{2\% arrnge}
+\item\exac{Give name of Crystal data file  }\ital{TESTAR}\\
+\item\exac{Give name of file containing rejection list   }\ital{badref}\\
+\item\exac{Give name of reflection file   }\ital{refln1.c5}\\
+\item\exac{Give name of next reflection file (or c/r to end)  }\ital{refln2.c5}\\
+\item\exac{Give name of next reflection file (or c/r to end)  }\ital{refln3.c5}\\
+\item\exac{Give name of next reflection file (or c/r to end)}\\
+\ms 
+\item\exac{Sort started   . . .   Sorted 1485 records}\\ 
+\ms 
+\item\exac{Give name for output file of sorted reflections   }\ital{arrout}\ssp
+ \exac{3\%}
+\end{list} 
+ 
+In general, the user supplies file names on request.  The file extension
+for Crystal Data files defaults to .cry or .ccl . General data 
+files have default extension .dat although some default extensions are
+associated with particular data types. (For example, for \mbox{arrnge,} .fli is
+the default for DTYP=1, meaning
+polarised neutron flipping ratios). The extension .c5 is not one of
+these, hence the .c5 file
+extensions above were typed explicitly.  Exactly which defaults have been
+used is under the control of the writer of the main program, but
+routine \stlink{n}{NOPFIL}\ should in general allow the user to try again if he types
+a file name it cannot handle.\p
+\section{The \emph{Listing}\ File}\markright{The \emph{Listing}\ File}
+Every job will open one file which is intended to be read by a human.
+When using the ILL CCSL options this file is given the name of the 
+main program and extension .lis. On a UNIX system there may
+be an extra line at the start of the program dialogue saying:\\
+\exac{Existing file arrnge.lis will be overwritten OK? (Y/N) :}\\
+This will occur if \exac{arrnge} has been run before in the same directory. 
+It reminds the user that UNIX will overwrite the listing file from 
+the previous run and that, if this is not what is wanted, he should exit 
+from the program and save the listing with a different name. 
+With the RAL options, the user will 
+be asked to name the listing file, and if he responds by typing RETURN the file-name 
+will default as above.  So at RAL, there will be an extra line at the start of
+the dialogue saying :\\
+\exac{Give name for Output  }
+\p
+The listing file, which is on logical unit LPT,
+is opened by a call of OPNFIL, from SUBROUTINE \stlink{i}{INITIL}, usually from
+the call of \stlink{p}{PREFIN}\ which occurs near the start of most CCSL programs.  If
+the user wishes to open a specific unit number, say 8, he must set
+\exac{LPT=8} before the \exac{CALL~PREFIN}.
+\pn
+If he does not do this OPNFIL (via NOPFIL) will choose its own unit number.
+%
+\section{Running New or Changed Programs}
+\markright{Running New or Changed Programs}
+If a new main program is written, or if new versions of CCSL routines
+are made, the progam must be recompiled and relinked.
+Suppose a new program prog.f has been made which calls the new or modified
+subroutines su=b1 and sub2
+For LINUX/UNIX a sample  Makefile could be :\pn
+\begin{verbatim} 
+FC=gfortran -Wall -m32
+FFLAGS= -g -Wall -m32
+CCLIB=$(CCSLIB)
+PREQ=sub1.o sub2.o 
+prog: prog.o  $(PREQ) $(CCLIB)
+	$(FC)  prog.o  $(PREQ)  $(CCLIB) -o prog
+\end{verbatim}
+where CCLIB is an environment variable set to the file path to the  CCSL Object Library 
+(libmk4.a) file.
+\ssk
+ Graphics Libraries may also need to be included in the link step.
+\pn 
+% 
+\section{Use of Scratch COMMON}\markright{Use of Scratch COMMON}
+Two areas of labelled scratch COMMON are used in CCSL routines,
+and can with certain restrictions be made use of by user programs;
+they are called /SCRAT/ and /SCRACH/.\p
+COMMON /SCRAT/ has a maximum length
+within CCSL of 10201 items (integers or real numbers).\p
+COMMON /SCRACH/ is a character buffer to
+contain at least 80 characters, and usually 200.\p
+It is used extensively by the card reading routines.
+The CHARACTER *80 item ICARD in COMMMON /SCRACH/ is used as
+the buffer in which the routine \stlink{c}{CARDIN}\ places a character string from the
+Crystal Data, and where all the CCSL free format subroutines expect to find it. 
+It is this character
+string which is interpreted by the various INPUTx routines, and which
+could be interpreted by user programs. The subroutine \stlink{a}{ASK}\ which reads a line of
+input from the terminal puts it into this common area.\p 
+The character string NAMFIL, normally of length 100, is used to store complete
+file paths. If these are very long the symbolic variable name FNAM may need
+to be made greater than 100.
+In general it must not be assumed that either of the scratch common
+areas will be unchanged by CCSL routines;  the inexperienced user should 
+avoid them.
+\section{Main Programs Currently Available}
+\markright{Main Programs Currently Available}
+A list follows of 
+\iftexforht{\href{../appenx/maiapx.html}{CCSL main programs}}
+{CCSL main programs}%
+\ currently used at ILL, and available in the 
+Master File. They have been classified into the same
+\htmlref{groups}{chap2:groups} as the subroutines
+in chapter 2. The existing programs reflect, rather strongly, the interests of 
+the present
+author. Many of them have been written specially to deal with the reduction
+and evaluation of data obtained using the single crystal diffractometers at ILL.
+\iftexforht{href{../appenx/appendix.html\#appd}{Appendix D}}{Appendix D}
+  describes these programs and 
+how to use them in more detail. 
+\htmlonly{An% 
+\hyperref{../appenx/maialfa.html}{alphabetically ordered index}
+is also given.}\\[1ex]
+\latexonly{\begin{center}{\bbold Index of Main Programs}\\
+The page numbers given refer to AppendixD\\[1ex]\end{center}
+\input {maiclasslist}%
+}%
+\ms 
+More main programs are being added all the time.  Although some of these
+are for applications specific to their authors, they may well help the
+new user tackle some related problem.\p
+The user should should be able to obtain the totality of CCSL code
+(Library routines and main programs) in the form of
+FORTRAN source files. He may find it useful to work with printouts of these files, but should
+be cautious about printing out the whole Library, which is long.\\[1cm] 
+\subsection{Test Data}
+For most of the MAIN programs in general use, data are available against which
+a new compilation may be tested. They  may be downloaded individually,  or as 
+a single compressed archive testdata.tar.gz
+from the \href{http://forge.epn-campus.eu/projects/sxtalsoft/repository/show/CCSL/testdata}
+{epn-campus repository}
+.\\ The files are arranged in
+sub-directories with the same name as that of the programs to which they 
+refer. For  each set of test data (eg \exac{xxx}) There is normally a crystal
+data file  \exac{xxx.cry} and perhaps an input data file \exac{xxx.ext} (where
+\exac{ext} may be a default extension expected by the program). There will
+always be a listing file \exac{pname\_xxx.lis},  where \exac{pname} is the
+program name. There may be other output files named \exac{xxx.yyy} and
+identifable from the extension \exac{yyy}. For example the sflsq (structure
+factor least squares directory contains the files for structure factor
+refinement of LiCoPO4
+\begin{description}
+\item      [\exac{lcp.cry} ] the crystal data file 
+\item      [\exac{lcp.sfe}]  the observations file containing the extinction
+                    constants (calculated by EXTCAL)
+\item      [ \exac{sflsq\_lcp.lis}]        the output listing
+\item      [\exac{lcp.new} ]  a crystal data file containing the 
+ refined parameters
+For each set of data there is a file \exac{\_xxx} (or simply \exac{r} if
+there is only one test data set for the program) The program can be
+tested by running it so that it takes its input from the \_xxx file eg
+with the command \exac{pname < \_xxx}.
+\p
+There is an executable  perl script "CCSLtests" in the CCS\_PERL
+directory which will run all the tests specified in the file tes\_list
+and report on the results. The \exac{\_xxx} response files for graphics
+programs may need to be modified to reflect local options. \end{description}
+
+\section{Conditions of Use}%
+\subsection{Disclaimer}%
+This software is distributed in the hope that it will be useful
+but \emph{without any warranty}. The author(s) do not accept responsibility 
+to anyone for the consequences of using it or for whether it serves 
+any particular purpose or works at all.  
+\\ 
+\subsection{Copying}%
+Use and copying of this software and the preparation of derivative
+works based on it are permitted, so long as the following
+conditions are met:
+\begin{itemize}
+\item 
+The copyright notice and this entire notice are included intact
+and prominently carried on all copies and supporting documentation.
+\item 
+No fees or compensation are charged for use, copies, or
+access to this software. You may charge a nominal
+distribution fee for the physical act of transferring a
+copy, but you may not charge for the program itself. 
+\item 
+If you modify this software, you must cause the modified
+file(s) to carry notices describing the changes, who made 
+the changes, and the date
+of those changes.
+\end{itemize} 
+\subsection{Authors}
+The CCSL library was written by J.C. Matthewman and P.J. Brown with
+contributions from W.I.F. David, J.B. Forsyth J.H. Matthewman, and J.P. Wright.\\[2ex] %
+Copyright \copyright 1999--2001. All rights reserved.
+\\[3ex]
+\latexonly{\begin{tabular}{lllll}
+\qquad&P.J. Brown  &\qquad&Institut Laue Langevin&\qquad e-mail: brownj(At)ill.fr\\
+&\today &&38042 Grenoble Cedex\\
+&&&{France.}\\
+\end{tabular}
+}%\end{latexonly}                                 
+\finchapter
+%S\end{document}
+

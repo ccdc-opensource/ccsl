@@ -1,0 +1,78 @@
+ ***** CCSL Documentation DISTRIBUTED FILES *****
+
+ *****The CCSL documentation an only be installed if the  *****T
+             ***** CCSL is already present *****
+
+The compressed archive ccsldoc.tar.gz should be decompressed
+and the constituent files unpacked, with the command
+  tar -zxf ccsldoc.tar.gz
+The files should be unpacked into a directory which is NOT the final
+target for the documentation.
+
+
+0README               This file
+ccsl.cfg			 Configuration file for TeX4ht
+CCSLapa.sty          The LaTeX style file for the appendices
+CCSLman.sty          The LaTeX style file for the MK4 manual
+Makefile.doc         Makefile for the MK4 manual and all appendices
+appene.tex           TeX source for appendix E
+chap1.tex            Chapter 1 of the mk4 manual
+chap2.tex            Chapter 2 of the mk4 manual
+chap3.tex            Chapter 3 of the mk4 manual
+chap4.tex            Chapter 4 of the mk4 manual
+chap5.tex            Chapter 5 of the mk4 manual
+chap6.tex            Chapter 6 of the mk4 manual
+chap7.tex            Chapter 7 of the mk4 manual
+doc3labels.pl        Perl script to insert card references in Appendices A and D
+ffacts.doc           directory containing the form-factor tables
+html.doc             directory containing html files
+icons.doc            directory containing icons used by html files
+CCSLman.tex          The Latex root file for the MK4 manual
+mkindex.pl           Perl script to make the indexes to the apendices
+orfeus.pl            Perl script to make Appendices A, C and D from the
+					 CCSL source files
+refile_html.pl		 perl script to re-arrange files made by TeX4ht
+					 in the proper directories.
+
+ ***** INSTALLING THESE  FILES (BOURNE shell) *****
+Edit the Install script so that the first line gives the location of Perl
+on your system.
+
+Ensure that the environment variable CCSL is set to the directory in which
+the the system is installed. Then do
+
+./Install  $CCSL
+
+Running the Install script will install the documentation in
+a directory structure rooted at the directory $CCSL/DOC.
+If no argument is are given to the Install script the root directory
+will be obtained interactively.
+
+After installation the root directory $CCSL should have aquired the subdirectory
+doc with  further subdirectories appenx,ffacts, html, icons, mk4man, pdf and texes..
+
+ ***** QUICK BUILD *****
+
+cd $CCSL
+source environment
+cd doc
+make all
+
+the "source environment" command sets the CCSL environment variable CCSL_DOC
+(added to environment by the install script) approriately.
+Assuming LaTeX and TeX4ht are installed on your system
+The "make all" command should build the CCSL documentation in both the
+htlm and pdf formats
+When complete the following postscript files should be in  $CCSL_DOC/pdfs
+	CCSLman.pdf
+    apendixD.pdf
+	appendixA.pdf
+	appendixC.pdf
+	appendixE.pdf
+The link to the html version is $CCSL_DOCS/htlm/ccsldoc.htm.
+
+Once all the documentation has been successfully compiled, unnecessary work
+files can be removed by executing "make clean"
+The complete set of files created by "make all" can be removed by
+executing "make clear".
+

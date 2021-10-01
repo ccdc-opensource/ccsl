@@ -1,0 +1,285 @@
+%% This is file `CCSLman.sty',
+
+\NeedsTeXFormat{LaTeX2e}
+
+\ProvidesPackage{CCSLman}
+
+\newboolean{ccslman}
+\setboolean{ccslman}{true}
+
+\renewcommand{\section}[1]{\markright{#1}%
+				\@startsection {section}{1}{\z@}%
+                {-3.5ex \@plus -1ex \@minus -.2ex}%
+                {2.3ex \@plus.2ex}%
+                {\normalfont\Large\bfseries} {#1}}%
+%
+%
+\def\ps@newheadings{%    
+    \def\@oddfoot{\hfil\thepage\hfil}\def\@evenfoot{\hfil\thepage\hfil}%
+    \def\@evenhead{\slshape Chapter\ \thechapter\hfil\slshape\leftmark}%
+    \def\@oddhead{{\slshape\rightmark}\hfil\slshape Section\ 
+    \thesection}%
+    \let\@mkboth\@gobbletwo
+    \let\sectionmark\@gobble
+    \let\subsectionmark\@gobble
+    }
+%
+\def\ps@appheadings{%    
+    \def\@oddfoot{\hfil\thepage\hfil}\def\@evenfoot{\hfil\thepage\hfil}%
+    \def\@evenhead{\slshape CCSL manual\hfil\slshape\leftmark}%
+    \let\@oddhead\@evenhead
+    \let\@mkboth\@gobbletwo
+    \let\sectionmark\@gobble
+    \let\subsectionmark\@gobble
+    }
+%
+% for setting version date
+\setlength{\oddsidemargin}{10mm}
+\setlength{\itemindent}{0pt}
+\setlength{\parsep}{0pt}
+\setlength{\itemsep}{0pt}
+
+\newcommand{\bold}{\bfseries}
+\newcommand{\bbold}{\large\bfseries}
+\newcommand{\bbig}{\Large\bfseries}
+\newcommand{\tts}{\small\ttfamily}
+\newcommand{\ital}[1]{\textit{#1}}
+% EMBOLDEN A PHRASE
+\newcommand{\bd}[1]{{\bold#1}}
+\newcommand{\bi}[1]{{\bfmath#1}}
+
+\setlength{\abovedisplayskip}{4pt}
+\setlength{\belowdisplayskip}{0pt}
+\setlength{\parindent}{0pt}
+\newcommand{\weeskip}{\vspace 2pt}
+\newcommand{\rr}{\raggedright}
+\newcommand{\pb}{\newpage}
+\newcommand{\supsc}[1]{$^{#1}$}
+\newcommand{\subsc}[1]{$_{#1}$}
+\newcommand{\degrees}{$^\circ$}
+%
+% LOGOS AND STUFF
+%CCSL logo
+\newsavebox{\logobox}
+\savebox{\logobox}{\Huge\raisebox{-.1ex}{C\hspace{-.85em}
+\raisebox {.45ex}{\normalsize C}\hspace{-.4em}
+\raisebox{-.8ex}{S\hspace{-.75em}
+\raisebox{.4ex}{\normalsize L}}}}
+\newcommand{\logo}{\usebox{\logobox}}
+\newsavebox{\logosbox}
+\savebox{\logosbox}{\Large \raisebox{.2ex}{C\hspace{-.85em}
+\raisebox {.45ex}{\tiny C}\hspace{-.45em}
+\raisebox{-.8ex}{S\hspace{-.75em}
+\raisebox{.4ex}{\tiny L}}}}
+\newcommand{\logos}{\usebox{\logosbox}}
+\newcommand{\threelog}{\begin{center}\logos\quad\logo\quad\logos\end{center}}
+% A TWIDDLY BIT TO SHOW THE END OF A CARD DEFINITION:
+\newcommand{\cardend}{\iftexforht{}{\vspace{4ex}\twiddles}}
+\newcommand{\twiddle}{\S\hs\S\hs{$\mathbf\infty$}\hs{$\mathbf\infty$}
+            \hs\S\hs\S}
+\newcommand{\twiddles}{\makebox[\textwidth]{\hfill\twiddle\hfill}\\}
+%DOUBLY FRAMED BOX WITH CENTRED CONTENTS
+\newcommand{\dbox}[1]{\framebox[12cm]{\vspace*{2mm}\noindent
+            \framebox{\parbox{11.5cm}{\begin{center}#1\end{center}}}}}
+% 
+%
+% SPECIAL DEFINITIONS USED IN MANUAL
+%USEFUL LENGTHS
+\newlength{\vip}
+\newlength{\currentwidth}
+\setlength{\currentwidth}{\textwidth}
+\newlength{\labelindent}
+\newlength{\itemwidth}
+\newlength{\medskiplength}
+\newlength{\smallskiplength}
+\newlength{\bigskiplength}
+\newlength{\minusspace}
+\settowidth{\minusspace}{$-$}
+\newcommand{\msp}{\hspace{\minusspace}}
+%
+%SPACE SKIPPING
+\setlength{\medskiplength}{1ex}
+\setlength{\smallskiplength}{0.5ex}
+\setlength{\bigskiplength}{2ex}
+%
+\newcommand{\ssk}{\vspace {0.2ex}}
+\newcommand{\ms}{\vspace {1ex}}
+\newcommand{\ssp}{\\ [0.2ex]}
+\newcommand{\bgs}{\vspace {2ex}}
+\newcommand{\hs}{\hspace {0.5 em}}
+%
+%PARAGRAPH BREAKING            
+% PARAGRAPH BREAK WITH REQUEST **NOT** TO BREAK PAGE HERE:
+\newcommand\pn{\nopagebreak[3]\par}
+% PARAGRAPH BREAK WITH SUGGESTION TO BREAK PAGE HERE IF CONVENIENT:
+\newcommand\p{\pagebreak[2]\par\vspace{1ex}}
+%
+%FORMATTING COMMANDS
+% CENTRE A LINE
+\newcommand{\cl}[1]{\begin{center} #1\end{center}}
+%HANGING INDENTATION
+% SET THE HANGING INDENT
+\newcommand{\shgdlist}[2][0pt]{\setlength{\labelindent}{#1}
+                             \setlength{\labelwidth}{#2}
+                             \setlength{\itemwidth}{\currentwidth}
+                             \addtolength{\itemwidth}{-\labelindent}
+                             \addtolength{\itemwidth}{-\labelwidth}
+                             \addtolength{\itemwidth}{-1em}}
+%DO HANGING INDENT
+\newcommand{\hgd}[2]{\hspace*{\labelindent}\makebox[\labelwidth][l]{#1}
+            \parbox[t]{\itemwidth}{#2}\\[1ex]}
+% INDENTED MATERIAL            
+\newenvironment{varindent}[1]
+                         {\setlength{\vip}{-\parskip}
+                          \addtolength{\currentwidth} {-#1}
+                          \list{}{\listparindent 0em%
+                                 \topsep \vip%
+                                 \leftmargin #1%
+                                 \itemindent    \listparindent
+                                 \parsep        \z@ \@plus\p@}%
+                                 \item\relax}
+                         {\endlist}
+          
+% THE START OF A CARD DEFINITION:
+\newcommand{\newcard}[3]{\iftexforht{\section{ #2 cards:\hspace{2em} #3}
+	\hyperdef{carddef}{card:#2}{}}{\cl{\framebox[#1 cm]{\vspace*{1ex}
+            \parbox{#1 cm}{\cl{{\bbig#2 cards}\\[1ex]#3\\[1ex]}}}}}
+           \markboth{#2 cards}{#3}	\hypertarget{card:#2}{}		
+} 
+% SUB-SECTIONS OF THE CARD DESCRIPTIONS: EACH STARTS WITH           
+% A BOLD SUB-HEADING FOLLOWED BY INDENTED MATERIAL:
+\newcommand{\indentafterbold}[2]{\vspace{\medskiplength}
+                                 \bd{\nopagebreak#1}:
+                                 \begin{varindent}{1 cm} #2
+                                 \end{varindent}\p}%
+%
+\newcommand{\cdir}[1]{\indentafterbold {ITEMS READ}{#1}}%
+\newcommand{\cdam}[1]{\indentafterbold {ASSUMPTIONS MADE}{#1}}%
+\newcommand{\cdid}[1]{\indentafterbold {ITEMS DEMANDED}{#1}}%
+\newcommand{\cdd}[1]{\indentafterbold {DETAILS}{#1}}%
+\newcommand{\cdr}[1]{\indentafterbold {ROUTINES WHICH READ THE CARDS}{#1}}%
+\newcommand{\cdrf}[1]{\indentafterbold {REFERENCE}{#1}}%
+\newcommand{\cdcd}[1]{\indentafterbold {CARDS DEMANDED}{#1}}%
+\newcommand{\cdn}[1]{\indentafterbold {NOTE}{#1}}
+\newcommand{\cde}[1]{\indentafterbold {EXAMPLE}{#1}}
+\newcommand{\cdes}[1]{\indentafterbold {EXAMPLES}{#1}}
+\newcommand{\cdtl}[1]{\indentafterbold {TELESCOPING OF SIMPLE CARDS}{#1}}
+\newcommand{\cdwr}[1]{\indentafterbold {WARNING}{#1}}
+%
+\def\cddf{\bgs\bd{DATA FOLLOWING ALLOWED CCSL WORDS:}\p}
+%
+% SUB-SUB-HEADINGS:
+% This one defined so that the space between the WORD and "Data" is small:
+\newcommand{\cdsir}[2]{\bd{#1}\\ 
+                       \hspace*{5mm}\nopagebreak\bd{Data}:
+                       \begin{varindent}{1 cm}#2
+                       \end{varindent}\p}
+\newcommand{\indentaftersub}[2]{\vspace{\medskiplength}\hspace*{5mm}\bd{\nopagebreak#1}:
+            \begin{varindent}{1cm}#2\end{varindent}\p}            
+\newcommand{\cdsd}[1]{\indentaftersub {Details}{#1}}
+\newcommand{\cdsns}[1]{\indentaftersub {Notes}{#1}}
+\newcommand{\cdsn}[1]{\indentaftersub {Note}{#1}}
+\newcommand{\cdse}[1]{\indentaftersub {Example}{#1}}
+\newcommand{\cdsdt}[1]{\indentaftersub {Data}{#1}}
+\newcommand{\cdsam}[1]{\indentaftersub {Assumptions made}{#1}}
+%
+% SHORTHANDS FOR VARIOUS COMMONLY USED PHRASES:
+\newcommand{\cd}[1]{\bd{#1}\ card}
+\newcommand{\cds}[1]{\bd{#1}\ cards}
+\newcommand{\cw}{\ital{CCSL-word}\ }
+\newcommand{\cwcomma}{\ital{CCSL-word}}
+\newcommand{\cws}{\ital{CCSL-words} }
+\newcommand{\cwn}{\ital{CCSL-word/number pair}\ }
+\newcommand{\cwns}{\ital{CCSL-word/number pairs}\ }
+\newcommand{\cwnscomma}{\ital{CCSL-word/number pairs}}
+\newcommand{\atlab}{\ital{atom-label}\ }
+\newcommand{\atlabs}{\ital{atom-labels}\ }
+\newcommand{\scat}{\ital{scattering-factor-label}\ }
+\newcommand{\scatcomma}{\ital{scattering-factor-label}}
+\newcommand{\scats}{\ital{scattering-factor-labels} }
+\newcommand{\word}{\ital{word}\ }
+\newcommand{\words}{\ital{words}\ }
+\newcommand{\cclabel}{\ital{label}\ }
+%
+% FOR A PIECE OF TEXT WITHIN A SENTENCE (THEREFORE NO NEWLINE), IN TYPEWRITER
+% FONT WITH SPACES NOT ALTERED, SO SUITABLE FOR TEXT WHICH WENT INTO OR
+% CAME OUT OF A COMPUTER:
+\newcommand{\exac}[1]{{\ttfamily #1\ }}
+%
+%COMMANDS USED TO WRITE THE CLASSIFIED LIST OF ROUTINES
+\newcommand{\classheading}[2]{\cl{\bbold#1~~#2}\\
+The page numbers given refer to AppendixA\pn}
+\newcommand{\typeheading}[2]{{\bold#1\hspace{10mm}#2}\pn\shgdlist{22mm}}
+\newcommand{\routinedescr}[2]{\hgd{#1}{#2}}
+%
+%NEW SECTION
+\newcommand{\hd}[1]{\section{#1}\markright{#1}}
+\newcommand{\chap}[2]{\chapter{#2}\markboth{#1}{}}
+%END OF CHAPTER
+\newcommand{\finchapter}{\iftexforht{}{
+\ifthenelse{\isodd{\value{page}}}
+{\newpage{\ }\vfill\threelog\vfill}{}\newpage}}
+%
+%SPECIAL SYMBOLS USED IN CHAPTER 6
+\newcommand{\pv}{\ensuremath{{\bm \tau}}}
+\newcommand{\kv}{\mbox{$\bf \tau$}}
+\newcommand{\lat}{\mbox{$\bf l$}}
+\newcommand{\rl}{\mbox{$\bf g$}}
+\newcommand{\rv}{\mbox{$\bf r$}}
+\newcommand{\Mk}{\mbox{$\mathbf{M(\q)}$}}
+\newcommand{\Mv}{\ensuremath{{\bf M}}}
+\newcommand{\q}{k}
+\newcommand{\qv}{\ensuremath{{\bf q}}}
+\newcommand{\sv}{\mbox{$\bf k$}}
+\newcommand{\Qk}{\mbox{$\mathbf{Q(\q)}$}}
+\newcommand{\Qv}{\mbox{$\mathbf{Q_{\perp}}$}}
+\newcommand{\Sv}{\mbox{${\bf S}$}}
+%
+% SPECIAL DEFINITIONS USED IN APPENDICES
+\newcommand{\listitem}[4][]{\item[#1\hfill] #2\dotfill{#3}} 
+\newenvironment{catslist}[2]{{\bold #1 #2}
+                              \begin{list}{}{%\setlength{\rightmargin1}{1em}
+                                        \setlength{\labelwidth}{2em}                                        
+                                        \addtolength{\itemsep}{0ex}
+                                        \setlength{\leftmargin1}{\labelwidth}
+                                        \addtolength{\leftmargin}{\labelsep}}}
+                          {\end{list}} 
+\newenvironment{typeslist}[2]{\item{\bold #1} {\emph{#2}}
+                              \begin{list}{}{%\setlength{\rightmargin1}{1em}
+                                        \setlength{\labelwidth}{2em}                                        
+                                        \addtolength{\itemsep}{0ex}
+                                        \setlength{\leftmargin1}{\labelwidth}
+                                        \addtolength{\leftmargin}{\labelsep}}}
+                          {\end{list}} 
+
+\newenvironment{subrlist}{\item{\vspace{-1ex}\emph{Attached Subroutines}}
+                              \begin{list}{}{%\setlength{\rightmargin1}{1em}
+                                        \setlength{\labelwidth}{2em}                                        
+                                        \addtolength{\itemsep}{0ex}
+                                        \setlength{\leftmargin1}{\labelwidth}
+                                        \addtolength{\leftmargin}{\labelsep}
+                                        \addtolength{\topsep}{-2ex}}}
+                          {\end{list}} 
+%SYMBOLS TO BE REUSEABLE IMAGES
+\newcommand{\sthl}{\mbox{$\sin\theta/\lambda$}}
+%
+\newcommand{\internal}[1]{}
+\newcommand{\startdocument}{}
+\newcommand{\latexonly}[1]{\iftexforht{}{#1}}
+\newcommand{\htmlonly}[1]{\iftexforht{#1}{\relax}}
+%New commands for the hypertex version
+%link to subroutine descriotions
+\newcommand{\slink}[2]{\iftexforht{\href{../appenx/libsec_#1.html\##2}{#2}}{#2}}
+\newcommand{\stlink}[2]{\iftexforht{\href{../appenx/libsec_#1.html\##2}{#2}}{\hyperlink{#2}{#2}}}
+%link to main programs
+\newcommand{\applink}[3]{\href{#2\##3}{#1}}
+\newcommand{\mlink}[2]{\iftexforht{{\href{../appenx/#1.html}{#2}}}{\hyperlink{#1}{#2}}}
+\newcommand{\htlink}[4]{\iftexforht{\hyperlink{#3}{#1}}{\hyperlink{#3}{#2\pageref{#4}}}}
+\newcommand{\htmllink}[2]{\hyperref{\ref{#2}}{#1}}
+\newcommand{\htmladdnormallink}[2]{\iftexforht{\hyperref{\ref{#2}}{#1}}{#1}}
+\newcommand{\htmlref}[2]{\hyperref{#2}{#1}}
+\newcommand{\cardhead}[2]{\Tg<h1>\Tg<a>name="\thesection"\Tg<\a>\Tg<a>\name="card:#1"\Tg</a>
+\Tg<br>\Tg<b>\Tg<big>#1\Tg<\big>\Tg<\b>#2\Tg<\h1>}
+%\endinput
+%%
+%% End of file `CCSLman.sty'.

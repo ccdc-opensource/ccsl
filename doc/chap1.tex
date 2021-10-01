@@ -1,0 +1,522 @@
+%\setcounter{page}{0}
+%\setcounter{chapter}{0}
+%\chapter{INTRODUCTION TO CCSL}
+%\begin{htmlonly}
+%\usepackage{CCSLman,html,makeidx,color,ifthen,bm}
+%\input{chap1.ptr}
+%\end{htmlonly}
+%\internal{c2}
+%\internal{c3}
+%\internal{c4}
+%\internal{c5}
+%\internal{c6}
+%\internal{c7}
+%\startdocument
+\label{chap:1}%\hyperlink{chap:1}
+\markboth{Introduction to CCSL}{}
+This Manual describes the Cambridge Crystallography
+Subroutine Library  (``CCSL").
+It describes the material in the Master File of the program and is intended
+for distribution to users at sites where CCSL is installed.
+\pn 
+\section{Content of the Manual}\markright{Content of the Manual} 
+The Manual is intended both as an introduction to the Library for new
+users and as an \ital{aide memoire} for more experienced users.
+Some familiarity with the use of FORTRAN is assumed, including the use of a
+computer to make and edit files and to compile, link and run FORTRAN jobs.
+\pn
+% 
+\subsection{Scope} 
+The manual indicates how to use all members of CCSL except those 
+specifically written
+for Profile Refinement, for which separate documentation is available.
+\pn
+% 
+\subsection{Changes}
+% 
+This revision of the Manual describes the system as of \versiondate. 
+Inevitably, some of the information will change as the library develops.  New
+editions of the Manual will reflect important changes in the system. \pn
+% 
+\subsection{Content of the chapters} 
+This Chapter ends with two sample jobs, followed through in enough
+detail to introduce various necessary ideas.  The other chapters describe
+different aspects of the Library and need not necessarily be read in
+sequence.
+\pn
+\htmlref{Chapter 2}{chap:2} gives an overall view of the Library.  It should also help the
+user to discover what is provided, and to begin to appreciate the system as
+a whole.  At the end is a classified list of all the available routines.
+\pn
+\htmlref{Chapter 3}{chap:3}
+ describes the \ital{Crystal Data File},  which contains the
+ data describing the crystal structure, essentially, all data other than lists
+of reflections,  observations etc.  The bulk of the chapter provides detailed
+descriptions of the formats in which these data must be provided.
+\pn
+\htmlref{Chapter 4}{chap:4}
+describes the input of other data, such as lists of 
+observations for Least Squares Refinement, etc.  There is also a
+section on the creation and use of input/output files.
+\pn 
+\htmlref{Chapter 5}{chap:5}
+introduces the Least Squares Refinement facilities which the system provides,
+and explains some of the terminology for users who want to refine
+something a little different from what is already available.
+\pn 
+\htmlref{Chapter 6}{chap:6}
+explains how the CCSL deals with magnetic structures.
+\pn
+\htmlref{Chapter 7}{chap:7}
+describes how to run jobs, with reference to operating
+systems under which CCSL has been implemented.  A list of some currently
+available main programs is given.
+\pn  
+\subsection{Content of the appendices} 
+The Appendices collect together lists of information useful for reference,
+to obtain further understanding of the system, or for writing new programs.
+They will usually be available separately from the Manual.
+\pn 
+\iftexforht{\href{../appenx/libapx.html}{Appendix A}}{Appendix A} lists the routines 
+alphabetically, with explanation of:\pn
+\begin{varindent}{3 cm}prerequisite calls or settings,\\
+what is altered or output by the routine,\\
+what the routine is used for, and, briefly, how it works.\\
+\end{varindent}
+\pn 
+For each routine Appendix A lists which other
+routines it calls, and which  routines call it. It also catalogues the COMMON
+blocks that it declares and the items that it accesses from each. This
+information was originally provided in Appendix B which is now obsolete.
+\p 
+\iftexforht{\href{../appenx/appenc.html}{Appendix C}}{Appendix C} lists all the labelled COMMON, with brief descriptions of 
+their content. It also gives a list of the symbolic parameters (with their default values), which can be used 
+to re-dimension items in these blocks
+\p 
+\iftexforht{\href{../appenx/maiapx.html}{Appendix D}}{Appendix D} describes some main programs which
+are available and how to use them. It also gives information about them similar
+to that provided for the library subroutines in Appendix A. 
+A new user may at first find what he wants here, but will
+probably move on to developing his own main programs from the existing ones.
+\pn 
+All the material for the Appendices is contained within CCSL itself, and
+there are programs available to create the Appendices from the Master File.
+\p
+\section{An introductory example}\markright{An introductory example}
+CCSL is a Library of FORTRAN routines intended to be used for standard
+crystallographic calculations.  The routines may be thought of as
+tools with which the crystallographer can make his own programs to do
+exactly the computations he wants.
+\pn
+It has been written with the needs of the non-standard crystallographer
+(or the solid state physicist working with crystalline materials) in mind.
+It is not intended simply for the solution or refinement of ordinary crystal
+structures, for which other systems may be more suitable.
+\pn
+Let us first take a simple but realistic small example.  The main program:
+\bgs
+%
+\ttfamily\begin{verbatim}
+      LOGICAL NOMORE
+      DIMENSION H(3),K(3)
+      COMMON /IOUNIT/LPT,ITI,ITO,IPLO,LUNI,IOUT
+      CALL PREFIN('SIMPLE')
+      CALL SYMOP
+      CALL OPSYM(1)
+      CALL SYMUNI
+      CALL RECIP
+      CALL SETGEN(0.2)
+      NSUM=0
+      WRITE (LPT,2000)
+2000  FORMAT (//'   h     k    l  Multiplicity')
+C
+   1  CALL GETGEN(H,NOMORE)
+      IF (NOMORE) GO TO 2
+      MULT=MULBOX(H)
+      NSUM=NSUM+MULT
+      CALL INDFIX(H,K)
+      IF (MULT .NE. 0) WRITE (LPT,2001) K,MULT
+ 2001 FORMAT(3I5,I8)
+      GO TO 1
+C
+   2  WRITE (LPT,2002)  NSUM
+2002  FORMAT (/' Number of reflections inside sphere =',I5)
+      STOP
+      END
+\end{verbatim}\rm 
+\bgs 
+if supplied with a Crystal Data File named SAMPLE.CRY which says:\\
+\ttfamily\begin{verbatim}
+C 7.07107   7.07107   8.66025
+S     Y,     Y-X,  1/6+Z
+S    -Y,     -X,   1/6-Z
+\end{verbatim}\rm 
+\bgs
+\par 
+and run as a FORTRAN job, given CCSL as a Library, produces the 
+\htlink{output}{output on page~}{simple.lis}{simple:out}.
+\p
+\section{Explanation of the Example}\markright{Explanation of the Example}
+The user will naturally need some knowledge of FORTRAN.  Throughout the manual,
+words which are parts of the FORTRAN programs will be written in
+capitals, as they usually are in the actual source code.  
+\pn 
+This main program should be recognisable to the user as FORTRAN, most of
+which he can interpret.  The nine names which refer to routines of CCSL
+are:
+\pn 
+   \stlink{p}{PREFIN}, \stlink{s}{SYMOP}, \stlink{s}{SYMUNI}, \stlink{r}{RECIP}\ and 
+   \stlink{s}{SETGEN} (all for input), \stlink{o}{OPSYM}\
+for symmetry output and
+   GETGEN, MULBOX and INDFIX inside a loop generating $h,k,l$ values.
+\pn 
+The routines  \stlink{g}{GETGEN}\ and \stlink{m}{MULBOX} are of special interest.  
+GETGEN fills the
+array H with the ``next" set of reflection indices $h,k,l$, eventually
+generating all reciprocal lattice vectors in
+the whole of an asymmetric unit of reciprocal space.  MULBOX returns the
+value of the multiplicity of the reflection with indices $h,k,l$.
+\pn
+GETGEN is a FORTRAN SUBROUTINE (invoked by the word CALL), whereas MULBOX
+is a FORTRAN FUNCTION, in which a variable called MULBOX is set to the
+multiplicity.
+Every member of the CCSL except for a few BLOCK DATA SUBPROGRAMS 
+is either a SUBROUTINE or a FUNCTION ;
+for ease of discussion we use the word ``routine" to mean ``either
+SUBROUTINE or FUNCTION".
+\pn 
+GETGEN and MULBOX, then, are examples of \ital{crystallographic}\ routines of
+CCSL.  There are a variety of others, such as LOGICAL FUNCTION ISPABS(H)
+which determines whether $h,k,l$\/ in array H is or is not a space group absence,
+COMPLEX FUNCTION FCALC(H) which calculates a complex Structure Factor,
+and SUBROUTINE FOUR1Z which calculates one layer of a Fourier map.
+\pn 
+\stlink{i}{INDFIX}\ is a small \ital{utility} routine of CCSL which takes the 3 numbers in
+the array H and ``fixes" them (converts them from REAL numbers to INTEGERS)
+into the integer array K.  Utility routines exist for any operation which
+the authors have become tired of writing several times, such as matrix
+multiplication, finding a number in a given list, vector products, packing
+small integers into bigger ones, etc.
+\pn 
+Except for OPSYM, the remaining CCSL routines in the example
+(PREFIN, SYMOP, RECIP,
+SYMUNI and SETGEN) are all involved in the input of data necessary to
+perform the later calculations and are examples of \ital{setting-up routines}.
+\pn 
+\begin{list} {} {\setlength{\labelwidth}{2 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}}
+\item[\stlink{s}{SYMOP} \hfill] reads and interprets the data cards starting \bd{S} for the space group
+symmetry.
+\item[\stlink{r}{RECIP} \hfill] reads the \cd{C} for the unit cell parameters.
+\item[\stlink{s}{SYMUNI} \hfill] makes a reciprocal space asymmetric unit, using the space group
+information.
+\item[\stlink{s}{SETGEN} \hfill] sets up the system ready for repeated use of GETGEN.  It needs
+to know the space group, the asymmetric unit and the cell parameters,
+so SYMOP, SYMUNI and RECIP must all have been obeyed before SETGEN.
+\item[\stlink{o}{OPSYM}(1) \hfill] writes out the space group so found, in real space terms. 
+ (OPSYM(2) would use reciprocal space).\end{list}
+\pn 
+This leaves \stlink{p}{PREFIN}.  All CCSL programs which read a Crystal Data File
+should CALL PREFIN with the
+name of the program as argument at an early
+stage.  It initialises various aspects of the system, and puts the crystal
+data into a form from which it can subsequently be read and interpreted
+as often as required. 
+\pn 
+The remainder of the main program is ordinary FORTRAN.  Note that
+although the Library does the work of producing $h,k,l$ values and
+multiplicities, it is the main program which controls what is done with
+them and how they are printed. The labelled COMMON /IOUNIT/ has to be
+declared in the main program to direct the output of indices 
+to the logical unit LPT which has been set up in PREFIN to be a printable file.
+\p\pagebreak[8]
+{\label{simple:out}
+\hyperdef{}{simple.lis}{simple.lis}
+\begin{verbatim}
+
+                    * * * S I M P L E * * *
+
+         Cambridge Crystallography Subroutine Library     Mark 4.0
+
+                    Job run at 15:59 on 19-AUG-92
+
+ Crystal data file  SAMPLE.CRY opened
+
+ Data read by PREFIN from file SAMPLE.CRY
+        1 card   labelled C
+        2 cards  labelled S
+
+ Non-centrosymmetric space group with 12 operator(s)
+
+ The group is generated by the 2 element(s) numbered:  2  7
+
+ Friedel's law NOT assumed - hkl distinct from -h-k-l
+
+ General equivalent positions are:
+       0                   0                   0       + 
+
+  1      x                   y                   z       
+  2      y                  -x+y                1/6+z    
+  3     -x+y                -x                  1/3+z    
+  4     -x                  -y                  1/2+z    
+  5     -y                   x-y                2/3+z    
+  6      x-y                 x                  5/6+z    
+  7     -y                  -x                  1/6-z    
+  8     -x                  -x+y                1/3-z    
+  9      x-y                -y                  -z       
+ 10     -x+y                 y                  1/2-z    
+ 11      x                   x-y                5/6-z    
+ 12      y                   x                  2/3-z    
+
+ Indices  13  11  10 to be used for typical reflection inside asymmetric unit
+
+ Asymmetric unit has  2 plane(s):
+             k>=0        
+             h>=k        
+
+ Symmetry constraints on lattice parameters    b   =  a  
+                                             alpha = 90
+                                              beta = 90
+                                             gamma = 120
+
+ Real cell          7.0711    7.0711    8.6602   90.00   90.00  120.00
+ Volume =   375.0001
+
+ Reciprocal cell    0.1633    0.1633    0.1155   90.00   90.00   60.00
+ Volume =   0.2667E-02
+
+ Real cell quadratic products:
+ A (=a  sqrd)     B            C   D (=b c cos alpha)  E          F 
+     50.00003    50.00003    74.99992     0.00000     0.00000   -25.00002
+
+ Reciprocal cell quadratic products:
+ A*(=a* sqrd)     B*          C*  D*(=b*c*cos alpha*)  E*         F*
+      0.02667     0.02667     0.01333     0.00000     0.00000     0.01333
+
+ Matrices for transformation of vectors to orthogonal axes
+ Real space:
+    6.1237    0.0000    0.0000
+   -3.5355    7.0711    0.0000
+    0.0000    0.0000    8.6602
+
+ Reciprocal space:
+    0.1633    0.0816    0.0000
+    0.0000    0.1414    0.0000
+    0.0000    0.0000    0.1155
+
+   h     k    l  Multiplicity
+    1    1    2      12
+    1    1    1      12
+    1    1    0       6
+    1    0    0       6
+    2    0    0       6
+    0    0   -1       2
+    1    0   -1      12
+    2    0   -1      12
+    0    0   -2       2
+    1    0   -2      12
+    2    0   -2      12
+    0    0   -3       2
+    1    0   -3      12
+
+ Number of reflections inside sphere =  108
+\end{verbatim}|
+\par  
+\goodbreak
+\section{Comments on the example output}
+\markright{Comments on the example output}
+The output charts the progress of the program.  PREFIN notes one \cd{C} 
+and two \cds{S} (without interpreting the data on them yet).  SYMOP
+detects the lack of a centre of symmetry, and counts 12 operators in
+total in the group.  In passing it looks for an \bd{I} (``Instructions") card
+which could say, e.g.,
+\pn\begin{verbatim}
+I FRIE  1
+\end{verbatim}\rm 
+\par 
+and would ask to assume Friedel's Law.  It does not find one, and says so.
+\pn 
+OPSYM(1) lists the operators (this is separate from SYMOP because once
+the user is happy with his space group he may well not want to list all
+operators for every run).
+\pn 
+SYMUNI notes that it has not been given a \bd{U} (``Unit") card with typical
+$h,k,l$, so it uses (13,11,10), as being a general reflection with
+$h > k > l$.  It finds a suitable asymmetric unit and prints it out.
+\pn 
+RECIP determines the relationships
+imposed on the cell parameters by the symmetry and prints them out.  
+In the example, which has hexagonal symmetry, these relationships imply that 
+only values of cell sides a and c are needed from the \cd{C} (the value of b
+is present on the sample Crystal Data but need not be).  It reads and
+interprets the \cd{C}, filling in various useful quantities connected
+with the cell parameters. Not all these quantities are printed.  It is
+possible to make RECIP print more if more detail is needed.
+\pn 
+SETGEN then devises a scheme for traversing the whole of the asymmetric
+unit.  The argument 0.2 is the maximum value of sin$\theta/\lambda$
+required. Again, nothing is printed, but it could be if it is needed.
+\pn 
+The remaining output is generated by the WRITE statements in the user's
+main program.
+\pn 
+Note that one of the arguments of the CALL of GETGEN is a LOGICAL
+variable, NOMORE, which is eventually set to be .TRUE. when there are
+no more $h,k,l$ values.  This must be declared LOGICAL at the head of
+the main program.  Similarly, because arrays H and K are used, these
+must be DIMENSIONed at the start, as H(3), K(3).
+\pn 
+In more complicated main programs it may be necessary to have access to
+variables, such as the cell parameters, used in the Library routines.  Such
+variables are held in labelled COMMON blocks.  The cell parameters are in
+\pn\ttfamily\begin{verbatim}
+      COMMON /CELPAR/CELL(3,3,2),V(2),ORTH(3,3,2),CPARS(6,2),KCPARS(6),
+     & CELESD(6,6,2),CELLSD(6,6,2),SDCELL,LSQCEL,PRODSD,KOM4
+      LOGICAL SDCELL,PRODSD,LSQCEL
+\end{verbatim}\rm
+\par 
+where the array CELL holds both real and reciprocal space sides and angles.
+If the main program wants to refer to CELL, it should declare
+COMMON /CELPAR/ at its head, copying it from the Library.
+\pn 
+The user will see from the discussion above that it will be easier to
+read this Manual if he has available a printout of the FORTRAN source
+code of the Library, although this is very bulky and a copy of Appendix
+A may suffice.
+\pn 
+There are, of course, certain typical computations which many users will
+require often, and these give rise to standard main programs using CCSL.
+To the user, such a main program is, for his particular computer, made
+into a complete job which he can regard as a `black box'.  He feeds his
+data into this box as if he were using a more conventional system of
+programs.
+\pn 
+A new user will probably approach CCSL this way.  It is quite likely,
+though, that soon the black box will not do exactly what he wants, and
+he will move on to using CCSL in the way it is intended, writing his own
+programs, or modifying existing programs, to fit his problem precisely.
+\p
+% 
+\section{A More Elaborate Example}\markright{A More Elaborate Example}
+% 
+Taking the sample program as a basis, let us expand it to illustrate the
+sort of features to expect in CCSL.  Suppose we have data which describe
+a crystallographic structure, and we want to generate indices as above,
+but then to take an asymmetric unit full of reflections, sort them in
+ascending order of $\sin\theta/\lambda$, and list them with calculated
+structure factors.
+\pn
+The expanded program below uses in addition from CCSL:\p
+\begin{list} {} {\setlength{\labelwidth}{60mm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}} 
+\item[crystallographic routines \hfill] 
+\stlink{l}{LATABS}\ - is it a lattice absence?\\
+\stlink{f}{FCALC}\  - form a complex structure factor\\
+\stlink{i}{ISPABS}\ - is it a space group absence?
+\item[utility routines \hfill] 
+\stlink{v}{VCTMOD}\ - vector length (for $\sin\theta/\lambda$)\\
+\stlink{i}{INDFLO}\ - convert integers into real numbers\\
+\stlink{s}{SORTX}\  - sort real numbers in ascending order\\
+\stlink{e}{ERRMES}\ - send an error message if necessary
+\item[input (\ital{setting-up}) routines \hfill] 
+\stlink{a}{ATOPOS}\ - read a set of atomic positions\\
+\stlink{s}{SETFOR}\ - read a set of form factors\\
+\stlink{s}{SETANI}\ - read anisotropic temperature factors\end{list}
+There are more declarations at the head of the program.  The FUNCTION
+FCALC is COMPLEX, so both it and the variable to which the program sets
+it must be declared COMPLEX.  ISPCE and ISTAR must be declared
+CHARACTER *1.
+\pn 
+ISPABS and LATABS are LOGICAL FUNCTIONs, and must be so declared.
+SORTX sorts within arrays in store, so these must be DIMENSIONed. 
+\goodbreak \pn
+The following, then, is the larger example main program.  It should
+by now be fairly clear to the reader what the various parts of it are,
+and how they fit together.
+\p
+\ttfamily\begin{verbatim}
+      COMPLEX FC,FCALC
+      LOGICAL NOMORE,ISPABS,LATABS
+      DIMENSION H(3),K(3,1000),SINTH(1000),IPNT(1000)
+      COMMON /IOUNIT/LPT,ITI,ITO,IPLO,LUNI,IOUT
+      CHARACTER *1 ISPCE,ISTAR
+      DATA ISPCE,ISTAR/' ','*'/
+C
+      CALL PREFIN('GETSF')
+      WRITE (ITO,2002)
+2002  FORMAT (' Value of sin theta/lambda max? ')
+      READ (ITI,1000) S
+1000  FORMAT (F10.4)
+      CALL SYMOP
+      CALL OPSYM(1)
+      CALL OPSYM(2)
+      CALL RECIP
+      CALL ATOPOS
+      CALL SETFOR
+      CALL SETANI
+      CALL SYMUNI
+      WRITE (LPT,2000)
+2000  FORMAT (////'  Sorted structure factors - * indicates space',
+     1 'group absence:'/'     No.    h   k   l    Mult     s',
+     2'            A            B          FcMod')
+      CALL SETGEN(S)
+C COMPLAIN AND STOP IF THERE WERE ERRORS IN THE INPUT
+      CALL ERRMES(0,0,' to GETSF')
+      NSUM=0
+      N=0
+   1  CALL GETGEN(H,NOMORE)
+      IF (NOMORE) GO TO 2
+      IF (LATABS(H)) GO TO 1
+      MULT=MULBOX(H)
+      IF (MULT .EQ. 0) GO TO 1
+      N=N+1
+      NSUM=NSUM+MULT
+      SINTH(N)=VCTMOD(0.5,H,2)
+      CALL INDFIX(H,K(1,N))
+      GO TO 1
+C
+C SORT THE ARRAY IPNT, SO THAT IT POINTS TO THE ELEMENTS 
+C OF SINTH IN SEQUENCE:  
+   2  CALL SORTX(SINTH,IPNT,N)
+      DO 3 I=1,N
+      J=IPNT(I)
+      CALL INDFLO(H,K(1,J))
+      FC=FCALC(H)
+      A=REAL(FC)
+      B=AIMAG(FC)
+      FCMOD=SQRT(A*A+B*B)
+      IC=ISPCE
+      IF (ISPABS(H)) IC=ISTAR
+      M=MULBOX(H)
+      WRITE (LPT,2001) IC,I,(K(L,J),L=1,3),M,SINTH(J),A,B,FCMOD
+2001  FORMAT (' ',A1,I5,2X,3I4,2X,I5,F10.5,3X,3F12.5)
+   3  CONTINUE
+      WRITE (LPT,100)  NSUM,S
+ 100  FORMAT (/'  Total number of reflections inside sphere',
+     1'=',I4/' S max=',F10.4)
+      STOP
+      END
+\end{verbatim}\rm 
+\par 
+The initial dialogue which has been given as a WRITE and a READ statement for
+simplicity could be more elegantly rendered as:
+\pn\ttfamily\begin{verbatim}
+      CALL ASK('Value of sin theta/lambda max?')
+      CALL RDREAL(S,1,IP,80,IE)
+\end{verbatim}\rm
+\par 
+because the routine ASK puts out the given message on the screen, and reads in a
+line from the keyboard ready for routine RDREAL to read the value of S.
+\pn
+Similarly, the WRITE statement with FORMAT 2000 could be replaced by:
+\pn\ttfamily\begin{verbatim}
+      CALL CENTRE(LPT,4,'Sorted structure factors - * indicates '//
+     1 'space group absence;',80)
+      CALL MESS(LPT,0,'    No.    h   k   l    Mult     s'//
+     2 '            A            B          FcMod')
+\end{verbatim}\rm
+%
+\finchapter
+%\end{document}

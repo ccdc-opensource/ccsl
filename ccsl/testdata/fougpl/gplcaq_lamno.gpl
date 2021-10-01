@@ -1,0 +1,62 @@
+reset
+set xrange [   0.000:   3.874]
+set yrange [   0.000:   5.036]
+set table "cmap.dat"
+splot "map.dat" using 1:2:3
+unset table
+
+set contour base
+unset surface
+set cntrparam level incremental   -8.750,   2.500,  15.930
+set table "cont.dat"
+splot "cmap.dat"
+unset table
+
+set terminal "aqua"   enhanced dashed size  669.413, 800.000 font "Times-Roman,16"
+set bmargin at screen    0.133
+set tmargin at screen     0.840
+set lmargin at screen    0.175
+set rmargin at screen    0.841
+unset border
+set object  1 polygon from graph   0.000,  1.00 rto  graph  1.000, 0.000 rto  graph  0.000,-1.000 rto  graph -1.000, 0.000 rto  graph -0.000, 1.000
+set object  1 fillstyle empty front
+set title " LaMnO  3.27 muB spherical Section at 0.500 on [  0  1  0]"\
+ offset character 0, 1.00 font "Times-Bold,20"
+set size ratio    1.300
+unset xtics 
+unset ytics
+set label   2 "0.00" at graph  -0.098,   1.000 offset character 0.5,0.
+set label   3 "0.05" at graph  -0.098,   0.800 offset character 0.5,0.
+set label   4 "0.10" at graph  -0.098,   0.600 offset character 0.5,0.
+set label   5 "0.15" at graph  -0.098,   0.400 offset character 0.5,0.
+set label   6 "0.20" at graph  -0.098,   0.200 offset character 0.5,0.
+set label   7 "0.25" at graph  -0.098,   0.000 offset character 0.5,0.
+set label   8 "-.50" at graph   0.000,   1.028 offset character -1.3,0.
+set label   9 "-.30" at graph   0.200,   1.028 offset character -1.3,0.
+set label  10 "-.10" at graph   0.400,   1.028 offset character -1.3,0.
+set label  11 "0.10" at graph   0.600,   1.028 offset character -1.3,0.
+set label  12 "0.30" at graph   0.800,   1.028 offset character -1.3,0.
+set label  13 "0.50" at graph   1.000,   1.028 offset character -1.3,0.
+set arrow  14 from graph  0.00, 1.06 rto graph 0.45, 0.00
+set label  14 "[ 1 0 0]" at graph  0.45, 1.06 offset character   1.0,  0.0           
+set arrow  15 from graph -0.12, 1.00 to graph -.122,0.550
+set label  15 "[ 0 0 1]" at graph -0.12, 0.46 offset character   0.0,  0.0 rotate by    90.00
+set object 16 polygon from graph    0.500,   0.606\
+ rto graph   -0.020,   0.026 rto graph    0.039,   0.000 rto graph   -0.020,  -0.026
+set object 16 front noclip fc rgb "#FF0000" fillstyle solid 1.0 border lt -1
+set arrow  17 from graph  0.45,-0.04 rto graph-0.08, 0.00
+set arrow  18 from graph  0.55,-0.04 rto graph 0.08, 0.00
+set encoding iso_8859_1
+set label 18 "1{\305}" at graph  0.50,-0.04 offset character  -0.8,  0.0
+set object 19 polygon from graph    0.478,  -0.088\
+ rto graph   -0.020,   0.026 rto graph    0.039,   0.000 rto graph   -0.020,  -0.026
+set object 19 front noclip fc rgb "#FF0000" fillstyle solid 1.0 border lt -1
+set label 20 "O3  " at graph  0.50,-0.08 offset character   0.0,  0.0
+set xrange [   0.000:   3.874]
+set yrange [   0.000:   5.036]
+unset key
+set cbrange [   -8.75:   15.93]
+a =  0.21
+ b =  0.79
+set palette functions 2*(1.-(1.05*(a+b*gray)))/3.,abs(1-2*(a+b*gray)),(1.- 0.3*cos(pi*(a+b*gray))**20)model HSV
+p "cmap.dat" with image, "cont.dat" w l lt -1 lw 1.5

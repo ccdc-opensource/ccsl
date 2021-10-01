@@ -1,0 +1,46 @@
+N LiCoPO4 (Posns from lmp Pnma #62)
+C 10.1684 5.8974 4.6792
+C SD 0.0010 0.0012 0.0005
+S 1/2+x, 1/2-y, 1/2-z
+S x, 1/2-y, z
+S -x, -y, -z
+A Co     0.27785   0.25000  -0.02033   0.15748     
+A SD Co     0.00045   0.00000   0.00099   0.09061        1.00000
+A Li     0.00000   0.00000   0.00000   0.63102     
+A SD Li     0.00000   0.00000   0.00000   0.12255        1.00000
+A P      0.09429   0.25000   0.41812   0.16891     
+A SD P      0.00023   0.00000   0.00046   0.05883        1.00000
+A O1     0.09729   0.25000  -0.25795   0.23349     
+A SD O1     0.00021   0.00000   0.00044   0.05512        1.00000
+A O2     0.45395   0.25000   0.20512   0.25445     
+A SD O2     0.00022   0.00000   0.00041   0.05796        1.00000
+A O3     0.16632   0.04420   0.28179   0.28514     
+A SD O3     0.00014   0.00064   0.00028   0.04742        1.00000
+F Co      1   0.25000
+F Li      1  -0.19000
+F O       1   0.58050
+F P       1   0.51300
+F CoM  2  0.4332 14.3553  0.5857  4.6077 -0.0382  0.1338  0.0179
+I DTYP 2
+I NCYC 12 PRIN 3
+L SCAL  14.08297
+ZL VARY ONLY SCAL 1
+ZL FIX ALL ITF
+ZL VARY Li SITE
+L FIX DOMR
+L REFI 1
+L WGHT 1
+L MODE 5
+E    1  100.0000    0.7247
+B BOTH Co
+B BESD
+B AESD
+B BMAX 3
+X ARRO.4 0.15 .08 .02 .5
+X SYMB Li .2 green
+X SYMB Co .3 magenta yellow
+X SYMB O1 .4 crimson
+X SYMB O2 .4 crimson
+X SYMB O3 .4 crimson
+X SYMB P .2 black
+X CM/A 1.

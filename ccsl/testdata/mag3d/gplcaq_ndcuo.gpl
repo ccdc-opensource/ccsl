@@ -1,0 +1,22 @@
+set terminal  aqua        enhanced dashed size  282.10,  800.00 font "Helvetica,16"
+set linetype  1 lc rgbcolor "#000000"
+set linetype  2 lc rgbcolor "#FF0000"
+set linetype  3 lc rgbcolor "#00FF00"
+set linetype  4 lc rgbcolor "#0000FF"
+set linetype  5 lc rgbcolor "#00FFFF"
+set linetype  6 lc rgbcolor "#FF00FF"
+set linetype  7 lc rgbcolor "#FFFF00"
+set linetype  8 lc rgbcolor "#FFA500"
+set linetype  9 lc rgbcolor "#00FF7F"
+set linetype 10 lc rgbcolor "#2E8B57"
+set linetype 11 lc rgbcolor "#87CEEB"
+set linetype 12 lc rgbcolor "#800080"
+set linetype 13 lc rgbcolor "#FFC0CB"
+set linetype 14 lc rgbcolor "#A9A9A9"
+set linetype 15 lc rgbcolor "#D3D3D3"
+set size    0.95,    0.95
+unset border;unset xtics;unset ytics;unset key
+set xrange  [    0.00:   11.42]
+set yrange  [    0.00:   32.39]
+
+plot "gnuplt.dat" using 1:2:3 with lines lc variable

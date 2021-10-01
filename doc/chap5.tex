@@ -1,0 +1,554 @@
+%\chapter{LEAST SQUARES REFINEMENT USING CCSL}
+%\begin{htmlonly}
+%\documentclass[a4paper]{CCSLman}
+%\usepackage{html,makeidx,color}
+%\input{chap5.ptr}
+%\end{htmlonly}
+%\internal{c2}
+%\internal{c3}
+%\internal{c4}
+%\internal{c1}
+%\internal{c6}
+%\internal{c7}
+\startdocument
+%\htmladdtonavigation{\htmladdnormallink
+%  {\htmladdimg{../icons/appenx.gif}}
+%  {../appenx/appendix}}
+\label{chap:5}
+\markboth{Least Squares Refinement}{}
+\section{What We Mean by LSQ}\markright{What We Mean by LSQ}
+% 
+The term LSQ is used here to mean \ital{Least Squares Refinement}, 
+which uses
+observations of a function to improve the values of some set of
+parameters on which that function depends.
+\p 
+Refinement involving a crystal structure could be either \ital{standard} single 
+crystal LSQ
+refinement, in which each observation depends on a single
+structure factor, or \ital{profile refinement} (PR) for which
+several structure factors contribute to one observation.
+\p 
+The PR routines are written to use many of the same CCSL routines as do 
+standard LSQ
+main programs.  The PR programs and Libraries are available separately, with 
+a separate Manual.
+\p 
+CCSL also deals with simpler LSQ problems.  For example, the main program
+FWLSQ fits the 5,7 or 9 parameters of the exponential approximation to a 
+scattering factor curve. The simplicity in this case is that no crystal structure is
+involved.
+Another simple case is the refinement of (up to) 6 cell parameters,
+given an observed list of d-spacings (actually d* squared values, in
+the main program DSLSQ).  This must deal with
+the constraints which are
+necessarily imposed on the cell parameters by the space group symmetry.
+\p 
+The essentials of a LSQ problem are:\p
+\begin{list} {} {\setlength{\labelwidth}{8mm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{4mm}}
+\item[a) \hfill] a set of \ital{observations} of something, 
+(the \ital{observed function})
+usually with their \ital{estimated standard deviations,} $\sigma$'s,
+measured at different values of some argument \ital{ARG};
+\ital{ARG} may be $h,k,l$ (for standard LSQ), $\sin\theta/\lambda$, 
+$\theta$ (for
+Rietveld PR) or $\lambda$, or energy, or time of flight; it is a
+quantity which takes different values, and will identify the
+observation.\\[1mm]
+For crystallographic applications the observations are often all of the
+same physical thing, but this is not necessary.  For example, geometric
+constraints may be introduced by giving bond lengths and/or angles as
+additional types of observation, with $\sigma$'s.
+\item[b) \hfill]  some \ital{calculated function} involving \ital{ARG},
+which defines a
+mathematical model to be compared with an observation.  This calculated
+function depends on \ital{parameters}, things which may possibly be varied in order
+to improve the fit of the function to its related observations.\\[1mm]
+By \ital{fit} we mean minimisation of the weighted sum of squares of 
+differences
+between observed and calculated function values (where the summing is
+over the different values of \ital{ARG}).  It is desirable to use 
+statistical weights ($1/\sigma^2$)
+for the differences.\\[1mm]
+The theory may be viewed as using the beginning of a Taylor series
+expansion, and therefore requires that the parameters be close to
+their \ital{correct} values, making the required shifts so small that their
+squares may be neglected.\end{list}
+ 
+\section{Parameters and Variables}\markright{Parameters and Variables}
+% 
+\subsection{Parameters}
+In LSQ a \ital{parameter} is something which it is sensible to try to
+adjust. It represents some physical thing like ``the x coordinate of the 3rd
+atom'', ``an overall temperature factor'' or ``the scale factor for all
+observations coded number 2''.
+\p 
+A \ital{parameter} is also something with respect to which the function may be
+differentiated.  Differentiation may be analytic, if it is possible (and
+sensible) to write down such derivatives algebraically.  It may also be
+numerical in awkward cases, using a simple approximation to the
+derivative involving function values.
+\p 
+For any particular run of a LSQ refinement program, it is unlikely that
+the user will want to vary every parameter.  The subset of parameters
+which are actually to be varied (i.e. those for which shifts are
+required) we call \ital{variables}.
+\p 
+Parameters are thus either \ital{fixed} or \ital{varied}.
+For a fixed parameter,
+there is no need for a derivative; but for all parameters to be
+varied, derivatives will be needed.
+% 
+\subsection{Basic Variables}
+% 
+It is often the case that parameters are related, either inherently by
+the symmetry of the problem, or by a strict constraint applied by the user.  If
+two variables are related, they must not both be refined by LSQ;  the
+process expects the shifts to be independent.  Every constraint or
+relation reduces by 1 the number of variables to be refined.
+\p 
+The subset of variables for which shifts are actually calculated
+we call \ital{basic variables}, or basics for short.
+\p 
+Those variables which are not basic we call \ital{redundant}. 
+Thus if a problem has $n_p$ parameters, $n_f$ of 
+which are fixed and $n_v$ varied,
+               $$n_p = n_f + n_v$$
+and if, of those $n_v$, $n_b$ are basic and $n_r$ are redundant,
+              $$n_v = n_b + n_r$$
+% 
+\subsection{Strict Constraints}
+% 
+The existence of $n_r$ redundant variables implies that there are $n_r$
+strict constraints on the problem. Derivatives are calculated 
+(and shifts are required) for all
+variables, not just the basics.
+\p
+Those constraints which must be imposed because of the crystallographic
+symmetry are generated automatically by CCSL, and need not be provided by
+the user.  For example, the  special position $(x,x,x)$ will give rise to
+one basic variable, $x$, with two redundant variables $y$ and $z$ related to
+it by two constraints, but the user will not need to tell the system
+this.\p
+The user may impose additional strict constraints.  Two constraint types
+are at present available.  The simpler is type 1:
+             $$a_1\Delta p_1 = a_2\Delta p_2$$
+that is, constant $a_1$ times the shift in parameter 1 = constant $a_2$ times
+the shift in parameter 2.\p
+Type 2 constraints involve a linear combination of parameters, with
+constant coefficients, thus:
+ $$  a_1\Delta p_1 + a_2\Delta p_2 + a_3\Delta p3 + \ldots\ \mbox{etc}\
+   = 0$$
+Note that the way these expressions are written involves differentiating
+the original constraint.  For example, if a type 2 constraint is
+needed to fix the sum of three parameters to be 3, the constraint
+$$p_1 + p_2 + p_3 = 3\quad\mbox{becomes}\quad \Delta p_1 + 
+\Delta p_2 + \Delta p_3 = 0$$
+Other more complicated types of constraint could be added if needed.
+%
+\subsection{Parameter Names}
+% 
+The need to fix, vary or relate parameters implies the need to call
+these parameters by name.  The CCSL LSQ facilities allow each problem to
+be set up individually.  Names for the parameters of a problem are
+given in its main program;  the user needs to know what these names are
+in order to refer to the parameters in his Crystal Data.
+\p
+Examples of names used in various standard main programs are:
+\ssp
+\verb| Na2 X  Ca B11  SCAL 2  P23 ITF   A*|
+\ssp 
+Most names have two parts, which we call the genus and species names;  the
+genus names above are \exac{\ Na2, Ca, SCAL, P23}, with corresponding
+species names \exac{\ X, B11, 2} and \exac{ITF}.  The name \exac{A*} 
+is simply a species name.
+\p 
+In LSQ programs which involve structure factors,
+those structure parameters which belong to a particular named atom
+have the atom name as genus name, and one of:
+\ssp 
+\verb|X   Y   Z   B11   B12   B13   B22   B23   B33   ITF  SITE  SCAT|
+\ssp 
+as species name.  
+(\exac{SCAT} means the scattering factor, when this is represented 
+by one number and it is sensible to refine it).
+\p
+MAGLSQ has the additional species names:
+\ssp
+\exac{MU   MU1   THET   THE1   PHI   PHI1   PSI1   PSI2   PSI3   PSI4}.
+\p
+When LSQ programs refer to parameters in output for shifts, correlations etc,
+they use these parameter names.
+\p 
+More details about parameter
+names are to be found in Chapter 3 under \cds{\htmlref{L FIX}{ss:fix}}.  
+Note the availability
+of words like \bd{XYZ} to mean ``all three x,y,z coordinates", 
+\bd{CELL} to mean ``all six
+cell parameters", etc.  One may also use the word \bd{ALL} 
+to mean ``all the members
+of this genus" (as in \exac{ALL Na3} for ``all the parameters of atom Na3")
+ or ``all
+the genera with this species" (as in \exac{ALL X}, or \exac{ALL SITE}, or even 
+\exac{ALL XYZ}).
+%
+\subsection{Families of Parameters}
+% 
+Structure parameters such as those introduced in the previous section,
+being a commonly occurring group in LSQ, are said in CCSL to belong to 
+\ital{family
+2} of the parameters.  \ital{Family~1} contains all other
+parameters in the simple LSQ applications we are considering here.  Other
+families are used in PR, and in other LSQ programs.
+\p 
+Family 1, genus 1 is treated by CCSL as special.  It
+contains the parameters for which the species name by itself is enough,
+like \exac{A*} above;  another example is an overall temperature factor for a
+structure, known as \exac{TFAC}.
+\p 
+Genera 2, 3 etc of family 1 may in general be given any genus name.  Within
+such a genus the species name could be simply an integer, or species could have 
+individual names.  This choice is
+for the writer of the main program.  In \mlink{sflsq}{SFLSQ}\ there are two genera in
+family 1, the second being named \exac{SCAL} with species numbered 1,2 etc.
+\p 
+Unless the user is writing or modifying a main program, he need not be
+concerned with the detailed mechanism for numbering parameters.  He only
+needs to know what names he is allowed to use on his Crystal Data
+for the programs he runs.
+\p 
+\section{Examples of Least squares programs}
+\markright{Examples of Least squares programs}
+%
+We illustrate these general ideas by, first, a simple example of LSQ
+which does not involve structure parameters, and, second, notes on the
+use of the standard single crystal structure refinement program, SFLSQ.
+\p
+There are two fundamental questions to be asked of a main LSQ program:
+\begin{enumerate}
+\item on which calculated function is it refining 
+\item which parameters may be refined.
+\end{enumerate}
+%
+\subsection{DSLSQ}
+% 
+DSLSQ is a main program which determines the values of up to 6 cell
+parameters by LSQ fitting, using values of d spacings observed at 
+different values of h,k,l.
+
+The calculated function used is the expression for the square of d*, 
+in reciprocal space:
+$$d^*(h,k,l)^2 = (h^2a^{*2} + k^2b^{*2} + l^2c^{*2} +
+         2kb^*l c^*\cos\alpha^* + 2lc^*ha^*\cos\beta^*
+ + 2ha^*kb^*\cos\gamma^*)
+$$
+The parameters to be varied are the reciprocal cell quadratic products
+A*, B*, C*, D*, E* and F*, where A*=$a^{*2}$, D*=$b^*c^*\cos\alpha^*$, etc.
+\p
+The author of the main program had the choice of names for these
+parameters, and decided to make them members of family 1, genus 1,
+having species names A*, B* etc.  Alternatively, she could have made 
+them members of
+family 1, genus 2, with genus name CELL, and species names the integers
+1 to 6.  There are no other parameters in this simple example.
+\p 
+The calculated function $G_{calc}(h,k,l)$ has been programmed into a routine
+CALCDS, which is given the values of h,k,l, and returns the value of 
+$G_{calc}$ as
+defined above, together with all derivatives of $G_{calc}$ with respect to
+the relevant cell parameters. If a user happened to have data which were
+observations of, say, d rather than d* squared, CALCDS could be simply
+rewritten to calculate instead $G_{calc}(h,k,l)=d$ and its derivatives.
+\p 
+Other routines which have been written for this specific application are:\\
+\stlink{a}{APSHDS} to apply shifts to the parameters,\\
+\stlink{n}{NWINDS} to output new Crystal Data containing the shifted parameters,\\
+\stlink{p}{PARSDS} to decide which are the parameters of the problem, and\\
+\stlink{v}{VARSDS} to set up which parameters are variables.
+\p 
+The routines APSHDS, CALCDS, NWINDS, PARSDS and VARSDS may be inspected
+in a listing of CCSL if further detail is sought.
+% 
+\subsection{Structure Factor LSQ}
+\mlink{sflsq}{SFLSQ}\ (standard LSQ refinement with possible geometric constraints),
+GRLSQ (taking groups of input reflections together) and \mlink{maglsq}{MAGLSQ}\ 
+(for magnetic structures) are all examples of CCSL single-crystal LSQ programs.
+\p 
+Crystallographic LSQ involving structure factors follows much the same
+pattern as the DSLSQ example above.  The calculated function involves a
+structure factor computation by a routine such as LFCALC, during which 
+derivatives are made with respect to all structure parameters which are
+variables.
+\p 
+For details of the \hyperlink{card:L}{\cds{L}} which drive such LSQ programs the
+user  should consult the specification in Chapter 3.  An example of the Crystal
+Data  for \mlink{sflsq}{SFLSQ}\ is as follows: 
+\p\ssk\begin{verbatim} 
+I NCYC 5   PRIN 3   CONV 0.02
+L RELA 2   2 Co SITE  1 Mn SITE  1 Sn SITE
+L VARY   ALL SITE
+L MODE 5     WGHT 1
+L SCAL     1    1    1
+L FIX  DOMR
+N Co2Mnsn at room temp
+S     -X,    -Y,     -Z
+S  1/2+X, 1/2+Y,      Z
+S      Y,     Z,      X
+S     -Y,     X,     -Z
+A Co   1/4   1/4   1/4    0.3115
+A Mn     0     0     0    0.2842
+A Sn   1/2   1/2   1/2    0.3386
+F Co    1    0.2500
+F Mn    1   -0.3730
+F Sn    1    0.6228
+C 6
+E    1    100.    0.05
+\end{verbatim}
+\par   
+The \hyperlink{card:C}{C}, \hyperlink{card:S}{\bd{S}}, 
+\hyperlink{card:A}{\bd{A}}, \hyperlink{card:F}{\bd{F}}, and
+\hyperlink{card:E}{\cds{E}}are the same 
+as for other programs, giving 3
+atoms in special positions in a cubic space group, with neutron nuclear
+scattering factors, and type 1 extinction corrections on the structure
+factors.
+\p 
+The \hyperlink{card:I}{\cd{I}} requests 5 cycles of refinement, with printing of 
+the observed and calculated values of the function on the first 
+and last cycles, and terminating before the
+5th cycle if the largest shift/$\sigma$ is smaller than 0.02 (rather than the
+default of 0.01).
+\p
+\hyperlink{card:L}{\cds{L}} are needed where defaults need to be changed, so \bd{L WGHT} 
+asks for
+unit weights rather than statistical weights, \bd{L MODE} asks for the special
+\ital{extinction correction} input mode rather than the standard format for
+observed input files, and so on.
+\p 
+Each LSQ main program has its own defaults built in as to whether a
+given parameter should be fixed or varied.  In general most structure
+parameters are by default varied, but site occupation factors are
+by default fixed, so the \exac{L VARY ALL SITE} card is needed here.
+\p 
+It is required to relate all three site occupation factors by the
+linear relation expressed on the \cd{L RELA}.
+%
+\subsection{Interpretation}
+% 
+The main program \mlink{sflsq}{SFLSQ} interprets the above Crystal Data and deduces
+that all three atomic positions are so special that all their
+coordinates are fixed.  It makes 9 basic variables, being:
+\ssp 
+\exac{MOSC, SCAL 1, SCAL 2, SCAL 3} (having deduced that there are 3 scale
+zones from the \cd{L SCAL}) \exac{Co ITF, Mn ITF, Sn ITF} (the isotropic
+temperature factors, varied by default) and \exac{Mn SITE} and \exac{Sn SITE}.
+\p 
+it makes 10 variables, being all the above plus \exac{Co SITE} (a redundant
+variable), and records the constraint:
+\ssp 
+\cl{\exac{2* Co SITE + Mn SITE + Sn SITE = constant}}
+\ssk 
+By default, as there is no \cd{L REFI}, the program refines on the
+modulus of the structure factor.  Another input dataset is needed, in the
+format indicated by the card saying \exac{L MODE 5};
+  the name of the file containing
+this data set is requested interactively.
+% 
+\section{Making Other Least Squares Programs}
+\markright{Making Other Least Squares Programs}
+%
+The existing main programs can be adapted to refine different parameters,
+or to use a different calculated function in the refinement.  Examples
+which already exist are:
+\p
+\mlink{mplsq}{MPLSQ}, multipole LSQ, in which the scattering density is expressed as a sum
+of spherical harmonic (multipole) functions, and the coefficients of these
+functions  may be refined.  A new family 5 has been defined for
+them, as there may be different numbers of multipole coefficients for 
+different atoms.
+\p
+\mlink{palsq}{PALSQ}, polarization analysis LSQ, in which the observations to be fitted
+are the components of the scattered neutron polarization for a given input
+polarization.
+\p
+Recently (April 2001) some changes have been made to make it easier to introduce new parameters
+   into a least squares refinement based on structure factors. The author of the
+   new program must provide:
+\begin{enumerate}   
+\item   		 An augmented main program in which the new parameters are defined
+             this should be based on \mlink{sflsq}{SFLSQ}.
+             The names of the new parameters (A4) must be added to ISFWRD
+             and their specifications (family, genus, and species) to ISWDSP
+\item       A subroutine called say DOXXX1 with 1 dummy agument MODE.
+             When called with MODE=1 it should read all the data from the
+             CDF which are needed to give values to the new parameters.
+             When called with MODE=2 it should check that enough data have
+             been read, and do any necessary tidying up.
+             For every new parameter which can be refined there should be a
+             corresponding integer pointer. This pointer will be set to the
+             number  of the of the variable to which ithe parameter is
+             assigned, or zero if it is fixed.
+             DOXXX1 should be called in the main program with MODE=1 just after
+             \stlink{s}{SETFC}, and with MODE=2 just before \stlink{p}{PARSSF}.
+\item       A logical function called say DOXXX2 with two dummy arguments
+             NN and MODE
+\begin{description}             
+\item[MODE = 1] Determine symmetry constraints on new parameters
+                      NN is not used.
+\item[MODE = 2] Set Variable pointers to new parameters
+                 NN is the variable number
+\item[MODE = 3] Apply shifts, one parameter per entry.
+                      NN is not used
+\item[MODE = 4] Write new parameter card (one per entry)
+                      NN is the serial number of the letter on the card to
+                      rewrite
+\item [MODE = 5] Do any calculation required because of parameter changes 
+                      at the end of a least squares cycle.
+\item [MODE = 6] Interpret new words used to fix or vary groups of parameters
+ when they apply to a particular genus.
+ Such words should be defined in the main program as belonging to families
+ with  negative numbers (<-10).
+\item [MODE = 7] Interpret new words used to fix or vary groups of parameters
+ when they apply to all such parameters (all genera or genus not applicable).
+\end{description}     
+\item  A subroutine called say LXXCAL to calculate the structure factors
+             and their derivatives with respect to all the structural parameters
+             (Only needed if the new parameters modify the structure factor)
+\item   A subroutine called say CALXXX to calculate the measurement (GCALC)
+             to be fitted, in terms of the structure factor and other
+             experimental parameters.
+             (Only needed if the new parameters change how this is done)
+\item   A logical function called say DFTXXX which will be called  with
+             the dummy arguments set to the family, genus and species of a 
+             parameter. It should return TRUE if the parameter is to be varied.
+\end{enumerate}             
+        In the EXTERNAL declaration in the main program:
+
+\begin{varindent}{3 cm}
+                       LFCALC should be replaced by LXXCAL\\ 
+                       DOTHER should be replaced by DOXXX2\\ 
+                       DEFALT should be replaced by DFTXXX\\
+\end{varindent} 
+\par                      
+        A call to CALXXX should replace that to \stlink{c}{CALCSF} inside the least squares
+        cycles. It has two dummy arguments: H giving the reflection indices, 
+        and the second LXXCAL being the structure factor calculation routine.      
+        If, as for magnetic structures, two types of structure factors are to
+        be calculated a third parameter gives the name of the required routine.
+        It should be declared EXTERNAL. 
+        For example for magnetic least squares the call becomes:
+        call CALCMG(H,LFCALC,LMCALC)\\
+        \stlink{l}{LFCALC} calculates the nuclear structure factors and their
+        derivatives.\\
+        \stlink{l}{LMCALC} calculates the magnetic structure factors and their
+        derivatives.\\
+        \stlink{c}{CALCMG} combines them into GCALC to match the observed quantity GOBS.\\ 
+\p        
+        Note. It is convenient to group the main program and the 
+        special subroutines in a single file to be included in the main program
+        section of the master file.
+%        
+\section{Structure Factor Least Squares with multiple Data Sources}
+\markright{ Multiple Data Sources}
+As of Version 4.4 of CCSL the set of structure factor least squares programs have been reorganised to allow
+data from more than one source to be refined concurrently. To facilitate this,
+provision has been made to attach source dependent information such as crystal orientation, wavelength, neutron polarisation etc, to the files containing the experimental data. This information is found in lines at the start of the data files  beginning with a \#  followed by a word indicating the type of information and the information itself. The words following the \# which can currently be recognised are: 
+\begin{description}
+\item{Polarisation} followed by 5 numbers: the Up and Down polarising efficiencies
+		and the polarisation direction in orthogonal crystal coordinates.
+\item{Wavelength} followed by  its value and, if needed, the absorption 
+		coefficient.
+\item{Orientation} followed by 9 components of the matrix giving the directions of the diffractometer axes in orthogonal crystal coordinates.
+\end{description}
+Only the first 5 characters of the words are matched, their case is unimportant.
+
+The CCSL  programs \mlink{absmsf}{ABSMSF}, \mlink{sorgam}{SORGAM}, \mlink{sorasy}{SORASY} etc which make 
+files  to use as input to least
+squares programs now automatically add these lines.
+This information is used when necessary to calculate the parameters used in
+Becker Coppens extinction so these no longer need be included with the data -
+(L MODE=5 and L MODE=7 are now obsolete).\\
+The data are now read only once, rather than once per least squares cycle as
+in versions prior to 4.4.
+
+The least squares programs \mlink{sflsq}{SFLSQ}, \mlink{mplsq}{MPLSQ}, \mlink{maglsq}{MAGLSQ}, \mlink{mmplsq}{MMPLSQ}, \mlink{chilsq}{CHILSQ}, \mlink{mpclsq}{MPCLSQ} and \mlink{mgtlsq}{MGTLSQ}
+all now use this new structure. 
+\begin{itemize}
+\item \mlink{sflsq}{SFLSQ}  and \mlink{mplsq}{MPLSQ}  can only read structure factor type data (REFI 1-4)
+\item \mlink{chilsq}{CHILSQ} and \mlink{mpclsq}{MPCLSQ} normally only read polarised neutron data (REFI=5 or 7)
+but in both cases data measured with different orientations or wavelengths
+can be refined together. It is sometimes useful to include unpolarised structure factor data
+measured with an applied field as well. \\
+Update 4.4.17 allows polarised neutron data from  polycrystalline samples of anisotropic
+paramagnets to be refined (MODE 11, REFI 9)
+
+\item \mlink{maglsq}{MAGLSQ}, \mlink{mmplsq}{MMPLSQ} and \mlink{mgtlsq}{MGTLSQ} all allow integrated intensity and polarised neutron data to be combined. (REFI=1-4,5,and 7)
+\end{itemize}
+When there are multiple data sets, each is presented in a separate file and the 
+values of MODE and REFI for each as well as its allocated weight may be given at the same time as the file-name. 
+In this case the request for the data file name has the form:\\
+{\tt Name of data set, its MODE, REFI and weight? :}\\
+If the reply given is just the filename then the program assumes there is just a
+ single source of data: \bd{MODE} and \bd{REFI} are taken from the crystal data file 
+ as in the pre-4.4 versions.
+ \subsection{SNPLSQ}
+ In the new program \mlink{snplsq}{SNPLSQ}, which allows SNP and structure factor data to be refined
+ together, provision has to be made for different scale factors and different
+ magnetic domain populations to be associated with each data-set. These quantities must 
+ also be identified with valid least squares parameters. Each data set is therefore identified by a
+ {\em name} of up to 4 characters eg \bd{PA27} which is given on a 
+ \hyperlink{Q:sorc}{\cd{L SORC}}. \bd{SORC}
+ may be followed by the filename given with a path which is either absolute (starts with ``/")
+ or relative to the current working directory. Environment variables are recognised.
+ If no filename follows the identifier, the file name will be requested interactively.
+ For each data source identified by {\em name}  there should be one or more \cds{L SORC {\em name}} 
+ giving further information specific to these data: \bd{REFI}, \bd{MODE} and \bd{WGHT} are obligatory. The
+integers following REFI and MODE have their usual meanings but apply only to this particular data-set. The number following \bd{WGHT} gives the weight for these data. 
+\p
+There should also
+be \cds{L SORC SCAL} and \cds{L SORC DPOP} giving the scale factors and domain populations
+for the data set. The number of scale factors needed is the number of scaling zones
+given in the data file. The number of domains whose populations must be given depends
+on the relative symmetries of the nuclear and magnetic structures and on the type of refinement.  
+The new least squares parameters associated with the scales and domain populations are identified by the genus {\em name} and a composite species name starting with either \bd{SC} for a scale factor
+or \bd{DP} for a domain population and ending with 2 digits identifying its number.
+\subsection{SNPLSQ: Example L DATA and L SORC Cards}  
+\p\ssk\begin{verbatim} 
+L DATA PA27 $TT/khe27k.pal 
+L SORC PA27 MODE 9 REFI 8 WGHT 1.0 
+L SORC PA27 DPOP  0.18  0.07  0.07 0.18  0.18 0.07 0.07 0.18   
+L DATA SF30 $TT/khe30k.sf 
+L SORC SF30 MODE 7 REFI 1 WGHT 0.3 SCAL 7.16
+L SORC SF30 DPOP 0.25 0.25 0.25 0.25
+\end{verbatim}
+The data are for a helical structure with 4 orientation domains. PA27 contains
+SNP data (REFI 8) which is sensitive to the chirality so 8 domain populations are needed.
+SF27 is a set of structure factor amplitudes (REFI 1) insensitive to chirality so only 4
+domain populations can be refined. Pairs of chiral domains are numbered consecutively
+so only odd-numbered domains are defined for the SF27 data. Constraints might therefore be 
+given as follows:
+\begin{verbatim} 
+Z Domain constraints for PA data
+L RELA 1 1 PA27 DP08 1 PA27 DP01
+L RELA 1 1 PA27 DP07 1 PA27 DP02
+L RELA 1 1 PA27 DP06 1 PA27 DP03
+L RELA 1 1 PA27 DP05 1 PA27 DP04
+L RELA 2 1 PA27 DP01 1 PA27 DP02 1 PA27 DP03 1 PA27 DP04 
+Z Domain constraints for SF data
+L RELA 2 1 SF30 DP01 1 SF30 DP03 1 SF30 DP05 1 SF30 DP07  
+\end{verbatim}
+No scale factors are needed for the SNP data; one is needed for the structure amplitudes.
+It could be fixed using:
+\begin{verbatim} 
+L FIX  SF30 SC01
+\end{verbatim}
+\p
+ For least squares refinements using different types of data, the weight given
+ to each is important. A rough rule of thumb is to make the relative weights
+ inversely proportional to the residual $\chi^2$ of each when refined separately.
+%
+\finchapter
+%\end{document}

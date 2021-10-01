@@ -1,0 +1,160 @@
+\documentclass[onecolumn,12pt,a4paper,]{report}
+\usepackage{CCSLman,makeidx,color,ifthen,bm}
+\makeatletter
+\makeatletter
+\@ifpackageloaded{tex4ht}
+  {\let\iftexforht\@firstoftwo}
+  {\let\iftexforht\@secondoftwo}
+\makeatother
+%
+\iftexforht{\usepackage{here}}{\usepackage[style=plaintop]{floatrow}}
+\usepackage{hyperref}
+\iftexforht{\newcommand{\tablesize}{\normalsize}}{\newcommand{\tablesize}{\footnotesize}}
+\usepackage{hyperref}
+
+%
+\newenvironment{clist}{\begin{list}{}{\setlength{\labelwidth}{2.5cm}
+  \setlength{\itemsep}{-4ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{2cm}}}{\end{list}}
+
+\pagestyle{empty}\usepackage{CCSLman}
+
+%\input{versiondate}
+%\newcommand{\versiondate}{\version}
+%
+%
+%\html{\ccslstyles{../CCSLstyles.css}}
+\title{Analytical approximations to Magnetic Form Factors}
+\author{P.J. Brown}
+\makeindex
+\setlength{\topmargin}{0mm}
+\def\kpv{{\bf{q}}}
+\def\kp{q}
+\def\kpu{\hat{\bf{q}}}
+\def\rv{{\bf r}}
+\def\ru{\hat{\bf r}}
+\def\hf{\frac{1}{2}}
+\def\Mv{{\bf M}}
+\def\mv{{\bf m}}
+\def\stl{$\sin\theta/\lambda$}
+\def\inA{\AA{$^{-1}$}}
+\def\n{\relax}
+\def\p{\par}
+\begin{document}
+\maketitle
+\chapter{Magnetic Form Factors}
+\section{Definition of form factors}
+The magnetic form factor  $f(\kpv)$ is obtained from the fourier transform of
+the  magnetisation distribution of a single magnetic atom. Assuming that it
+has a unique magnetisation direction it can be written
+\begin{equation}
+\Mv\int 
+m(\rv)e^{i\kpv\cdot\rv}\,dr=\Mv f(\kpv)
+\end{equation}
+where \Mv\ gives the magnitude and direction of the moment and $m(\rv)$ is
+a normalised scalar function  which describes how the intensity of magnetisation 
+varies over the volume of the atom.
+When the magnetisation arises from electrons in a single open shell the magnetic
+form factor can be calculated from the radial distribution of the electrons in
+that shell. The integrals from which the form factors are obtained have the form
+\begin{equation}
+\left\langle j_L(\kp)\right\rangle= \int 
+U^2(r)j_l(\kp r)4\pi r^2\,dr
+\end{equation}
+The $j_l$ are the spherical Bessel functions defined by
+\begin{equation}
+j_l(x)={\sqrt{\pi\over2x}}J_{l+\frac12}(x)
+\end{equation}
+If the open shell has orbital quantum number $l$ the form factor 
+for spin moment is 
+\begin{equation}
+f_s(\kpv)=\frac1{\mathrm{M}_S}\sum_{L=0}^{2l}i^L\left\langle 
+j_L(\kp)\right\rangle
+\sum_{M=-L}^L
+S_{LM}Y^L_M\left({\kpu}\right)
+\end{equation}
+and that for orbital moment 
+\begin{equation}
+f_o(\kpv)=\frac1{\mathrm{M}_L}\sum_{L=0,2,\ldots}^{2l}
+\left(\left\langle j_L(\kp)\right\rangle +
+\left\langle j_{L+2}(\kp)\right\rangle\right)
+\sum_{M=-L}^LB_{LM}Y^L_M(\kpu)
+\end{equation}
+\n
+The coefficients $S_{LM}$, $B_{LM}$ have to be computed from the  orbital
+wave-function \cite{Marshall}. The total spin moment ${\mathrm{M}_S}$ is  
+given by $S_{00}$ 
+and the orbital moment  ${\mathrm{M}_L}$ by $B_{00}$. For small $\kp$ the dipole
+approximation 
+\begin{equation}
+f(\kpv)=({\mathrm{L+2S})}\left\langle j_0(\kp)\right\rangle
+{\mathrm{L}}\left\langle j_2(\kp)\right\rangle
+\end{equation}
+can be used.
+\\[2ex]
+\section{Analytical approximation}
+The tables which follow give the coefficients of an analytic approximation 
+to the $\langle j_0\rangle$ integrals for the d electrons in ions of the 
+\htmlref{3d}{3dj0} 
+and \htmlref{4d}{4dj0}  and \htmlref{5d}{5dj0} series, the \htmlref{4f}{re4fj0} and \htmlref{5d}{re5dj0}
+electrons of some rare earth ions and  the \htmlref{5f electrons }{acj0} of some actinide ions. 
+For the 3d, 4d, 4f and 5f form factors the approximation has the form
+\begin{equation}
+\langle j_0(s)\rangle = A \exp(-as^2) + B \exp(-bs^2) + C \exp(-cs^2) + D
+\end{equation}
+For the data in the tables $s = \sin\theta/\lambda$ in units of \inA.
+\\[2ex]
+For the transition metal series the fits were made with 
+form factor integrals  calculated from Hartree-Fock wave-functions \cite{clementi}. 
+For
+the rare-earth and actinide series the fits were with
+Dirac-Fock form factors \cite{FandD,DandF}. 
+There are some more recent calculations of form-factors for the 5d electrons
+of the third group transition metals and of the rare-earth elements
+\cite{kob:11,kob:12}. These authors used an expansion with seven rather than five terms
+to fit the calculated form factors:
+\begin{eqnarray}  
+\langle j_0(s)\rangle& = &A \exp(-as^2) + B \exp(-bs^2) + C \exp(-cs^2)\nonumber\\
+& &+ D \exp(-ds^2) + E\\
+\end{eqnarray}
+In the tables the number 
+following the atom symbol indicates the ionisation state of the atom. 
+Thus the coefficients following Fe0 are for a neutral iron atom and 
+those following Fe2 are for Fe$^{2+}$.
+\p
+The integrals $\langle j_L\rangle$ with $L\ne0$ are zero when $s=0$ and have been
+fitted with the forms 
+\begin{equation}
+\langle j_{L\ne 0}(s)\rangle = \left(A\exp(-as^2) + B\exp(-bs^2) + 
+C\exp(-cs^2) + D\right)s^2
+\end{equation}
+or 
+\begin{eqnarray}  
+\langle j_{L\ne 0}(s)\rangle&= &\left(A\exp(-as^2) + B\exp(-bs^2) + C\exp(-cs^2)\right.\nonumber\\
+& &  \left. + D\exp(-ds^2) + E \right)s^2
+\end{eqnarray}
+
+The second set of tables give the coefficients obtained for  
+$\langle j2\rangle$ for \htmlref{3d}{3dj2}, \htmlref{4d}{4dj2} and \htmlref{5d}{5dj2} transition metals, 
+\htmlref{4f}{re4fj2} and \htmlref{5d}{re5dj2} electrons of rare earths  and \htmlref{actinides}{acj2};
+ $\langle j4\rangle$ for  \htmlref{3d}{3dj4}, \htmlref{4d}{4dj4} and \htmlref{5d}{5dj4} transition metals, 
+\htmlref{rare earths}{rej4} and \htmlref{actinides}{acj4};
+and $\langle j6\rangle$ for \htmlref{rare earths}{rej6} and \htmlref{actinides}{acj6}. 
+\chapter{Tables of Form Factors}
+\newpage
+\input{fftable}
+
+\begin{thebibliography}{99}
+\bibitem{Marshall}Marshall W and Lovesey S W{\it Theory of thermal neutron
+scattering Chapter 6} Oxford University Press (1971)
+\bibitem{clementi} Clementi E and Roetti C {\it Atomic Data and Nuclear Data
+Tables}{\bf 14} pp 177-478 (1974)
+\bibitem{FandD}Freeman A J and Descleaux J P {\it J. Magn. Mag. Mater.} {\bf 12}
+pp 11-21 (1979)
+\bibitem{DandF}Descleaux J P and Freeman A J {\it J. Magn. Mag. Mater.} {\bf 8} pp 119-129 (1978)
+\bibitem{kob:11}Kobayashi K Nagao T and Ito M {\it Acta Cryst.}. {\bf A68}, pp 473-480  (2011)
+\bibitem{kob:12}Kobayashi K Nagao T and Ito M {\it Acta Cryst.}  {\bf A68}, pp  589-594 (2012).
+
+\end{thebibliography}
+\end{document}

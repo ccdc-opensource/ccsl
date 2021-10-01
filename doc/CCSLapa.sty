@@ -1,0 +1,250 @@
+%% This is file `CCSLapa.sty',
+%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{CCSLapa}
+\newboolean{ccslman}
+\setboolean{ccslman}{false}
+
+%
+\renewcommand{\section}[1]{\markright{#1}%
+				\@startsection {section}{1}{\z@}%
+                {-3.5ex \@plus -1ex \@minus -.2ex}%
+                {2.3ex \@plus.2ex}%
+                {\normalfont\Large\bfseries} {#1}}%
+%
+\def\ps@newheadings{%    
+    \def\@oddfoot{\hfil\thepage\hfil}\def\@evenfoot{\hfil\thepage\hfil}%
+    \def\@evenhead{\slshape Chapter\ \thechapter\hfil\slshape\leftmark}%
+    \def\@oddhead{{\slshape\rightmark}\hfil\slshape Section\ 
+    \thesection}%
+    \let\@mkboth\@gobbletwo
+    \let\sectionmark\@gobble
+    \let\subsectionmark\@gobble
+    }
+%
+\def\ps@appheadings{%    
+    \def\@oddfoot{\hfil\thepage\hfil}\def\@evenfoot{\hfil\thepage\hfil}%
+    \def\@evenhead{\slshape CCSL manual\hfil\slshape\leftmark}%
+    \let\@oddhead\@evenhead
+    \let\@mkboth\@gobbletwo
+    \let\sectionmark\@gobble
+    \let\subsectionmark\@gobble
+    }
+%
+\setlength{\evensidemargin}{10mm}
+\setlength{\oddsidemargin}{0mm}
+\setlength{\itemindent}{0pt}
+\setlength{\parsep}{0pt}
+\setlength{\itemsep}{0pt}
+
+\newcommand{\bold}{\bfseries}
+\newcommand{\bbold}{\large\bfseries}
+\newcommand{\bbig}{\Large\bfseries}
+\newcommand{\ital}{\itshape}
+\newcommand{\tts}{\small\ttfamily}
+\renewcommand{\rm}{\rmfamily}
+% EMBOLDEN A PHRASE
+\newcommand{\bd}[1]{{\bold#1}}
+\newcommand{\bi}[1]{{\bfmath#1}}
+
+\setlength{\abovedisplayskip}{4pt}
+\setlength{\belowdisplayskip}{0pt}
+\setlength{\parindent}{0pt}
+\newcommand{\weeskip}{\vspace 2pt}
+\newcommand{\rr}{\raggedright}
+\newcommand{\pb}{\newpage}
+\newcommand{\supsc}[1]{$^{#1}$}
+\newcommand{\subsc}[1]{$_{#1}$}
+\newcommand{\degrees}{$^\circ$}
+\newcommand{\sinth}{\ensuremath{\sin\theta/\lambda}}
+\newcommand{\inA}{\AA\ensuremath{^{-1}}}
+%
+% 
+%
+% SPECIAL DEFINITIONS USED IN APPENDICES
+%USEFUL LENGTHS
+\newlength{\remainwidth}
+\newlength{\chdrwidth}
+\newlength{\commwidth}
+\settowidth{\chdrwidth}{/MMMMMM/ to use:}
+\setlength{\commwidth}{\textwidth}
+\addtolength{\commwidth}{-\chdrwidth}
+\newlength{\smallskiplength}
+\newlength{\bigskiplength}
+%
+%SPACE SKIPPING
+\setlength{\smallskiplength}{0.5ex}
+\setlength{\bigskiplength}{2ex}
+%
+\newcommand{\ssk}{\vspace {0.2ex}}
+\newcommand{\ssp}{\\ [0.2ex]}
+\newcommand{\bgs}{\vspace {2ex}}
+\newcommand{\hs}{\hspace {0.5 em}}
+%
+%PARAGRAPH BREAKING            
+% PARAGRAPH BREAK WITH REQUEST **NOT** TO BREAK PAGE HERE:
+\newcommand\pn{\nopagebreak[3]\par}
+% PARAGRAPH BREAK WITH SUGGESTION TO BREAK PAGE HERE IF CONVENIENT:
+\newcommand\p{\pagebreak[2]\par\vspace{2mm}}
+%
+\newcommand{\sstartmodule}[5] {#5\begin{center}
+           {\bbig #1\\}{\bbold #2\\}\end{center}
+            #3\index{{#1}{#4}{#2}{#3}}
+           \pn}
+\newcommand{\startmodule}[4]{\begin{center}
+           {\bbig #1\\}{\bbold #2\\}\end{center}
+            #3\index{{#1}{#4}{#2}{#3}}
+            \pn}
+\newcommand{\theprogrun}{{\bold Running the program:}\\ }
+\newcommand{\thearguments}{{\bold Arguments:}\\ }
+\newcommand{\theprecalls}{{\bold Prerequisite calls:}\\ }
+\newcommand{\thedescription}{{\bold Description:}\\ }
+\newcommand{\thenotes}{{\bold Notes:}\\ }
+\newcommand{\theinput}{{\bold Input:}\\ }
+\newcommand{\theoutput}{{\bold Output:}\\ }
+\newcommand{\thecommon}{{\bold Common blocks used:}\\[-4ex] \begin{commlist}}
+\newcommand{\finmodule}[3]{\begin{center} #1 
+            \makebox[\textwidth]{\bold Classification:\hfill#2\hfill#3}
+            \end{center}
+            \rule{\textwidth}{0.5pt}\p}
+%The title pages
+\newcommand{\HTMLTitlePage}[2]{\pagestyle{empty}\pagenumbering {roman}
+	\begin{center}
+            {\bbig The Cambridge Crystallographic
+            Subroutine Library #1\\[20mm]}
+              {\bbold #2\\ }
+              \end{center}
+            \newpage
+            \pagenumbering{arabic}}%
+%
+\newcommand{\MakeTitlePage}[2]{\pagestyle{empty}\pagenumbering {roman}
+            \vspace*{25mm}
+            \begin{center}
+            \rule{100mm}{1pt}\\[5mm]
+            {\bbig The Cambridge Crystallographic\\
+            Subroutine Library\\
+            \rule{100mm}{1pt}\\[30mm]
+             #1}\\[10mm] 
+            {\bbold to the\\[5mm]Mark 4 User's Manual}\\[20mm]
+            {\bbig #2\\
+            \vfill 
+            \rule{50mm}{1pt}\\
+            P.J. Brown\\
+            \today\\}
+            \rule{50mm}{1pt}\\[10mm]
+            \end{center}
+            \newpage
+            \ \ 
+            \vfill
+            \hrule
+            \vspace{1mm}
+            The text for this appendix was produced from the Cambridge
+            Crystallography Subroutine Mark 4 library using a perl script
+            written by the author and it was  typeset using \LaTeX.
+            \\[-2mm]
+            \hrule
+            \newpage
+            \pagenumbering{arabic}}%
+\newcommand{\listitem}[4][]{\item[#1\hfill] #2\dotfill{#3}} 
+%\newcommand{\listitem}[6][]{\iftexforht{\item[#3\hfill] #4\dotfill{#5}} 
+%							{\#1	\item[#3\hfill] #4\dotfill{#5} }}         
+\newenvironment{callslist}{\begin{list}{}{\setlength{\rightmargin1}{2mm}
+                                        \setlength{\labelwidth}{6em}
+                                        \setlength{\leftmargin1}{\labelwidth}
+                                        \addtolength{\leftmargin}{\labelsep}}}
+                          {\end{list}} 
+\newcommand{\callitem}{\item[\bold Calls:\hfill]}                                     
+\newcommand{\calditem}{\item[\bold Called by:\hfill]}                                     
+\newcommand{\entritem}{\item[\bold Entries:\hfill]}                                     
+\newenvironment{commlist}{\begin{list}{}{\setlength{\rightmargin1}{1em}
+                                        \setlength{\labelwidth}{10em}                                        
+                                        \addtolength{\itemsep}{-2ex}
+                                        \setlength{\leftmargin1}{\labelwidth}
+                                        \addtolength{\leftmargin}{\labelsep}}}
+                          {\end{list}} 
+\newcommand{\commitem}[1]{\item[#1\hfill]}                                     
+\newenvironment{alfalist}[1]{{\bbold #1}
+                              \begin{list}{}{%\setlength{\rightmargin1}{1em}
+                                        \setlength{\labelwidth}{5em}                                        
+                                        \addtolength{\itemsep}{-1ex}
+                                        \setlength{\leftmargin1}{\labelwidth}
+                                        \addtolength{\leftmargin}{\labelsep}}}
+                          {\end{list}} 
+\newenvironment{catslist}[2]{{\bold #1 #2}
+                              \begin{list}{}{%\setlength{\rightmargin1}{1em}
+                                        \setlength{\labelwidth}{2em}                                        
+                                        \addtolength{\itemsep}{0ex}
+                                        \setlength{\leftmargin1}{\labelwidth}
+                                        \addtolength{\leftmargin}{\labelsep}}}
+                          {\end{list}} 
+\newenvironment{typeslist}[2]{\item{\bold #1} {\emph#2}
+                              \begin{list}{}{%\setlength{\rightmargin1}{1em}
+                                        \setlength{\labelwidth}{2em}                                        
+                                        \addtolength{\itemsep}{0ex}
+                                        \setlength{\leftmargin1}{\labelwidth}
+                                        \addtolength{\leftmargin}{\labelsep}}}
+                          {\end{list}} 
+\newenvironment{subrlist}{\item{\vspace{-1ex}\emph{Attached Subroutines}}
+                              \begin{list}{}{%\setlength{\rightmargin1}{1em}
+                                        \setlength{\labelwidth}{2em}                                        
+                                        \addtolength{\itemsep}{0ex}
+                                        \setlength{\leftmargin1}{\labelwidth}
+                                        \addtolength{\leftmargin}{\labelsep}
+                                        \addtolength{\topsep}{-2ex}}}
+                          {\end{list}} 
+\newenvironment{MakeClassList}[1]{\setcounter{page}{0}
+                                  \newpage
+                                  \pagenumbering{roman}
+                                  \pagestyle{plain}
+                                  \setcounter{page}{0}
+                                  \begin{center}{\bbig Classified Index \\
+                                                {\bbold of}\\#1}\end{center}
+                                  \vspace{15mm}}
+               {\newpage\setcounter{page}{0}} 
+\newenvironment{MakeAlphaList}[1]
+                {\newpage
+                \begin{center}{\bbig Alphabetic Index\\{\bbold of}\\#1}\end{center}
+                \vspace{15mm}}
+               {}
+\newenvironment{listdirectory}{\\[1ex] \begin{tabular}{ll}}{\end{tabular}\\}  
+\newcommand{\diritem}[2]{#1&#2\\}                                      
+\newcommand{\thecomblock}[1]{{\bbold COMMON BLOCK #1}\nopagebreak[3]\\[1ex]
+                               {\bold Specification:}\nopagebreak[3]\\[-3ex]
+                               \begin{verbatim}} 
+\newenvironment{thecomdesc}{{\bold Description:}\nopagebreak[3]\\[-3ex]
+                            \begin{quote}}
+                            {\end{quote}\vspace{-3ex}}
+\newenvironment{thecomdecl}{{\bold Declared by:}\nopagebreak[3]\\[-3ex]
+                            \begin{commonlist}}
+                           {\end{commonlist}}
+\newenvironment{thecomsymb}{{\bold Symbolic parameters used:}\nopagebreak[3]\\[-3ex] 
+                             \begin{commonlist}}
+                            {\end{commonlist}}
+\newenvironment{commonlist}{\begin{list}{}{\setlength{\labelwidth}{25mm}                                        
+                                        \setlength{\leftmargin1}{\labelwidth}
+                                        \addtolength{\leftmargin}{\labelsep}
+                                        \addtolength{\itemsep}{-1.5ex}}}
+                            {\end{list}}
+\newenvironment{thesympars}{
+                            \section{List of Symbolic parameters}
+                                \begin{list}{}{\setlength{\labelwidth}{15mm}                                        
+                                        \addtolength{\itemsep}{1ex}
+                                        \addtolength{\parsep}{-1.5ex}
+                                        \setlength{\leftmargin1}{\labelwidth}
+                                        \addtolength{\leftmargin}{\labelsep}}}
+                            {\end{list}}
+\newenvironment{sympar}[3]{\clistitem{{\bold #1}}#3
+                                      \begin{list}{}{\setlength{\labelwidth}{20mm}                                        
+                                      \setlength{\leftmargin1}{\labelwidth}
+                                      \setlength{\topsep}{-2ex}
+                                      \addtolength{\leftmargin}{\labelsep}
+                                      \addtolength{\leftmargin}{5mm}
+                                      \addtolength{\itemsep}{-1ex}}
+                            \clistitem{set to:}  #2}
+                           {\end{list}}
+\newcommand{\citedlist}{\clistitem{assigned in:}}
+\newcommand{\clistitem}[1]{\item[#1\hfill]}   
+%Hyperref commands   
+\newcommand{\mlink}[2]{\hyperref{../appenx/}{#1.html/}{}{#2}}
+\newcommand{\htmllink}[2]{\hyperref{\ref{#2}}{#1}}
+\newcommand{\htmladdnormallink}[2]{\hyperref{\ref{#2}}{#1}}

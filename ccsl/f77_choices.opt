@@ -1,0 +1,3 @@
+#MacOSX Intel gfortran
+gfortran -c -Wall -m64  # Fortran command to compile library modules as object modules
+gfortran  -Wall -m64                 # Fortran compiler for main progs

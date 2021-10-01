@@ -1,0 +1,283 @@
+\documentclass[onecolumn,twoside,11pt,a4paper]{report}
+\usepackage{makeidx,color}
+\usepackage{ifthen,CCSLapa,}
+\usepackage{hyperref}
+\makeatletter
+\makeatletter
+\@ifpackageloaded{tex4ht}
+  {\let\iftexforht\@firstoftwo}
+  {\let\iftexforht\@secondoftwo}
+\makeatother
+\newcommand{\latexonly}[1]{\iftexforht{}{#1}}
+\newcommand{\htmlonly}[1]{\iftexforht{#1}{\relax}}
+\pagestyle{appheadings}
+\makeindex
+\begin{document}
+\iftexforht{\HTMLTitlePage{Appendix E}{Tools for processing the CCSL Master file}}
+{\MakeTitlePage{Appendix E}{Tools for processing the CCSL Master file}}
+\appendix
+\setcounter{chapter}{5}
+\markboth{Tools for processing the CCSL Master file}{}
+\section{Distributed files}
+The CCSL can be downloaded by anonymous ftp from \href{http://forge.epn-campus.eu/projects/sxtalsoft/repository/show/CCSL/source}{the epn-campus repository}.  The compressed
+archive ccslx.x.x.tar.gz (where x.x.x is the version number) contains the
+CCSL source code and a set of data with which to test some of the programs in the installation. The scripts needed to make and install the library  are also in the archive.  The constituent files should be
+unpacked from the \emph{archive}, into a temporary directory, with the command\\
+\texttt{tar -zxf ccslX.X.X.tar.gz}
+\\[2ex]
+The archive contains the following files needed to build the system:
+\begin{listdirectory}
+\diritem{0README\hfill} {Description}
+\diritem{Install\hfill} {Perl script to install all files in the recommended 
+directory tree}
+\diritem{Makefile.ccsl\hfill} {File to make the library and executables for chosen
+main programs}
+\diritem{aliases.ccsl\hfill} {commands to set aliases for CCSL tools}
+\diritem{ccsl.pl\hfill}{Perl script to manipulate the master file}
+\diritem{ccsl\_choices.opt\hfill} {Site and system choices}
+\diritem{CCSLtests.pl} {A sript for running the system tests.}
+\diritem{extract.pl\hfill} {Perl script called by ccls to extract a \emph{part} 
+from the master file}
+\diritem{f77\_choices.opt\hfill} {Location of f77 compiler, choice of
+ compilations switches, Fortran run-time libraries etc.}
+\diritem{fpr.pl\hfill} {Perl script to print a Fortran listing on a postscript
+printer.}
+\diritem{get.pl\hfill} {Perl script used to extract indididual routines 
+or programs.}
+\diritem{graphics\_choices.opt\hfill} {Choice of graphics driver, location of
+ graphics libraries}
+\diritem{list\_of\_progs.opt\hfill} {List of programs to be created as 
+executables}
+\diritem{load.pl\hfill} {Perl script to make single executable programs}
+\diritem{makobj.pl\hfill} {Perl script to make object modules}
+\diritem{mistre.ss\hfill} {The CCSL master file}
+\diritem{parlist.opt\hfill} {List of local preferences for values of symbolic 
+parameters}
+\diritem{testdata.testd\hfill} {A directory structure containing data for checking the installation.} 
+\end{listdirectory}\par
+\section{Installing the CCSL files in the distribution}
+The Install script must be edited so that its first line indicates where Perl
+is installed on your system. 
+eg ``\#! /usr/bin/perl" may need to be changed to say ``\#! /usr/sbin/perl"\
+\par
+Then choose the directory in which the system is to be installed (it need not yet exist) and set the environment variable CCSL to point to it.
+Move to the directory into which the archive was unpacked and execute the command:
+\texttt{./Install \$CCSL}. This should install
+the required files in a directory structure rooted at the directory
+\$CCSL. Setting [part] to\emph{source} will install just those files needed to make the system. 
+\p
+The CCSL root directory \$CCSL 
+has  subdirectories  exe, graf, options, perl, lib, testdata  and source.
+\par
+./exe should be empty. 
+It will finally contain the executable programs
+\\[0.5ex]
+./graf should be empty
+It will finally hold the graphics modules.
+\\[0.5ex]
+./options contains files used to specify local options:\\
+\begin{tabular}{lllll}
+ccsl\_choices\qquad&graphics\_choices\qquad&parlist\\               
+f77\_choices\qquad&list\_of\_progs\\[0.5ex] 
+\end{tabular}\\
+They are provided as examples only and should be edited to suit local 
+conditions.      
+\\[0.5ex]
+./perl contains all the perl scripts viz: \\
+\begin{tabular}{lllll}
+ccsl\qquad &CCSLtests\qquad&extract\qquad&fpr\\         
+get\qquad&makobj\qquad&mkindex\\
+\end{tabular}\\
+All these scripts will have been edited by Install so that their initial
+line indicates where perl is located.
+\\[0.5ex]
+./lib should be empty.  
+It will eventually contain the linkable library of object modules.
+\\[0.5ex]
+./source contains just the master file: mistre.ss.\\ 
+It will eventually hold the FORTRAN source code for the library and 
+the main programs.
+\\[1ex]
+The Install script also creates a file ``environment" in the base directory
+which defines environment variables pointing to the various directories
+created. ``source"ing this file should set these variables. They must be set
+before using the make files and perl scripts described in the following
+sections.
+The environment variables defined are:
+\begin{listdirectory}
+\diritem{CCSL\hfill}          {to point to the CCSL root directory}
+\diritem{CCSL\_SRC\hfill}      {as \$CCSL/source}
+\diritem{CCSL\_OPT\hfill}     {as \$CCSL/options}
+\diritem{CCSL\_PERL\hfill}     {as \$CCSL/perl}
+\diritem{CCSL\_LIB\hfill}      {as \$CCSL/lib}
+\diritem{CCSL\_EXE\hfill}      {as \$CCSL/exe}
+\diritem{CCSL\_GRAF\hfill}     {as \$CCSL/graf}
+\diritem{CCSLIB\hfill}      {as \$CCSL/lib/libmk4.a (the linkable library)}
+\end{listdirectory}
+You might then add  the following lines to your
+\$HOME/.tcshrc file\\
+\texttt{
+\# Define variables and aliases for CCSL\\setenv CCSL path\\
+if (-e \$CCSL/environment) then\\
+\hspace*{3em}source \$CCSL/environment\\
+\hspace*{3em}setenv PATH \$PATH':'\$CCSL\_EXE\\
+endif\\
+\#CCSL aliases\\ 
+if (-e \$CCSL/aliases) then\\
+\hspace*{3em}source \$CCSL/aliases\\
+endif\\
+\# End of CCSL setup\\}
+%
+\section{Building the system}
+\subsection{The format of the master file}
+The master file is divided into sections separated by lines beginning   with a
+\emph{``flag word"}.  The first section documents all changes made to the mk4 code.
+It is flagged \textbf{UPDT}. It is followed by the disclaimer and copyright notice
+flagged \textbf{!!!!!} and a section flagged \textbf{++++} which defines how
+routines should be documented using special comment lines. These lines allow the
+appendices to the manual to be generated automatically. The third section flagged
+\textbf{PARS} lists the names of all the symbolic parameters and their default
+values. If different values are required they can be defined in the file 
+\$CCSL\_OPT/parlist. The end of the section is flagged \textbf{STOP}. The fourth
+section contains the definitions of all the shared COMMON BLOCKS with symbolic
+parameters substituted for some of the array dimensions. Its start is flagged
+\textbf{COMM} and its end \textbf{DONE}. 
+\par
+The remaining sections contain the different \emph{parts} of the library
+they are \textbf{PIG PR JBF PF MAI LIB NEW PJB PMA}. The start of each 
+is flagged \textbf{\#\#XXX}
+where \textbf{XXX} is the \emph{part} name and its end by \textbf{\#\#ENDXXX}. 
+\subsection{The \emph{parts} in the master file}
+The different parts contain:
+\begin{listdirectory}
+\diritem{LIB\hfill}     {The main MK4 library} 
+\diritem{MAI\hfill}     {Generally useful main programs} 
+\diritem{PIG\hfill}     {Drivers for different graphics devices} 
+\diritem{PR\hfill}      {General profile refinement subroutines} 
+\diritem{PF\hfill}      {TOF profile refinement subroutines} 
+\diritem{PMA\hfill}     {Profile refinement main programs} 
+\diritem{JBF\hfill}     {Special main programs} 
+\diritem{PJB\hfill}     {Special main programs} 
+\diritem{NEW\hfill}     {Experimental code - not used} 
+\end{listdirectory}
+  (Only the parts LIB, MAI and PIG are used in what follows)
+\\
+\subsection {Flags for system dependent code}
+Within the \emph{parts} sections of the master file the common blocks used by
+each module are simply indicated by their names viz: /NAME/ and occurrences of
+symbolic parameters in the code by \textbf{\%PAR\%} where \textbf{PAR} 
+is the parameter name.
+\par
+Lines of code which are system dependent are flagged \textbf{CXXX} or 
+\textbf{C-XXX} where XXX is
+one of the options. Options currently defined in mutually exclusive sets are:
+\begin{listdirectory}
+\diritem{VMS/UNIX\hfill}   {operating system } 
+\diritem{LAX/PICKY\hfill}  {strictness of F77 standard} 
+\diritem{ILL/RAL\hfill}    {site options} 
+\end{listdirectory}
+The line is included if XXX is selected and it is flagged \textbf{CXXX}, and excluded
+if flagged \textbf{C-XXX}.
+%   
+\section{Making the library}
+Once the environment variables have been set by changing to the directory \$CCSL
+and executing ``\texttt{source environment}" a default version of the whole  system
+can be built by  executing\\  
+\texttt{make all}\\
+The local options used by this command are defined in the \$CCSL/options directory.
+The example files given are those used on an Intel MAC running OS10.6.5 with gfortran installed. They
+may need to be changed for other systems.
+\par
+The ``\texttt{make all}" command first extracts the LIB and MAI sections from the
+master file, substitutes the chosen values for all the symbolic parameters,
+inserts the complete specifications of the COMMON blocks and includes chosen
+flagged lines by inserting an unflagged copy. The resulting files libmk4.f and
+maimk4.f are added to the \$CCSL/source sub-directory. 
+\par
+In a second step the libmk4.f file is split into individual routines each of
+which is compiled separately and all the object modules are archived in the file
+\$CCSL/libmk4.a. Modules which fail to compile are placed in the directory
+\$CCSL/bad and the error messages from the compilation in \$CCSL/fortran.errors.
+If compiled successfully both the source and object modules are deleted. The
+compiler commands are specified in the file \$CCSL/options/f77\_choices.
+\par
+The main programs to be loaded are listed in the file
+\$CCSL/options/list\_of\_progs. Programs which use graphics require 
+some switches to be given. The currently recognised switches are:
+\begin{listdirectory}
+\diritem{-g \qquad}    {uses the  graphics library specified in graphics\_choices}
+\diritem{-ps\qquad}   {uses the postscript version of CCSL graphics (pigpos.f)}
+\diritem{-pg \qquad}   {uses the CCSL graphics driver chosen in graphics\_choices}
+\end{listdirectory}
+The \texttt{make all} command will extract the graphics part (PIG) from the master file
+and place the fortran source file containing all the different versions in
+\$CCSL/graf/pigmk4.f. Then for each program in the list it gets the FORTAN code
+from maimk4.f, compiles it and links it with \$CCSL/lib/libmk4.a. Where
+indicated by the switches the appropriate graphics routine and any associated
+graphics libraries are also included. The location of the graphics library must be
+defined in the file \$CCSL/options/graphics\_choices. The executable code
+corresponding to programs which have been successfully compiled and linked are
+transferred to the directory \$CCSL/exe; they are identified by the name of the
+program.
+\section{Using other modules}
+\subsection{Loading Main programs}
+Any  program included in maimk4.f (eg simple) can be loaded by the 
+dialogue:\\[0.2ex]
+1\% \texttt{\$CCSL\_PERL/get mai}\\
+ Name of module (RETURN to exit) \texttt{simple} \\  
+Got simple.got\\
+ Name of module (RETURN to exit)\\ 
+2\% \texttt{mv simple.got simple.f}\\
+3\% \texttt{f77 -n32 simple.f \$CCSL\_LIB/libmk4.a -o simple}\\
+4\%\\[0.2ex] 
+Alternatively the \emph{load} command defined in the aliases file can be used eg\\
+5\% \texttt{\$CCSL\_PERL/load simple}\\
+6\%\\[0.2ex] 
+Note that this command will \emph{get} simple.f if it is not present.
+If the CCSL aliases have been set then \texttt{\$CCSL\_PERL/get} can be
+replaced simply by \texttt{get} and \texttt{\$CCSL\_PERL/load} by 
+\texttt{load}
+%
+\subsection{Extracting subroutines}
+The same \emph{get} script can be used to extract individual modules from the library
+eg: \texttt{\$CCSL\_PERL/get lib}\  \ 
+will extract one or more chosen modules from libmk4.f and place
+them in  files \emph{module-name}.got.
+Using  the -f switch (\texttt{\$CCSL\_PERL/get -f lib}) gives the extracted 
+files the extension .f.\\
+\section{Testing the Installation} 
+\subsection{Structure of the test data} 
+The \$CCSL/testdata directory contains a collection of data files which
+may be used to test the installation. The files are arranged in
+sub-directories with the name of the programs (pname) to which the data refer.
+For each set of test data, identified by say xxx, in a directory (eg
+\$CCSL/testdata/pname) there is normally a crystal data file xxx.cry and
+perhaps an input data file xxx.ext (where ext is the default extension
+expected by the program). There will always be a listing file
+``pname\_xxx.lis". There may be other input and output files named
+``xxx.yyy" or ``somename\_xxx.yyy" and identifable from either ``somename"
+or the extension ``yyy". For example the sflsq (structure factor least
+squares directory contains the files for a structure factor refinement of
+LiCoPO4.  lcp.cry is the crystal data file lcp.sfe the observations file
+containing the extinction constants sflsq\_lcp.lis the output listing
+and lcp.new a crystal data file containing the refined parameters.
+%
+\subsection{Running the tests}
+For each set of data there is a file r\_xxx (or simply r if there is
+only one test data set for the program) The program can be tested by
+running the program so that it takes its input from the r\_xxx file eg
+with the command: \\
+\texttt{pname < r\_xxx}\\
+There is an executable perl script "CCSLtests" in the perl directory
+which will run all the tests specified in the file test\_list and report
+on the results. The ``r\_xxx" files for graphics programs may need to be
+modified to reflect local options. 
+%
+\section{Documentation}
+\latexonly{The Users' manual for the CCSL system and its Appendices are available  
+ \htmladdnormallink{on the web.}{http://www.ill.eu/sites/ccsl/html/ccsldoc.html}.}
+  Printable PDF versions
+  \htmlonly {copies  of the Users' manual for the CCSL system and its Appendices}
+ can be downloaded from 
+ \htmladdnormallink{the epn-campus repository}{http://forge.epn-campus.eu/projects/sxtalsoft/repository/show/CCSL/doc}.
+\end{document}

@@ -1,0 +1,17 @@
+#Lines starting # are comment
+#
+# Terminal preferences for CCSL graphics using gnuplot
+# The first two lines list possible devices for 1 screen output, 2 hard copy
+# Each subsequent line defines parameter for one of the above  devices (gnuplot terminals)
+# They give the  device name  recognised by gnuplot
+# followed by 2 numbers: a scale factor S, and the canvas width W in the units understood
+# by gnuplot. S* W gives the canvas width in pixels
+# For hard copy devices W is followed by the 3 character extension for the printable output file.
+# the rest of the line gives the gnuplot terminal options
+aqua x11
+post jpg
+aqua 1 800   enhanced dashed
+x11  1 800   persist enhanced
+post eps 95.76 8. eps enhanced color
+# the scale factor 95.8 converts the width in inches to pixels (1.33 pixels /pt)
+jpg  1 800   jpg  enhanced color

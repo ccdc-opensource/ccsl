@@ -1,0 +1,218 @@
+%\setcounter{page}{9}
+%\setcounter{chapter}{1}
+%\chapter{THE STRUCTURE OF THE SYSTEM}
+%\begin{htmlonly}
+%\usepackage{CCSLman,html,makeidx,color,ifthen,bm}
+%\input{chap2.ptr}
+%\end{htmlonly}
+\internal{c1}
+\internal{c3}
+\internal{c4}
+\internal{c5}
+\internal{c6}
+\internal{c7}
+\startdocument
+\label{chap:2}
+\markboth{The Structure of the System}{}
+\par  
+This Chapter is an introduction to the Library as a whole,  the language
+used, and the Master File.  A reader interested initially only in the
+crystallography could skip to the 
+\latexonly{\bd{List of Available Routines}
+(page~\pageref{routines:lis})}
+\htmlonly{\href{../appenx/libclasslist.html}{List of Available Routines}}.
+\section{CCSL As a FORTRAN Library}\markright{CCSL As a FORTRAN Library}
+CCSL is a set of FORTRAN routines.  Specifications of all
+the routines with detailed descriptions are in Appendix A, in alphabetical
+order of routine.  Later in this chapter they are listed in groups under
+various headings, to give the user a broad view of what is available.
+\p
+A FORTRAN job always has a \ital{main} program, which usually calls routines. A
+CCSL user is expected to provide the main program, and then to link it with
+CCSL compiled as a searchable library.  (The Master File contains some  
+main programs as well as the Library).
+\p 
+Running a FORTRAN job varies from one computer to another, but
+where a FORTRAN compiler exists there should be some sort of facilities
+for:
+\p 
+\begin{list} {} {\setlength{\labelwidth}{2 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{5mm}}
+\item[(a) \hfill] compiling each routine of CCSL separately, and holding the set of
+       such compiled routines as a Library, and
+\item[(b) \hfill] when given a CCSL main program, scanning this Library and
+       extracting any routines referred to by the main program (and all
+       routines referred to by them, and so on) so that the program can be
+       run.\end{list}
+The point of compiling separate routines into a Library is that not
+every run needs every routine;  the user is unlikely to call for, say,
+absorption corrections in the same run as a plotted Fourier.  So he
+wishes to load and obey only those FORTRAN routines he actually needs in the
+program.
+\p 
+\subsection{Language}
+CCSL is written almost entirely in FORTRAN 77, (ANSI standard X3.9-1978). The
+reference for what is standard F77 was taken from the VAX-11
+FORTRAN Language Reference Manual (AA-D034C-TE) trying to ignore the
+extensions printed in blue. In update 4.21 (2011) the code was
+upgraded so as to generate no warnings when compiled with 
+\href{http://gcc.gnu.org/fortran/}{gfortran}.
+to 
+\p 
+\subsection{Portability}
+There will always be problems trying to make the FORTRAN portable.
+The areas which are particularly troublesome in portable programs are:
+\p 
+\begin{list} {} {\setlength{\labelwidth}{2 cm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{5mm}}
+\item[\ \ 1) \hfill] input/output
+\item[\ \ 2) \hfill] use of graphical output
+\item[\ \ 3) \hfill] what the consequences of an error are\end{list}
+\par  
+but there are other areas, which tend only to become apparent when the
+system is actually implemented on a particular machine.
+\p
+We are aware of the problems of portability, but nevertheless we insist
+that CCSL must be portable.  Some of the FORTRAN used may seem pedestrian
+as a result. 
+\p 
+The best way to get a view of CCSL's FORTRAN is to print out part of
+the Library.
+It is intended to be understandable as far as possible.
+\p 
+\section{The Master File}\markright{The Master File}
+The complete set of CCSL routines and main programs is held in a \ital{Master
+File}. When a new user who wishes to install CCSL on his computer,
+he should obtain a Master File and a set of 
+\iftexforht{\href{http://www.perl.com}{\ital{perl}}}{\ital{perl}}
+ scripts which can be used to
+generate a version of the Library and a set of main programs 
+to run on his computer.
+\p 
+It would be possible to provide a FORTRAN Library which could be
+compiled directly.  However, one of the features of the \ital{Master File}
+format is that it contains symbolic parameters which allow the dimensions 
+of arrays to be customised. For example, if the user discovers a need for,
+say, 100 atomic positions, when only 50 are allowed in the standard CCSL,
+he can remake his Library to cater for this.
+\p 
+It is useful to hold all the code (all routines and all programs)
+together, even though the resulting file is large. This 
+ensures that when a library and a set of programs is generated, all copies 
+of a particular labelled COMMON block are identical;  getting them
+out of step is a frequent
+source of error.  All the COMMON blocks are listed in alphabetical order
+of their names at the start of the Master File, many with symbolic
+dimensions for their arrays (see also 
+\iftexforht{\href{../appenx/appenc.html}{ Appendix C}}{Appendix C)}.
+\p 
+The Master File also contains all the alternative code for areas which
+are system or device dependent.  Such code has been classified into three types
+\begin{enumerate}
+\item The strictness with which the F77 standard is imposed.\\
+the present options are:
+\begin{description}
+\item[LAX] Allow very common extensions of the standard, in particular \$
+FORMAT processing.
+\item[PICKY] Enforce the standard rigidly
+\end{description}
+\item Operating system dependent code.
+\begin{description}
+\item[UNIX] Code and system functions understood only by UNIX operating 
+systems eg SETENV, and case dependent file-names.
+\item[VMS] The same for VMS. eg The READONLY option must be given to open
+existing files.
+\end{description}  
+\item Site preferences, of historical origin. After its inception in the
+now defunct Crystallographic laboratory of the Cavendish Laboratory Cambridge, 
+the library was developed in parallel at the Institut Laue Langevin 
+(ILL) and at the Rutherford Laboratory (RAL) where different preferences
+developed.
+\begin{description}
+\item[ILL] The default extension for Crystal Data files is ".cry". Listing files
+are called by the name of the program with extension ".lis".
+\item[RAL] The default extension for Crystal Data files is ".ccl". The user
+is asked to name his Listing files.
+\end{description}
+\end{enumerate}
+The start of option dependent lines of code are flagged in the master file 
+{\bf CS} followed by one of
+the above \ital{option words}. The line will be unflagged so that
+it is included in the FORTRAN compilation only if the \ital{option word} is amongst the
+chosen options. A minus sign(-) preceeding the \ital{option word} indicates that
+the line should be included only of the \ital{option} is {\bf not} chosen.
+\par 
+More details of the Master file and the scripts provided to manipulate it are
+given in \iftexforht{href{../appenx/appene.html}{Appendix E}}{Appendix E}. 
+\p
+\subsection{Sequence of Routines}
+The Master File contains a sequence of routines in alphabetical order of
+their names.  This ordering is usually the most convenient for reference,
+but is unsuitable for a library on machines which have
+one-pass loaders. 
+In order to make it possible  to generate a \ital{sorted} list of routines,
+which may be correctly linked by a one-pass loader. The necessary 
+information is stored in the first (comment) line of each routine, which reads:
+``C~LEVEL" followed by an integer.  Those routines which call nothing else from
+CCSL are LEVEL~1;  those only calling level 1 are LEVEL~2, and so on.
+The sorted version of the Library should have the routines of the highest
+level first, then all the next level, and so on down to LEVEL~1.
+\p
+{bf Note} added in the April 2013 edition\\
+One pass loaders are not used with gfortran and so the LEVELS given to recently
+added modules need no longer be strictly correct although the C LEVEL line
+must still be present.
+\p 
+\section{Routines Available}\markright{Routines Available}
+Most CCSL routines can be assigned to one of the three broad categories
+introduced in the small sample main program of \htmlref{Chapter 1}{chap:1}.  These are:
+\p
+\begin{list} {} {\setlength{\labelwidth}{20mm}
+  \setlength{\parsep}{-1ex}
+  \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{5mm}}
+ \label{chap2:groups}
+\item[A. \hfill] \ital{Setting-up} routines, concerned with input of information and 
+     preparation for subsequent calculation;
+\item[B. \hfill] \ital{Crystallographic} routines, doing specific calculations such as a
+       Fourier section, a structure factor or an absorption correction; 
+\item[C. \hfill] \ital{Utility} routines, which are of more general use, being small
+       routines to perform tasks such as the solution of spherical triangles,
+       matrix multiplication or a vector product.\end{list}
+\p
+The boundaries between categories are not rigid.  In general, category C
+routines can be used in many contexts and do not include labelled COMMON
+(other than /IOUNIT/ which associates FORTRAN input/output units with
+physical devices).  Category B are useful in more specific contexts;
+various output routines are included.  Category A includes all routines
+which read from the Crystal Data; most of these routines are used just once
+at the start of a job.
+\pn
+Within each category there is a wide range of material.  Some attempt at
+further classification follows.  Some routines are of obvious use to
+users who write their own main programs, whereas some belong internally
+to CCSL.
+\p 
+All the routines available at the time of writing are listed here.  The
+user should also consult the separate Appendix A, which gives more detail
+and may be more up-to-date.
+%******************************************************************
+% Note: The subroutine list is created from the index to Appendix A
+% by the perl script mkindex.  PJB
+%******************************************************************
+%
+%}%\end{latexonly}
+\iftexforht{\applink{see:Classified List of Subroutines\\}
+{../appenx/appendix.html}{appa}
+\href{../appenx/libalfa.html}{Alphabetic List of Subroutines}}
+{\section{Classified List of Subroutines \label{routines:lis}}
+\markright{Classified List of Subroutines}
+The page numbers given refer to AppendixA\\[0.5ex]
+\input{libclasslist}
+}
+\finchapter
+%\end{document}

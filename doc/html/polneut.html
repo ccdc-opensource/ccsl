@@ -1,0 +1,55 @@
+<HTML>
+<HEAD>
+<title>Polarised Neutron Scattering</title>
+<LINK REL="STYLESHEET" HREF="ccslweb.css">
+</HEAD>
+<BODY class = "interior">
+<spacer type = vertical size = 20>
+<h1>Routines for Polarised Neutron Scattering </h1>
+The library contains some programs and subroutines specially written to treat
+polarised neutron diffraction data. <p>
+The main programs are:
+<dl>
+<dt> <a href="../appenx/sorgam.html"> <bd>SORGAM</bd></a>
+<dd>A program to calculate magnetic structure factors
+from polarised neutron flipping ratios.
+<dt> <a href="../appenx/arrsnp.html"> <bd>ARRSNP</bd></a>
+<dd>A program to group together equivalent measurements of elements
+of polarisation matrices and give some statistics
+on their degree of equivalence, indices may be submultiples of integers.
+<dt> <a href="../appenx/arisnp.html"> <bd>ARISNP</bd></a>
+<dd>A program similar to ARRSNP but for reflections with incomensurate indices
+<dt> <a href="../appenx/avexar.html"> <bd>AVEXAR</bd></a>
+<dd>Reads the ARRNGEd  SNP data from either ARRSNP or ARISNOP and calculates  mean values of polarisation matrix 
+ components averaged over those which should be equivalent.
+<dt> <bd> <a href="../appenx/palsq.html">PALSQ</a></bd> 
+<dd>Least squares refinement of magnetic structures using scattered
+polarisations obtained with spherical neutron polarimetry (general input polarisation directions.)
+<dt> <bd> <a href="../appenx/snplsq.html">SNPSQ</a></bd> 
+<dd>Least squares refinement of magnetic structures using elements
+of the polarisation matrix which may be combined with other types of data
+such as intensity measurements.
+</dl>
+Some special subroutines are:
+<dl>
+<dt> <bd> <a href="../appenx/libsec_c#CALGAM">CALGAM</a></bd>
+<dd>Solves the quadratic equation for gamma (the ratio of the magnetic to 
+the nuclear structure factor) in terms of the flipping  ratio.
+<dt> <bd> <a href="../appenx/libsec_c#CALPOL">CALPOL</a></bd>
+<dd>Calculates scattered polarisations and their derivatives for 
+structures which may have mixed magnetic and nuclear reflections.
+<dt> <bd> <a href="../appenx/libsec_f#FGAMMA">FGAMMA</a></bd>
+<dd>Calculates gamma, and its standard deviation from a flipping ratio 
+measurement.
+<dt> <bd> <a href="../appenx/libsec_g#GAMEX"> GAMEX</a></bd>
+<dd>Calculates an extinction corrected gamma from a flipping ratio.
+<dt> <bd> <a href="../appenx/libsec_s#SETPOL">SETPOL</a></bd>
+<dd> Reads the up and down polarisations of a polarised neutron beam.
+</dl>
+<p>
+<ADDRESS>
+P.J. Brown - Institut Laue Langevin, Grenoble,  FRANCE.
+ <script type="text/javascript" src="./mailing.js">  </script>
+</ADDRESS>
+</BODY>
+</HTML>

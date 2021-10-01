@@ -1,0 +1,101 @@
+ ***** DISTRIBUTED FILES *****
+The CCSL can be downloaded by anonymous ftp from  ftp.ill.fr/public/dif/ccsl
+as the compressed archive ccsl.tar.gz. The archive should be decompressed
+and the constituent files unpacked, with the command
+  tar -xzf ccsl.tar.gz
+The files should be unpacked into a directory which is NOT the final
+target for CCSL.
+
+For the CCSL source (library and programs only)
+The archive contains the following files:
+
+0README               This file
+CCSLtests.pl         Script to run the tests in /testdata
+Install			     Perl script to install all files in the recommended
+                     directory tree
+aliases              Aliases
+ccsl_choices.opt     Site and system choices
+ccsl.pl              Perl script manipulate the master file
+extract.pl           Perl script called by ccsl to extract a "part" from the
+                     master file
+f77_choices.opt      Compiler commands
+gnuplt.opt           Gnuplot terminal options
+graphics_choices.opt Choice of graphics driver
+list_of_progs.opt    List of programs to be created as executables
+Makefile             File to make the library and executables for chosen
+mistre.ss            The CCSL master file
+load.pl              Perl script to create a makefile and load a program with selected subroutines
+parlist.opt          List of local preferences for values of symbolic
+                     parameters
+testdata             Test data for some CCSL programs
+
+ ***** INSTALLING THESE  FILES (BOURNE shell) *****
+Edit the Install script so that the first line gives the location of Perl
+on your system.
+
+set the environment variable CCSL to the directory in which the the system is to
+be installed. Then do
+
+./Install <part> $CCSL
+
+Running the Install script will install the <part> (all, source or doc):
+in a directory structure rooted at the directory $CCSL.
+If no arguments are given to the Install script the part and root directory
+are obtained interactively.
+
+After installation of "all" or "source" the root directory $CCSL should have
+subdirectories  exe, graf, options, perl, lib  source and testdata.
+After installing "all" or "doc" there should be the additional subdirectory doc.
+
+ ***** QUICK BUILD *****
+
+cd $CCSL
+source environment
+make all
+
+the "source environment" command sets the CCSL environment variables approriately.
+The "make all" command should build the CCSL library archive and executable versions
+of chosen main programs according to the options given in the $CCSL_OPT directory.
+(Note: "make lib" will build the library only)
+When the script is complete $CCSL_SRC should contain:
+libmk4.f    the Fortran source code of the library
+maimk4.f    the Fortran source code of the main programs provided
+mistre.ss   the CCSL Master file
+pigmk4.f    the Fortran source code of the graphics drivers
+
+$CCSL_LIB should contain:
+libmk4.a    the library archive
+
+$CCSL_EXE should contain executables of all the chosen main programs
+
+Fortran errors are reported in the file fortran.errors and fortran modules which
+failed to compile are ib the directory names "bad"
+
+ ***** CHOICES *****
+It is unlikely that the default options included with the distribution
+will be appropriate for installations other than ILL and it will be
+necessary to edit files in the  $CCSL_OPT directory in order to get
+the above quick installation to work.
+
+The $CCSL_OPT directory contains files that are used to define options
+used in building the library and loading programs. They are:
+
+ccsl_choices         defines the system and site preferences
+f77_choices          the commands to compile and link F77 modules
+graphics_choices     version of CCSL graphics driver to be used and the
+                     location of any graphics library needed
+list_of_progs        a list of main programs to be created as executables
+                     each name may be followed by a switch -(pgs)
+                       -p uses CCSL graphics drivers
+                       -g uses chosen grtaphics library
+                       -s uses CCSL postscript graphics.
+parlist              a list of symbolic parameters to be given values
+                     different from their default values, together with
+                     their chosen new values. (see Appendix C of the CCSL
+                     manual)
+The option files included with the distribution indicate the switches
+used at ILL on Silicon Graphics computers running IRIX 6.5 and PowerMacs
+G4/G5 running OSX.10.2/.4.
+In these files any line or part of a line starting # is taken to be
+comment and is not interpreted by the scripts.
+

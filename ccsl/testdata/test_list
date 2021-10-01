@@ -1,0 +1,37 @@
+arrinc kirm r kirm.arr
+arrnge 130kwp r_kwp 130kwp.arr
+arrnge fept r_fept fept.arr
+bonds lcp
+chilsq uas50k r_uas uas50k.new
+chilsq tsn105 r_tbsn tsn105.new
+chilsq tbt10k r_tbt tbt10k.new
+chilsq hexag r_hexag hexag.new
+chilsq powdif r_powdif powdif.new
+forfac feniwf r feniff.cry
+fougpl lamno r  gplcaq.gpl gplcpo.gpl map.dat cmap.dat cont.dat
+fougpl testm rm  gplcaq.gpl gplcpo.gpl  map.dat cmap.dat cont.dat
+fourpl lamno r
+getmsf lcp16 r_lcp16
+getmsf cuteo r_cuteo
+grafic lcpall r gplcaq.gpl gplcpo.gpl grafda.dat
+mag3d ndcuo r_ndcuo ndcuo.ps gplcaq.gpl gnuplt.dat
+maglsq dyfeal r_dyfeal dyfeal.new
+maglsq mnsi r_mnsi mnsi.new
+maglsq mncosb r_mncosb mncosb.new
+maglsq ymn r_ymn ymn.new
+mmplsq cr2o3p r_croj cr2o3p.new
+mmplsq mcsp r_mcsp mcsp.new
+mpclsq au4vp r_au4vp au4vp.new
+mplsq do3 r_do3 do3.new
+mplsq fe3pt r_fe3pt fe3ptp.new
+sflsq lcp r_lcp lcp.new
+sftlsq upt3 r upt3.new
+sorasy pms045 r_pms pms045.asy
+sorgam do3 r_do3 do384.msf SORCOR.LIS
+sorgam fept r_fept fept.msf SORCOR.LIS
+snp/arisnp erm25k r erm25k.arr
+snp/arrsnp mnps r mnps.arr
+snp/averpa erm25k r_ermn erm25k.pal
+snp/averpa mnps r_mnps mnps.pal
+snplsq mnps r_mnps mnps.new
+snplsq khe r_khe khe.new

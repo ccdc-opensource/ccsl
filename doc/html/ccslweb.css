@@ -1,0 +1,6 @@
+BODY.exterior  {background: #FFFF99}
+BODY.interior  {background: #FFFFFF}
+IMG.inset  {border: thick red}
+IMG.ball   {border: no}
+IMG.navig  {hspace: 25; 
+          border: 0}

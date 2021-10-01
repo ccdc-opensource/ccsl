@@ -1,0 +1,45 @@
+E    1   50.0000    0.1629
+L SCAL  20.43245
+L FIX DOMR MOSC SCAL 1
+L MODE 5
+I DTYP 8 OUTP 100 REJ 1 
+I PRIN 2 NCYC 5
+D WVLN    1.1750
+D GEOM    8
+D L/R  1
+D UMAT  0.054784 -0.087995 -0.000149 
+D UMAT  0.087945  0.054759 -0.003388 
+D UMAT -0.000149  0.001664  0.103600
+G FACE 1 1 1 2.21
+G FACE -1 1 1 2.21
+G FACE 1 -1 1 2.21
+G FACE 1 1 -1 2.21
+G FACE -1 -1 1 2.21
+G FACE 1 -1 -1 2.21
+G FACE -1 1 -1 2.21
+G FACE -1 -1 -1 2.21
+G MU .1776 MODE 1
+G PNTS 5 5 5
+N Potassium hexachloro-iridate magnetic symmetry
+C 9.6468,,9.6468
+A K      0.25000   0.25000   0.25000   0.31723     
+A Ir     0.00000   0.00000   0.00000   0.10286     
+A Cl1    0.24015   0.00000   0.00000   0.00000     
+A Cl2    0.00000   0.00000   0.24015   0.00000     
+T Cl1      2   0.16089   0.45706   0.45706   0.00000   0.00000   0.00000
+T Cl2      2   0.45706   0.45706   0.16089   0.00000   0.00000   0.00000
+S -x,-y,-z
+S y,x,z
+S -y,x,z
+S 1/2+x,1/2+y,z
+S y, z, x
+F K       1   0.36700
+F Ir      1   1.06000
+F Cl      1   0.95790
+F IrM     1 3.71
+Q STYP ANTI
+Q PROP 1 1/2 0
+Q IrM FORM Ir
+Q MSYM -1 1 2 1 5 -1
+Q Ir MU  1
+Q Ir SDIR  0 0

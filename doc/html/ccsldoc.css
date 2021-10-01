@@ -1,0 +1,12 @@
+body {margin-left: 1em;}
+dd.list{margin-top: -2.5ex; margin-left: 10em;}
+dt.list{margin-top: -0.5ex; margin-left: 2em;}
+td.nlinks{border: double 2px; border-color: #6699FF; padding-left:6px;
+padding-right: 6px; padding-top: 3px; padding-bottom: 3px;
+margin-top: -2px; margin-bottom: -2px; margin-left:50px;text-align:center;
+border-radius: 6px; background-color: #CCFFFF ; -moz-border-radius:
+6px 6px 0px 0px; -webkit-border-radius: 6px 6px 0px 0px;}
+a:visited{color: #4D7092; text-decoration: none;}
+a:link{color: #3333FFF; text-decoration: none;}
+a:hover{color: #27d; text-decoration; none;}
+td.clinks{border: double 2px; border-color: #0000FF; padding-left: 6px; padding-right: 6px; padding-top: 3px; padding-bottom: 3px; border-radius: 6px; background-color: #FFEE88 ; -moz-border-radius: 6px 6px 0px 0px; -webkit-border-radius: 6px 6px 0px 0px;}
